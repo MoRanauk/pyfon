@@ -1,0 +1,10 @@
+node_modules/
+.env
+.env.*
+!.env.example
+dist/
+build/
+.wrangler/
+*.log
+coverage/
+Thumbs.db
