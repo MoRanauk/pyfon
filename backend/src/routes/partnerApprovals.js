@@ -113,7 +113,7 @@ partnerApprovalRoutes.post('/approvals/:id/vote', writeLimiter, asyncHandler(asy
       final = u.rows[0];
     } else {
       const c = await client.query(
-        "SELECT count(*)::int AS n FROM approval_votes WHERE request_id = $1 AND vote = 'approve' AND partner_id = ANY($2::bigint[])",
+        "SELECT count(*)::int AS n FROM approval_votes WHERE request_id = $1 AND vote = 'approve' AND partner_id = ANY($2::uuid[])",
         [id, partners]
       );
       if (c.rows[0].n >= 3) {
@@ -150,3 +150,4 @@ partnerApprovalRoutes.post('/approvals/:id/cancel', writeLimiter, asyncHandler(a
   await audit(req, { action: 'approval.cancelled', entityType: 'approval_request', entityId: id, actorUserId: req.user.id });
   res.json({ request: shape(out) });
 }));
+
