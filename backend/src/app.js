@@ -2,11 +2,13 @@ import express from 'express';
 import cors from 'cors';
 import helmet from 'helmet';
 import rateLimit from 'express-rate-limit';
+import { fileURLToPath } from 'node:url';
 import { config } from './config.js';
 import { query } from './db/pool.js';
 import { HttpError } from './errors.js';
 import { requestLogger } from './middleware/requestLogger.js';
 import authRoutes from './routes/auth.js';
+import catalogRoutes from './routes/catalog.js';
 import { customerRoutes, partnerRoutes, devRoutes } from './routes/groups.js';
 
 const app = express();
@@ -19,6 +21,17 @@ app.use(cors({
   allowedHeaders: ['Content-Type', 'Authorization', 'X-Interface', 'X-Request-Id'],
   exposedHeaders: ['X-Request-Id'],
 }));
+
+// Product images: plain files, public, allowed to load on our other sites.
+app.use(
+  '/images',
+  (req, res, next) => {
+    res.set('Cross-Origin-Resource-Policy', 'cross-origin');
+    next();
+  },
+  express.static(fileURLToPath(new URL('../public/product-images', import.meta.url)), { maxAge: '1d' }),
+);
+
 app.use(express.json({ limit: '100kb' }));
 app.use(requestLogger);
 app.use(rateLimit({ windowMs: 60000, limit: 300, standardHeaders: true, legacyHeaders: false }));
@@ -37,6 +50,7 @@ app.get('/health/db', async (req, res) => {
 });
 
 app.use('/v1/auth', authRoutes);
+app.use('/v1/catalog', catalogRoutes);
 app.use('/v1/customer', customerRoutes);
 app.use('/v1/partner', partnerRoutes);
 app.use('/v1/dev', devRoutes);
