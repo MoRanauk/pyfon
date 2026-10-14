@@ -20,7 +20,7 @@ const reader = multer({
   limits: { fileSize: 10 * 1024 * 1024, files: 1, fields: 5, fieldSize: 1024 },
 }).single('file');
 
-function receive(req, res) {
+export function receive(req, res) {
   return new Promise((resolve, reject) => {
     reader(req, res, (err) => {
       if (!err) return resolve();
@@ -61,3 +61,4 @@ customerUploadRoutes.post('/uploads', limiter, asyncHandler(async (req, res) => 
   await audit(req, { action: 'upload.created', entityType: 'attachment', entityId: String(row.id), actorUserId: req.user.id, details: { purpose, mime: stored.mime, bytes: stored.bytes } });
   res.status(201).json({ attachment: shapeAttachment(row) });
 }));
+

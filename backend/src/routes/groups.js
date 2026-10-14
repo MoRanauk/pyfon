@@ -27,3 +27,6 @@ export const devRoutes = group('developer');
 
 import { customerUploadRoutes } from './uploads.js';
 customerRoutes.use(customerUploadRoutes);
+
+import { partnerUploadRoutes } from './partnerUploads.js';
+partnerRoutes.use(partnerUploadRoutes);
