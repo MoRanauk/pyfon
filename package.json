@@ -1,6 +1,5 @@
 {
   "name": "pyfon",
   "private": true,
-  "version": "0.1.0",
-  "workspaces": ["backend", "apps/*", "packages/*"]
+  "workspaces": ["apps/*", "packages/*"]
 }
