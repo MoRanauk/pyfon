@@ -1,0 +1,177 @@
+import { Router } from 'express';
+import rateLimit from 'express-rate-limit';
+import { z } from 'zod';
+import { query } from '../db/pool.js';
+import { withTransaction } from '../db/tx.js';
+import { HttpError, asyncHandler } from '../errors.js';
+import { parse } from '../validate.js';
+import { audit } from '../audit.js';
+import { createJob } from '../jobs/createJob.js';
+import { orderWhatsappUrl, quoteWhatsappUrl } from '../whatsapp.js';
+
+export const customerOrderRoutes = Router();
+
+const writeLimiter = rateLimit({ windowMs: 15 * 60 * 1000, limit: 20, standardHeaders: true, legacyHeaders: false });
+
+const phone = z.string().trim().regex(/^\+?[0-9 ]{9,15}$/, 'Enter a valid phone number');
+const shortText = (max) => z.string().trim().max(max);
+
+const orderSchema = z.object({
+  contactName: z.string().trim().min(2).max(100),
+  contactPhone: phone,
+  contactEmail: z.string().trim().email().max(150).optional(),
+  deliveryNotes: shortText(500).optional(),
+  lines: z.array(z.object({
+    sku: z.string().trim().min(1).max(40),
+    qty: z.number().int().min(1).max(100000),
+    options: z.record(z.string().max(40), z.string().max(80)).default({}),
+    personalization: z.object({ text: shortText(200).optional() }).default({}),
+  })).min(1).max(30),
+});
+
+const quoteSchema = z.object({
+  kind: z.enum(['service', 'bulk', 'corporate', 'design']),
+  sku: z.string().trim().min(1).max(40).optional(),
+  quantity: z.number().int().min(1).max(1000000).optional(),
+  companyName: shortText(150).optional(),
+  contactName: z.string().trim().min(2).max(100),
+  contactPhone: phone,
+  contactEmail: z.string().trim().email().max(150).optional(),
+  notes: shortText(2000).optional(),
+  spec: z.object({
+    size: shortText(100).optional(),
+    material: shortText(100).optional(),
+    finish: shortText(100).optional(),
+    turnaround: shortText(100).optional(),
+  }).default({}),
+});
+
+const FRIENDLY = {
+  finance_quote: 'Confirming price and payment',
+  creative: 'Preparing your design',
+  production: 'In production',
+  finance_delivery: 'Ready for dispatch',
+  done: 'Delivered',
+};
+
+function friendly(row) {
+  if (row.job_status === 'cancelled') return 'Cancelled';
+  return FRIENDLY[row.current_step] || 'Received';
+}
+
+async function findItems(skus, storefront) {
+  const { rows } = await query(
+    `SELECT ci.id, ci.sku, ci.name, ci.type, ci.price_type, ci.price_kes, ci.min_order_qty, ci.stock_status
+       FROM catalog_items ci
+       JOIN item_storefronts s ON s.item_id = ci.id
+      WHERE ci.sku = ANY($1) AND ci.status = 'active' AND s.storefront_code = $2`,
+    [skus, storefront]
+  );
+  return new Map(rows.map((r) => [r.sku, r]));
+}
+
+customerOrderRoutes.post('/orders', writeLimiter, asyncHandler(async (req, res) => {
+  const body = parse(orderSchema, req.body);
+  const storefront = req.interfaceCode;
+  const items = await findItems([...new Set(body.lines.map((l) => l.sku))], storefront);
+
+  const problems = [];
+  const lines = [];
+  body.lines.forEach((l, i) => {
+    const item = items.get(l.sku);
+    if (!item) return problems.push({ field: 'lines.' + i + '.sku', message: 'Item not available' });
+    if (item.type !== 'product' || item.price_type !== 'fixed' || item.price_kes == null) {
+      return problems.push({ field: 'lines.' + i + '.sku', message: 'This item needs a quote request, not an order' });
+    }
+    if (item.stock_status === 'out_of_stock') return problems.push({ field: 'lines.' + i + '.sku', message: 'Out of stock' });
+    if (l.qty < (item.min_order_qty || 1)) {
+      return problems.push({ field: 'lines.' + i + '.qty', message: 'Minimum order quantity is ' + item.min_order_qty });
+    }
+    lines.push({ itemId: item.id, sku: item.sku, name: item.name, unitPriceKes: item.price_kes, qty: l.qty, options: l.options, personalization: l.personalization });
+  });
+  if (problems.length) throw new HttpError(400, 'order_invalid', 'Some items cannot be ordered', problems);
+
+  const totalKes = lines.reduce((sum, l) => sum + l.unitPriceKes * l.qty, 0);
+
+  const result = await withTransaction(async (client) => {
+    const o = await client.query(
+      `INSERT INTO orders (customer_id, storefront_code, contact_name, contact_phone, contact_email, delivery_notes, total_kes)
+       VALUES ($1, $2, $3, $4, $5, $6, $7) RETURNING id, ref`,
+      [req.user.id, storefront, body.contactName, body.contactPhone, body.contactEmail ?? null, body.deliveryNotes ?? null, totalKes]
+    );
+    const order = o.rows[0];
+    for (const l of lines) {
+      await client.query(
+        `INSERT INTO order_lines (order_id, item_id, sku, name, unit_price_kes, qty, options, personalization)
+         VALUES ($1, $2, $3, $4, $5, $6, $7, $8)`,
+        [order.id, l.itemId, l.sku, l.name, l.unitPriceKes, l.qty, JSON.stringify(l.options), JSON.stringify(l.personalization)]
+      );
+    }
+    const job = await createJob(client, { orderId: order.id });
+    return { order, job };
+  });
+
+  await audit(req, { action: 'order.placed', entityType: 'order', entityId: String(result.order.id), actorUserId: req.user.id, details: { ref: result.order.ref, job: result.job.ref, totalKes } });
+
+  res.status(201).json({
+    order: { ref: result.order.ref, totalKes, lines: lines.map((l) => ({ sku: l.sku, name: l.name, qty: l.qty, unitPriceKes: l.unitPriceKes })) },
+    job: { ref: result.job.ref },
+    whatsappUrl: orderWhatsappUrl({ ref: result.order.ref, storefront, contactName: body.contactName, totalKes, lines, deliveryNotes: body.deliveryNotes }),
+  });
+}));
+
+customerOrderRoutes.post('/quote-requests', writeLimiter, asyncHandler(async (req, res) => {
+  const body = parse(quoteSchema, req.body);
+  const storefront = req.interfaceCode;
+  const problems = [];
+  if (body.kind === 'corporate' && !body.companyName) problems.push({ field: 'companyName', message: 'Company name is required' });
+  if (body.kind === 'bulk' && !body.quantity) problems.push({ field: 'quantity', message: 'Quantity is required' });
+  if (body.kind === 'service' && !body.sku) problems.push({ field: 'sku', message: 'Choose a service' });
+
+  let item = null;
+  if (body.sku) {
+    item = (await findItems([body.sku], storefront)).get(body.sku) || null;
+    if (!item) problems.push({ field: 'sku', message: 'Item not available' });
+  }
+  if (problems.length) throw new HttpError(400, 'quote_invalid', 'Some fields are invalid', problems);
+
+  const result = await withTransaction(async (client) => {
+    const q = await client.query(
+      `INSERT INTO quote_requests (customer_id, storefront_code, kind, item_id, spec, quantity, company_name, contact_name, contact_phone, contact_email, notes)
+       VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11) RETURNING id, ref`,
+      [req.user.id, storefront, body.kind, item ? item.id : null, JSON.stringify(body.spec), body.quantity ?? null, body.companyName ?? null, body.contactName, body.contactPhone, body.contactEmail ?? null, body.notes ?? null]
+    );
+    const quote = q.rows[0];
+    const job = await createJob(client, { quoteRequestId: quote.id });
+    return { quote, job };
+  });
+
+  await audit(req, { action: 'quote.requested', entityType: 'quote_request', entityId: String(result.quote.id), actorUserId: req.user.id, details: { ref: result.quote.ref, job: result.job.ref, kind: body.kind } });
+
+  const summary = [item ? item.name + ' (' + item.sku + ')' : null, body.quantity ? 'Quantity: ' + body.quantity : null, body.companyName ? 'Company: ' + body.companyName : null].filter(Boolean).join(', ');
+  res.status(201).json({
+    quoteRequest: { ref: result.quote.ref, kind: body.kind },
+    job: { ref: result.job.ref },
+    whatsappUrl: quoteWhatsappUrl({ ref: result.quote.ref, storefront, contactName: body.contactName, kind: body.kind, summary }),
+  });
+}));
+
+customerOrderRoutes.get('/orders', asyncHandler(async (req, res) => {
+  const { rows } = await query(
+    `SELECT o.ref, o.total_kes, o.created_at, j.ref AS job_ref, j.current_step, j.status AS job_status
+       FROM orders o LEFT JOIN jobs j ON j.order_id = o.id
+      WHERE o.customer_id = $1 ORDER BY o.created_at DESC LIMIT 50`,
+    [req.user.id]
+  );
+  res.json({ orders: rows.map((r) => ({ ref: r.ref, totalKes: r.total_kes, createdAt: r.created_at, progress: friendly(r) })) });
+}));
+
+customerOrderRoutes.get('/quote-requests', asyncHandler(async (req, res) => {
+  const { rows } = await query(
+    `SELECT q.ref, q.kind, q.status, q.quoted_price_kes, q.created_at, j.current_step, j.status AS job_status
+       FROM quote_requests q LEFT JOIN jobs j ON j.quote_request_id = q.id
+      WHERE q.customer_id = $1 ORDER BY q.created_at DESC LIMIT 50`,
+    [req.user.id]
+  );
+  res.json({ quoteRequests: rows.map((r) => ({ ref: r.ref, kind: r.kind, status: r.status, quotedPriceKes: r.quoted_price_kes, createdAt: r.created_at, progress: friendly(r) })) });
+}));
