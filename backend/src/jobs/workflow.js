@@ -163,3 +163,4 @@ export async function rejectStep(req, ref, { reason, sendBackTo }) {
   });
   return { ref: out.job.ref, rejectedStep: out.job.current_step, sentBackTo: out.target };
 }
+export { lockJob, actingFor };

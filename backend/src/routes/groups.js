@@ -2,6 +2,7 @@ import { Router } from 'express';
 import { authenticate, requireRole } from '../middleware/auth.js';
 import { customerOrderRoutes } from './customerOrders.js';
 import { partnerJobRoutes } from './partnerJobs.js';
+import { partnerExtraRoutes } from './partnerExtra.js';
 
 function group(role) {
   const router = Router();
@@ -15,6 +16,8 @@ function group(role) {
 export const customerRoutes = group('customer');
 customerRoutes.use(customerOrderRoutes);
 export const partnerRoutes = group('partner');
+partnerRoutes.use(partnerExtraRoutes);
 partnerRoutes.use(partnerJobRoutes);
 export const devRoutes = group('developer');
+
 
