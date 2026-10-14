@@ -24,3 +24,6 @@ export const devRoutes = group('developer');
 
 
 
+
+import { customerUploadRoutes } from './uploads.js';
+customerRoutes.use(customerUploadRoutes);

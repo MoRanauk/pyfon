@@ -10,3 +10,4 @@ coverage/
 Thumbs.db
 backend/test-*.ps1
 backend/change-pw.ps1
+backend/set-cloudinary.ps1
