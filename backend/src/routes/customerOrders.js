@@ -8,6 +8,7 @@ import { parse } from '../validate.js';
 import { audit } from '../audit.js';
 import { createJob } from '../jobs/createJob.js';
 import { orderWhatsappUrl, quoteWhatsappUrl } from '../whatsapp.js';
+import { shapeFile } from './customerFiles.js';
 
 export const customerOrderRoutes = Router();
 
@@ -158,20 +159,83 @@ customerOrderRoutes.post('/quote-requests', writeLimiter, asyncHandler(async (re
 
 customerOrderRoutes.get('/orders', asyncHandler(async (req, res) => {
   const { rows } = await query(
-    `SELECT o.ref, o.total_kes, o.created_at, j.ref AS job_ref, j.current_step, j.status AS job_status
+    `SELECT o.id, o.ref, o.total_kes, o.created_at, j.ref AS job_ref, j.current_step, j.status AS job_status
        FROM orders o LEFT JOIN jobs j ON j.order_id = o.id
       WHERE o.customer_id = $1 ORDER BY o.created_at DESC LIMIT 50`,
     [req.user.id]
   );
-  res.json({ orders: rows.map((r) => ({ ref: r.ref, totalKes: r.total_kes, createdAt: r.created_at, progress: friendly(r) })) });
+  const orderIds = rows.map((r) => r.id);
+
+  const linesByOrder = new Map();
+  if (orderIds.length) {
+    const lines = await query(
+      `SELECT id, order_id, sku, name, qty FROM order_lines WHERE order_id = ANY($1) ORDER BY id`,
+      [orderIds]
+    );
+    const lineIds = lines.rows.map((l) => l.id);
+    const filesByLine = new Map();
+    if (lineIds.length) {
+      const files = await query(
+        `SELECT id, order_line_id, purpose, url, original_name, mime_type, bytes
+           FROM attachments WHERE order_line_id = ANY($1) ORDER BY id`,
+        [lineIds]
+      );
+      for (const f of files.rows) {
+        const k = String(f.order_line_id);
+        if (!filesByLine.has(k)) filesByLine.set(k, []);
+        filesByLine.get(k).push(shapeFile(f));
+      }
+    }
+    for (const l of lines.rows) {
+      const k = String(l.order_id);
+      if (!linesByOrder.has(k)) linesByOrder.set(k, []);
+      linesByOrder.get(k).push({ lineId: l.id, sku: l.sku, name: l.name, qty: l.qty, files: filesByLine.get(String(l.id)) || [] });
+    }
+  }
+
+  res.json({
+    orders: rows.map((r) => ({
+      ref: r.ref,
+      totalKes: r.total_kes,
+      createdAt: r.created_at,
+      progress: friendly(r),
+      lines: linesByOrder.get(String(r.id)) || [],
+    })),
+  });
 }));
 
 customerOrderRoutes.get('/quote-requests', asyncHandler(async (req, res) => {
   const { rows } = await query(
-    `SELECT q.ref, q.kind, q.status, q.quoted_price_kes, q.created_at, j.current_step, j.status AS job_status
+    `SELECT q.id, q.ref, q.kind, q.status, q.quoted_price_kes, q.created_at, j.current_step, j.status AS job_status
        FROM quote_requests q LEFT JOIN jobs j ON j.quote_request_id = q.id
       WHERE q.customer_id = $1 ORDER BY q.created_at DESC LIMIT 50`,
     [req.user.id]
   );
-  res.json({ quoteRequests: rows.map((r) => ({ ref: r.ref, kind: r.kind, status: r.status, quotedPriceKes: r.quoted_price_kes, createdAt: r.created_at, progress: friendly(r) })) });
+  const quoteIds = rows.map((r) => r.id);
+
+  const filesByQuote = new Map();
+  if (quoteIds.length) {
+    const files = await query(
+      `SELECT id, quote_request_id, purpose, url, original_name, mime_type, bytes
+         FROM attachments WHERE quote_request_id = ANY($1) ORDER BY id`,
+      [quoteIds]
+    );
+    for (const f of files.rows) {
+      const k = String(f.quote_request_id);
+      if (!filesByQuote.has(k)) filesByQuote.set(k, []);
+      filesByQuote.get(k).push(shapeFile(f));
+    }
+  }
+
+  res.json({
+    quoteRequests: rows.map((r) => ({
+      ref: r.ref,
+      kind: r.kind,
+      status: r.status,
+      quotedPriceKes: r.quoted_price_kes,
+      createdAt: r.created_at,
+      progress: friendly(r),
+      files: filesByQuote.get(String(r.id)) || [],
+    })),
+  });
 }));

@@ -1,9 +1,12 @@
 import { Router } from 'express';
 import { authenticate, requireRole } from '../middleware/auth.js';
 import { customerOrderRoutes } from './customerOrders.js';
+import { customerFileRoutes } from './customerFiles.js';
+import { customerUploadRoutes } from './uploads.js';
 import { partnerJobRoutes } from './partnerJobs.js';
 import { partnerExtraRoutes } from './partnerExtra.js';
 import { partnerApprovalRoutes } from './partnerApprovals.js';
+import { partnerUploadRoutes } from './partnerUploads.js';
 
 function group(role) {
   const router = Router();
@@ -16,17 +19,14 @@ function group(role) {
 
 export const customerRoutes = group('customer');
 customerRoutes.use(customerOrderRoutes);
+customerRoutes.use(customerFileRoutes);
+customerRoutes.use(customerUploadRoutes);
+
+// Order matters: extra routes (guards) and approvals come before the job routes.
 export const partnerRoutes = group('partner');
 partnerRoutes.use(partnerExtraRoutes);
 partnerRoutes.use(partnerApprovalRoutes);
 partnerRoutes.use(partnerJobRoutes);
-export const devRoutes = group('developer');
-
-
-
-
-import { customerUploadRoutes } from './uploads.js';
-customerRoutes.use(customerUploadRoutes);
-
-import { partnerUploadRoutes } from './partnerUploads.js';
 partnerRoutes.use(partnerUploadRoutes);
+
+export const devRoutes = group('developer');
