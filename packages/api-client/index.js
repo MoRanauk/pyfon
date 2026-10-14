@@ -77,7 +77,9 @@ export function createClient({ baseUrl, interfaceCode, getToken }) {
       changePassword: (current_password, new_password) => post('/v1/auth/change-password', { current_password, new_password })
     },
     catalog: {
-      list: (query) => get('/v1/catalog', query)
+      categories: (store) => get('/v1/catalog/' + store + '/categories'),
+      items: (store, query) => get('/v1/catalog/' + store + '/items', query),
+      item: (store, sku) => get('/v1/catalog/' + store + '/items/' + encodeURIComponent(store ? sku : sku))
     },
     customer: {
       createOrder: (order) => post('/v1/customer/orders', order),
@@ -101,3 +103,4 @@ export function createClient({ baseUrl, interfaceCode, getToken }) {
     }
   };
 }
+
