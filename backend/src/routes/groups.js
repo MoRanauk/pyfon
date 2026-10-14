@@ -1,0 +1,15 @@
+import { Router } from 'express';
+import { authenticate, requireRole } from '../middleware/auth.js';
+
+function group(role) {
+  const router = Router();
+  router.use(authenticate, requireRole(role));
+  router.get('/ping', (req, res) =>
+    res.json({ ok: true, role: req.user.role, stage: req.user.stage, interface: req.user.interface })
+  );
+  return router;
+}
+
+export const customerRoutes = group('customer');
+export const partnerRoutes = group('partner');
+export const devRoutes = group('developer');

@@ -4,7 +4,10 @@ import helmet from 'helmet';
 import rateLimit from 'express-rate-limit';
 import { config } from './config.js';
 import { query } from './db/pool.js';
+import { HttpError } from './errors.js';
 import { requestLogger } from './middleware/requestLogger.js';
+import authRoutes from './routes/auth.js';
+import { customerRoutes, partnerRoutes, devRoutes } from './routes/groups.js';
 
 const app = express();
 app.set('trust proxy', 1);
@@ -33,17 +36,27 @@ app.get('/health/db', async (req, res) => {
   }
 });
 
+app.use('/v1/auth', authRoutes);
+app.use('/v1/customer', customerRoutes);
+app.use('/v1/partner', partnerRoutes);
+app.use('/v1/dev', devRoutes);
+
 app.use((req, res) => {
   res.status(404).json({ error: { code: 'not_found', message: 'Route not found' } });
 });
 
 app.use((err, req, res, next) => {
-  console.error(JSON.stringify({ level: 'error', requestId: req.id, message: err.message }));
-  const clientError = err.status >= 400 && err.status < 500;
-  res.status(clientError ? err.status : 500).json({
+  const known = err instanceof HttpError;
+  const badBody = err.type === 'entity.parse.failed' || err.type === 'entity.too.large';
+  const status = known || badBody ? err.status : 500;
+  if (status >= 500) {
+    console.error(JSON.stringify({ level: 'error', requestId: req.id, message: err.message }));
+  }
+  res.status(status).json({
     error: {
-      code: clientError ? 'bad_request' : 'server_error',
-      message: clientError ? 'Bad request' : 'Something went wrong',
+      code: known ? err.code : badBody ? 'bad_request' : 'server_error',
+      message: known ? err.message : badBody ? 'Invalid request body' : 'Something went wrong',
+      details: known ? err.details : undefined,
       requestId: req.id,
     },
   });
