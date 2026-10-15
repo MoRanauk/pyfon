@@ -13,7 +13,7 @@
   {"slug":"gifts-for-him","title":"Gifts for him","match":[{"skus":["PB-DRK-010","PB-TEC-002","PB-TEC-003","PB-STA-004","PB-ACC-002","PB-APP-002","PB-BAG-003"]}]},
   {"slug":"gifts-for-kids","title":"Gifts for kids","match":[{"category":"Kids & Babies"},{"skus":["PB-HOM-004"]}]},
   {"slug":"gifts-for-office","title":"Gifts for the office","match":[{"skus":["PB-STA-001","PB-STA-003","PB-STA-004","PB-STA-005","PB-STA-006","PB-TEC-002","PB-TEC-003","PB-TEC-004","PB-GFT-001","PB-GFT-002","PB-GFT-003"]}]},
-  {"slug":"wedding-bridal","title":"Wedding & bridal","match":[{"skus":[]}]},
+  {"slug":"wedding-bridal","title":"Wedding & bridal","match":[{"skus":["PB-GFT-007","PB-GFT-008","PB-GFT-009"]}]},
   {"slug":"personalised-gifts","title":"Personalised gifts","match":[{"skus":["PB-DRK-009","PB-DRK-011","PB-DRK-014","PB-STA-007","PB-ACC-001","PB-APP-004","PB-PHN-001","PB-WAL-002","PB-WAL-003","PB-HOM-001","PB-HOM-002","PB-HOM-004","PB-STK-003"]}]},
   {"slug":"gifts-under-1000","title":"Under KES 1,000","match":[{"skus":["PB-DRK-006","PB-DRK-009","PB-DRK-011","PB-ACC-001","PB-ACC-002","PB-ACC-003","PB-PHN-003","PB-STK-003","PB-STA-007","PB-STA-008"]}]},
   {"slug":"gift-sets","title":"Gift sets","match":[{"category":"Gift Sets"}]}
