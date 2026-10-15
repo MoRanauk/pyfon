@@ -244,3 +244,22 @@ body{background:var(--pf-bg)!important;color:var(--pf-text)!important}
 .card2 p{margin:0}
 .card2 b{display:inline-flex;width:32px;height:32px;border-radius:999px;background:var(--pf-gold);color:var(--pf-navy);align-items:center;justify-content:center;margin-bottom:8px}
 @media(prefers-reduced-motion:reduce){.site,.ann,.logo,.glow,.badge2,.fpa,.fpb,.mega{animation:none}}
+
+/* ===== Typography override: Fraunces headings, DM Sans body, ~10% smaller =====
+   To undo: delete everything from this comment down to the end of the file. */
+:root,body{--pf-font-heading:'Fraunces',Georgia,serif!important;--pf-font-body:'DM Sans',system-ui,sans-serif!important}
+body{font-family:'DM Sans',system-ui,-apple-system,'Segoe UI',sans-serif;font-size:14.5px}
+button,input,select,textarea{font-family:inherit}
+h1,h2,h3,.logo{font-family:'Fraunces',Georgia,serif}
+.announce{font-size:12px}
+.logo{font-size:20px}
+.hlinks a,.cartlink,.catbar a,.navright a{font-size:13px}
+.gbtn{font-size:14px}
+.megacats a{font-size:15px}
+.megaitem,.chip,.pill{font-size:13px}
+.hero h1{font-size:clamp(25px,4.5vw,43px)}
+.hs h1{font-size:clamp(23px,4.1vw,41px)}
+.hs .price{font-size:18px}
+.section h2{font-size:22px}
+.qband h2{font-size:clamp(18px,2.7vw,25px)}
+.pinfo h1{font-size:clamp(22px,2.7vw,29px)}
