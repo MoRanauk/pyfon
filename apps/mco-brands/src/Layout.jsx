@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { Link, Outlet, useLocation } from 'react-router-dom';
 import { useCart } from './CartState.jsx';
 import { useAuth, displayName } from './AuthState.jsx';
@@ -12,6 +12,59 @@ import { SearchHintProvider } from './SearchHint.jsx';
 import SideMenu from './SideMenu.jsx';
 import SiteFooter from './SiteFooter.jsx';
 import { FloatPair } from './FloatPair.jsx';
+
+// True only on a wide window with a mouse. Only then does hovering open the mega-menu.
+function useHoverMenu() {
+  const q = '(min-width: 901px) and (hover: hover)';
+  const get = () => typeof window !== 'undefined' && !!window.matchMedia && window.matchMedia(q).matches;
+  const [ok, setOk] = useState(get);
+  useEffect(() => {
+    const m = window.matchMedia(q);
+    const f = () => setOk(m.matches);
+    f();
+    m.addEventListener('change', f);
+    return () => m.removeEventListener('change', f);
+  }, []);
+  return ok;
+}
+
+// The row of groups under the header. It slides sideways so every group is reachable.
+function GroupBar({ tree, open, setOpen, hoverOk }) {
+  const ref = useRef(null);
+  const [edge, setEdge] = useState({ l: false, r: false });
+  const measure = useCallback(() => {
+    const el = ref.current;
+    if (!el) return;
+    setEdge({ l: el.scrollLeft > 4, r: el.scrollLeft + el.clientWidth < el.scrollWidth - 4 });
+  }, []);
+  useEffect(() => {
+    measure();
+    window.addEventListener('resize', measure);
+    return () => window.removeEventListener('resize', measure);
+  }, [measure, tree]);
+  const nudge = (d) => { if (ref.current) ref.current.scrollBy({ left: d * 360, behavior: 'smooth' }); };
+  return (
+    <div className="wrap">
+      <div className={'gslide' + (edge.l ? ' fl' : '') + (edge.r ? ' fr' : '')}>
+        {hoverOk && edge.l ? <button type="button" className="garrow gl" aria-label="Scroll left" onClick={() => nudge(-1)}>{'\u2039'}</button> : null}
+        <div className="gbar" ref={ref} onScroll={measure}>
+          {tree.map((gr) => (
+            <Link
+              key={gr.key}
+              to={'/c/' + gr.key}
+              className={'gbtn' + (open === gr.key ? ' on' : '')}
+              onMouseEnter={hoverOk ? () => setOpen(gr.key) : undefined}
+              onFocus={hoverOk ? () => setOpen(gr.key) : undefined}
+            >
+              {gr.title}{hoverOk ? <span aria-hidden="true">{'\u25be'}</span> : null}
+            </Link>
+          ))}
+        </div>
+        {hoverOk && edge.r ? <button type="button" className="garrow gr" aria-label="Scroll right" onClick={() => nudge(1)}>{'\u203a'}</button> : null}
+      </div>
+    </div>
+  );
+}
 
 function Shell({ lite }) {
   const { cats, tree } = useCatalog();
@@ -31,11 +84,13 @@ function Shell({ lite }) {
   const [scrolled, setScrolled] = useState(false);
   const [bump, setBump] = useState(0);
   const [mega, setMega] = useState({});
+  const hoverOk = useHoverMenu();
   const loc = useLocation();
   const { count } = useCart();
   const { user } = useAuth();
 
   useEffect(() => { setOpen(''); setMenu(false); setSOpen(false); }, [loc.pathname, loc.search]);
+  useEffect(() => { if (!hoverOk) setOpen(''); }, [hoverOk]);
   // Remember product pages the visitor opens (feeds /recent and /for-you).
   useEffect(() => {
     const m = loc.pathname.match(/^\/p\/([^/]+)/);
@@ -50,7 +105,8 @@ function Shell({ lite }) {
   }, []);
   useEffect(() => { if (count) setBump((b) => b + 1); }, [count]);
 
-  const g = tree.find((x) => x.key === open);
+  // The mega-menu only exists on wide windows with a mouse.
+  const g = hoverOk ? tree.find((x) => x.key === open) : null;
   // Fetch a few pictures for the open mega-menu group (once per group).
   useEffect(() => {
     if (!g || mega[g.key]) return undefined;
@@ -103,20 +159,7 @@ function Shell({ lite }) {
         </div>
         {!lite ? (
           <div className="groupbar" onMouseLeave={() => setOpen('')}>
-            <div className="wrap gbar">
-              {tree.map((gr) => (
-                <button
-                  key={gr.key}
-                  type="button"
-                  className={'gbtn' + (open === gr.key ? ' on' : '')}
-                  aria-expanded={open === gr.key}
-                  onMouseEnter={() => setOpen(gr.key)}
-                  onClick={() => setOpen(open === gr.key ? '' : gr.key)}
-                >
-                  {gr.title}<span aria-hidden="true">{'\u25be'}</span>
-                </button>
-              ))}
-            </div>
+            <GroupBar tree={tree} open={open} setOpen={setOpen} hoverOk={hoverOk} />
             {g ? (
               <div className="mega" key={g.key}>
                 <div className="wrap megain">

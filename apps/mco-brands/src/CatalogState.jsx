@@ -1,5 +1,6 @@
 import { createContext, useContext, useEffect, useState } from 'react';
 import { api, STORE } from './api.js';
+import { addExplore } from './tree.js';
 
 const Ctx = createContext({ cats: [], all: [], tree: [], ready: false, error: '' });
 
@@ -22,7 +23,8 @@ export function CatalogProvider({ children }) {
   useEffect(() => {
     let live = true;
     // The tree loads on its own: if it fails, the shop still works.
-    const treeP = api.catalog.tree(STORE).then((r) => r.tree || []).catch(() => []);
+    // addExplore puts Recently viewed and Designs picked for you under Explore.
+    const treeP = api.catalog.tree(STORE).then((r) => addExplore(r.tree || [])).catch(() => []);
     Promise.all([api.catalog.categories(STORE), loadAll(), treeP])
       .then(([c, all, tree]) => { if (live) setState({ cats: c.categories, all, tree, ready: true, error: '' }); })
       .catch((e) => { if (live) setState({ cats: [], all: [], tree: [], ready: true, error: e.message }); });

@@ -4,7 +4,9 @@ import { useCatalog } from './CatalogState.jsx';
 import { priceText } from './groups.js';
 import { useSearchHint } from './SearchHint.jsx';
 
-const still = () => typeof window !== 'undefined' && window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+// True when motion should be off: reduced-motion setting OR a narrow window (under 900px).
+const still = () => typeof window !== 'undefined' && !!window.matchMedia
+  && (window.matchMedia('(prefers-reduced-motion: reduce)').matches || window.matchMedia('(max-width: 900px)').matches);
 
 export const Burger = () => (
   <svg width="24" height="24" viewBox="0 0 24 24" aria-hidden="true"><path d="M3 6h18M3 12h18M3 18h18" stroke="currentColor" strokeWidth="2" strokeLinecap="round" fill="none" /></svg>
@@ -22,21 +24,21 @@ const MESSAGES = [
   'Printing, signage and design for your business.'
 ];
 
-// Rotating one-line announcements.
+// Rotating one-line announcements. Changes every 8 seconds with a soft fade.
 export function Announce() {
   const [i, setI] = useState(0);
   useEffect(() => {
     if (still()) return undefined;
-    const t = setInterval(() => setI((x) => (x + 1) % MESSAGES.length), 4200);
+    const t = setInterval(() => setI((x) => (x + 1) % MESSAGES.length), 8000);
     return () => clearInterval(t);
   }, []);
   return <div className="announce"><span key={i} className="ann">{MESSAGES[i]}</span></div>;
 }
 
 const IDEAS = ['Hoodies with your logo', 'A mug with their name on it', 'Posters for your wall', 'Gifts that feel personal', 'Banners for your business', 'Uniforms for your team'];
-const COLORS = ['#ff5a7a', '#1aa39a', '#7a5cff', '#d98e04', '#2f80ed', '#e0357b'];
+const COLORS = ['#b8566b', '#2f8a84', '#6b58c9', '#b57a0a', '#3a6fb5', '#b8446f'];
 
-// Types a phrase, erases it, then moves to the next one.
+// Types a phrase slowly, holds it, erases it, then moves to the next one. Large windows only.
 function useTyping(phrases, paused) {
   const [state, setState] = useState({ text: '', idx: 0 });
   const key = phrases.join('|');
@@ -52,18 +54,18 @@ function useTyping(phrases, paused) {
       const p = phrases[i % phrases.length];
       n += dir;
       setState({ text: p.slice(0, n), idx: i });
-      let wait = dir > 0 ? 70 : 35;
-      if (dir > 0 && n >= p.length) { dir = -1; wait = 1500; }
-      else if (dir < 0 && n <= 0) { dir = 1; i += 1; wait = 400; }
+      let wait = dir > 0 ? 150 : 70;
+      if (dir > 0 && n >= p.length) { dir = -1; wait = 3500; }
+      else if (dir < 0 && n <= 0) { dir = 1; i += 1; wait = 1200; }
       timer = setTimeout(tick, wait);
     };
-    timer = setTimeout(tick, 400);
+    timer = setTimeout(tick, 1200);
     return () => clearTimeout(timer);
   }, [key, paused]);
   return state;
 }
 
-// The big search bar with a glowing colour ring and a typing placeholder.
+// The big search bar with a slow colour ring and a typing placeholder.
 export function SearchBar() {
   const { cats, all } = useCatalog();
   const { hint, clear } = useSearchHint();
@@ -104,7 +106,7 @@ export function SearchBar() {
             onChange={(e) => setTerm(e.target.value)}
             onFocus={() => setFocus(true)}
             onBlur={() => setFocus(false)}
-            placeholder={focus ? 'Search products' : t.text + '|'}
+            placeholder={focus || still() ? 'Search products' : t.text + '|'}
             style={{ '--tc': COLORS[t.idx % COLORS.length] }}
             aria-label="Search"
           />

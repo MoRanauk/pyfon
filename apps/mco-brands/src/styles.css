@@ -13,7 +13,6 @@ a{color:inherit}
 .hero p{max-width:560px;margin:0 0 24px;opacity:.9}
 .btn{display:inline-block;padding:12px 22px;margin:0 10px 8px 0;border-radius:var(--pf-radius);background:var(--pf-gold);color:var(--pf-navy);font-weight:700;text-decoration:none}
 .btn.alt{background:transparent;color:#fff;border:1px solid #fff}
-.trust{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:16px;padding-top:24px;padding-bottom:24px;font-size:14px}
 .section{padding:32px 0}
 .section h2{font-family:var(--pf-font-heading);margin:0 0 16px}
 .grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(170px,1fr));gap:16px}
@@ -64,7 +63,6 @@ a{color:inherit}
 .section{padding:20px 0}
 .herowrap{max-width:1200px;margin:14px auto 0;padding:0 16px}
 .herowrap>div{border-radius:18px;isolation:isolate}
-.trust{padding-top:16px;padding-bottom:0}
 .catbar .wrap{scrollbar-width:none}
 .catbar a:hover{text-decoration:underline}
 .ctiles{display:grid;grid-template-columns:repeat(auto-fill,minmax(240px,1fr));gap:14px}
@@ -268,3 +266,94 @@ h1,h2,h3,.logo{font-family:'Fraunces',Georgia,serif}
 .gdrop{display:flex;flex-direction:column;gap:6px;font-size:14px;font-weight:600;max-width:320px;margin:12px 0 20px}
 .gdrop select{padding:10px 12px;border:1px solid var(--pf-border);border-radius:var(--pf-radius);background:#fff;font-size:14px}
 .gchips{display:flex;flex-wrap:wrap;gap:8px;margin:8px 0 20px}
+
+/* ===== B3: calm marketplace polish (appended; to undo, delete from here to the end) ===== */
+
+/* Group bar: slides sideways, soft edge fades, small arrows on large windows */
+.gslide{position:relative}
+.gbar{display:flex;gap:2px;overflow-x:auto;scrollbar-width:none;scroll-snap-type:x proximity;-webkit-overflow-scrolling:touch}
+.gbar::-webkit-scrollbar{display:none}
+.gbtn{flex:0 0 auto;display:inline-flex;align-items:center;text-decoration:none;scroll-snap-align:start;font-weight:500}
+.gslide::before,.gslide::after{content:'';position:absolute;top:0;bottom:0;width:36px;pointer-events:none;opacity:0;transition:opacity .4s ease;z-index:2}
+.gslide::before{left:0;background:linear-gradient(90deg,var(--pf-bg),rgba(251,248,241,0))}
+.gslide::after{right:0;background:linear-gradient(270deg,var(--pf-bg),rgba(251,248,241,0))}
+.gslide.fl::before,.gslide.fr::after{opacity:1}
+.garrow{position:absolute;top:50%;transform:translateY(-50%);z-index:3;width:30px;height:30px;border-radius:999px;border:1px solid var(--pf-border);background:#fff;color:var(--pf-navy);cursor:pointer;line-height:26px;padding:0;font-size:18px}
+.garrow.gl{left:0}
+.garrow.gr{right:0}
+
+/* Landing page banner and tiles (also used by the Home range tiles): image on top, plain label below */
+.gbanner{display:flex;justify-content:space-between;align-items:center;gap:24px;flex-wrap:wrap;border-radius:20px;padding:32px;margin-top:14px}
+.gbanner h1{font-family:'Fraunces',Georgia,serif;font-weight:500;font-size:clamp(26px,4vw,38px);margin:0 0 6px}
+.gbanner p{margin:0;max-width:460px;opacity:.8;line-height:1.5}
+.gbanner .gdrop{margin:0}
+.gtiles{grid-template-columns:repeat(4,1fr);gap:24px 16px}
+.gtiles .ctile{aspect-ratio:auto;background:none!important;overflow:visible;display:flex;flex-direction:column;gap:10px;border-radius:0}
+.gtiles .ctile img{position:static;inset:auto;width:100%;height:auto;aspect-ratio:1/1;object-fit:cover;border-radius:16px;background:var(--pf-surface)}
+.gtiles .ctile:hover img{transform:none;opacity:.92}
+.gtiles .noimg{display:block;width:100%;aspect-ratio:1/1;border-radius:16px}
+.gtiles .pill{position:static;transform:none;background:none;box-shadow:none;padding:0;color:var(--pf-text);font-weight:500;font-size:14px;text-align:center;white-space:normal}
+@media(max-width:700px){.gtiles{grid-template-columns:repeat(2,1fr);gap:20px 12px}}
+.gtext{max-width:720px;color:var(--pf-muted);line-height:1.7;font-size:14px;margin:0}
+.tbar{display:grid;grid-template-columns:repeat(3,1fr);gap:16px;border-top:1px solid var(--pf-border);padding-top:24px}
+.tbar>div{display:flex;gap:12px;align-items:flex-start;color:var(--pf-navy)}
+.tbar p{margin:0;display:flex;flex-direction:column;gap:2px;color:var(--pf-text)}
+.tbar b{font-weight:600;font-size:14px}
+.tbar span{font-size:13px;color:var(--pf-muted)}
+@media(max-width:700px){.tbar{grid-template-columns:1fr}}
+
+/* Featured picks collage */
+.mosaic{display:grid;grid-template-columns:repeat(4,1fr);grid-auto-rows:190px;grid-auto-flow:dense;gap:12px}
+.mtile{position:relative;display:block;overflow:hidden;border-radius:16px;background:var(--pf-surface);text-decoration:none}
+.mtile img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover}
+.mtile span{position:absolute;left:10px;right:10px;bottom:10px;display:flex;flex-direction:column;gap:2px;background:rgba(255,255,255,.92);border-radius:10px;padding:6px 10px;font-size:13px}
+.mtile b{font-weight:500;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.mtile small{color:var(--pf-muted);font-size:12px}
+.m-b{grid-column:span 2;grid-row:span 2}
+.m-t{grid-row:span 2}
+.m-w{grid-column:span 2}
+@media(max-width:700px){.mosaic{grid-template-columns:repeat(2,1fr);grid-auto-rows:150px}}
+
+/* Calm motion: slow, soft, large windows only */
+.site{animation-duration:1s}
+.ann{animation:annfade 1.8s ease both}
+@keyframes annfade{from{opacity:0}to{opacity:1}}
+.logo{animation-duration:16s}
+.glow{animation-duration:28s}
+.glow::before{opacity:.25;filter:blur(12px)}
+.badge2{animation:popsoft .8s ease}
+@keyframes popsoft{0%{transform:scale(.8)}60%{transform:scale(1.12)}100%{transform:scale(1)}}
+.fpa{animation:floaty2 14s ease-in-out infinite}
+.fpb{animation:floaty2 16s ease-in-out -4s infinite reverse}
+@keyframes floaty2{0%,100%{transform:translateY(-3px)}50%{transform:translateY(4px)}}
+.mega{animation-duration:.5s}
+.fp img{transition:opacity 2.4s ease,transform 12s ease}
+@media(max-width:900px){
+  .site,.ann,.logo,.glow,.fpa,.fpb,.mega,.badge2{animation:none}
+  .logo{background-position:100% 0}
+  .glow::before{display:none}
+  .fp img{transition:none}
+}
+@media(prefers-reduced-motion:reduce){.site,.ann,.logo,.glow,.fpa,.fpb,.mega,.badge2{animation:none}.logo{background-position:100% 0}}
+
+/* Type scale: headings 500, body 400, nav and labels 500, prices 600, bold only on main buttons */
+h1,h2,h3{font-weight:500}
+.section h2,.qband h2,.pinfo h1,.hs h1,.auth h1,.sellhero h1,.ghero h1{font-weight:500}
+.logo{font-weight:600}
+.announce,.hlinks a,.cartlink,.gbtn,.chip,.tabs button,.field,.pill{font-weight:500}
+.hs small,.megacats small,.megacats .megaall,.dsub{font-weight:600}
+.hs .price,.pprice,.fpword,.ghero-words{font-weight:600}
+.megacats a{font-weight:400}
+.muted,.sold{font-size:13px}
+.grid :is(h3,h4,strong,b),.rail :is(h3,h4,strong,b){font-family:'DM Sans',system-ui,sans-serif;font-weight:500;font-size:14px}
+
+/* ===== B3b: justified collage (Featured picks) ===== */
+.jcol{display:flex;flex-direction:column;gap:20px}
+.jrow{display:flex;gap:16px;align-items:flex-start}
+.jtile{min-width:0;display:flex;flex-direction:column;gap:8px;text-decoration:none;color:inherit}
+.jtile img{display:block;width:100%;height:auto;border-radius:14px;background:var(--pf-surface);transition:opacity .6s ease}
+.jtile:hover img{opacity:.92}
+.jtile span{display:flex;flex-direction:column;gap:2px;font-size:13px}
+.jtile b{font-weight:500;font-size:14px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.jtile small{color:var(--pf-muted);font-size:12px}
+@media(max-width:700px){.jrow{gap:12px}.jcol{gap:16px}}
