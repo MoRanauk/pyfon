@@ -1,14 +1,16 @@
 import { useEffect, useState } from 'react';
 import { Link, useParams } from 'react-router-dom';
 import { useCatalog } from './CatalogState.jsx';
-import { buildGroups, groupItems } from './groups.js';
+import { buildGroups, groupItems, showcase } from './groups.js';
+import { copyFor } from './tree.js';
+import { FloatPair, Words } from './FloatPair.jsx';
 import { Card } from './Shared.jsx';
 
 export default function Group() {
   const { key } = useParams();
   const { cats, all, ready } = useCatalog();
   const [sel, setSel] = useState('');
-  useEffect(() => { setSel(''); }, [key]);
+  useEffect(() => { setSel(''); window.scrollTo(0, 0); }, [key]);
 
   if (!ready) return <div className="wrap section"><p className="muted">Loading...</p></div>;
   const g = buildGroups(cats).find((x) => x.key === key);
@@ -20,16 +22,23 @@ export default function Group() {
       </div>
     );
   }
+  const c = copyFor(g.key);
   const items = groupItems(g, all).filter((i) => !sel || i.categorySlug === sel);
 
   return (
     <div className="wrap section">
-      <p className="muted"><Link to="/">Home</Link> / {g.title}</p>
-      <h1 style={{ fontFamily: 'var(--pf-font-heading)', margin: '0 0 16px' }}>{g.title}</h1>
+      <section className="ghero" style={{ background: c.color }}>
+        <div>
+          <h1>{g.title}</h1>
+          <p>{c.blurb}</p>
+          <div className="ghero-words"><Words lines={c.lines} /></div>
+        </div>
+        <FloatPair items={showcase(g, all, 8)} lines={c.lines} words={false} height={320} />
+      </section>
       <div className="chips">
         <button type="button" className={'chip' + (!sel ? ' on' : '')} onClick={() => setSel('')}>All</button>
-        {g.cats.map((c) => (
-          <button key={c.slug} type="button" className={'chip' + (sel === c.slug ? ' on' : '')} onClick={() => setSel(c.slug)}>{c.name}</button>
+        {g.cats.map((x) => (
+          <button key={x.slug} type="button" className={'chip' + (sel === x.slug ? ' on' : '')} onClick={() => setSel(x.slug)}>{x.name}</button>
         ))}
       </div>
       <div className="grid" style={{ marginTop: 24 }}>{items.map((it) => <Card key={it.sku} it={it} />)}</div>
