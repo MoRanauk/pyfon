@@ -1,0 +1,86 @@
+[
+ {"slug":"explore","title":"Explore","children":[
+  {"slug":"featured-picks","title":"Featured picks","match":[{"featured":true}]},
+  {"slug":"gift-ideas","title":"Gift ideas","match":[{"category":"Gift Sets"}]}
+ ]},
+ {"slug":"clothing-bags","title":"Clothing & Bags","children":[
+  {"slug":"apparel","title":"Apparel","children":[
+   {"slug":"t-shirts","title":"T-shirts","match":[{"category":"Apparel","subcategory":"T-shirts"}]},
+   {"slug":"hoodies-polos","title":"Hoodies & polos","match":[{"category":"Apparel","subcategory":"Hoodies"},{"category":"Apparel","subcategory":"Polo shirts"}]},
+   {"slug":"headwear","title":"Headwear","match":[{"category":"Apparel","subcategory":"Headwear"}]},
+   {"slug":"workwear","title":"Workwear & aprons","match":[{"category":"Apparel","subcategory":"Safety wear"},{"category":"Apparel","subcategory":"Aprons"}]}
+  ]},
+  {"slug":"bags","title":"Bags","match":[{"category":"Accessories","subcategory":"Bags"}],"children":[
+   {"slug":"totes","title":"Tote bags","match":[{"category":"Bags","subcategory":"Totes"}]},
+   {"slug":"drawstring-bags","title":"Drawstring bags","match":[{"category":"Bags","subcategory":"Drawstring"}]},
+   {"slug":"backpacks","title":"Backpacks","match":[{"category":"Bags","subcategory":"Backpacks"}]},
+   {"slug":"laptop-sleeves","title":"Laptop sleeves","match":[{"category":"Bags","subcategory":"Sleeves"}]}
+  ]}
+ ]},
+ {"slug":"drinkware","title":"Drinkware","children":[
+  {"slug":"mugs-cups","title":"Mugs","match":[{"category":"Drinkware","subcategory":"Mugs"},{"category":"Drinkware","subcategory":"Thermal mugs"}]},
+  {"slug":"bottles-flasks","title":"Bottles & flasks","match":[{"category":"Drinkware","subcategory":"Water bottles"},{"category":"Drinkware","subcategory":"Thermo flasks"}]},
+  {"slug":"tumblers","title":"Tumblers","match":[{"category":"Drinkware","subcategory":"Tumblers"}]}
+ ]},
+ {"slug":"home-gifts","title":"Home & Gifts","children":[
+  {"slug":"home-living","title":"Home & living","children":[
+   {"slug":"cushions","title":"Cushions","match":[{"category":"Home & Living","subcategory":"Cushions"}]},
+   {"slug":"clocks","title":"Clocks","match":[{"category":"Home & Living","subcategory":"Clocks"}]},
+   {"slug":"puzzles","title":"Puzzles","match":[{"category":"Home & Living","subcategory":"Puzzles"}]}
+  ]},
+  {"slug":"wall-art","title":"Wall art","children":[
+   {"slug":"posters","title":"Posters","match":[{"category":"Wall Art","subcategory":"Posters"}]},
+   {"slug":"canvas","title":"Canvas","match":[{"category":"Wall Art","subcategory":"Canvas"}]},
+   {"slug":"framed","title":"Framed prints","match":[{"category":"Wall Art","subcategory":"Framed"}]},
+   {"slug":"calendars","title":"Calendars","match":[{"category":"Wall Art","subcategory":"Calendars"}]}
+  ]},
+  {"slug":"gift-sets","title":"Gift sets","match":[{"category":"Gift Sets"}]},
+  {"slug":"kids-babies","title":"Kids & babies","children":[
+   {"slug":"kids-bottles","title":"Bottles","match":[{"category":"Kids & Babies","subcategory":"Bottles"}]},
+   {"slug":"kids-bags","title":"Bags","match":[{"category":"Kids & Babies","subcategory":"Bags"}]},
+   {"slug":"kids-clothing","title":"Clothing","match":[{"category":"Kids & Babies","subcategory":"Clothing"}]},
+   {"slug":"lunch-boxes","title":"Lunch boxes","match":[{"category":"Kids & Babies","subcategory":"Lunch boxes"}]}
+  ]}
+ ]},
+ {"slug":"accessories","title":"Accessories","children":[
+  {"slug":"tech","title":"Tech","children":[
+   {"slug":"phone-cases","title":"Phone cases","children":[
+    {"slug":"hard-cases","title":"Hard cases","match":[{"category":"Phone Cases","subcategory":"Hard cases"}]},
+    {"slug":"soft-cases","title":"Soft cases","match":[{"category":"Phone Cases","subcategory":"Soft cases"}]},
+    {"slug":"phone-grips","title":"Grips","match":[{"category":"Phone Cases","subcategory":"Grips"}]}
+   ]},
+   {"slug":"mouse-pads","title":"Mouse pads","match":[{"category":"Tech & Office","subcategory":"Mouse pads"}]},
+   {"slug":"storage","title":"Storage","match":[{"category":"Tech & Office","subcategory":"Storage"}]},
+   {"slug":"power","title":"Power","match":[{"category":"Tech & Office","subcategory":"Power"}]}
+  ]},
+  {"slug":"keyholders","title":"Keyholders","match":[{"category":"Accessories","subcategory":"Keyholders"}]},
+  {"slug":"wrist-bands","title":"Wrist bands","match":[{"category":"Accessories","subcategory":"Wrist bands"}]},
+  {"slug":"name-tags","title":"Name tags","match":[{"category":"Accessories","subcategory":"Name tags"}]}
+ ]},
+ {"slug":"stickers-magnets","title":"Stickers & Magnets","children":[
+  {"slug":"stickers","title":"Stickers","match":[{"category":"Stickers & Labels","subcategory":"Stickers"}]},
+  {"slug":"labels","title":"Labels","match":[{"category":"Stickers & Labels","subcategory":"Labels"}]},
+  {"slug":"magnets","title":"Magnets","match":[{"category":"Stickers & Labels","subcategory":"Magnets"}]}
+ ]},
+ {"slug":"office","title":"Office","children":[
+  {"slug":"notebooks","title":"Notebooks","match":[{"category":"Stationery","subcategory":"Notebooks"}]},
+  {"slug":"diaries","title":"Diaries","match":[{"category":"Stationery","subcategory":"Diaries"}]},
+  {"slug":"pens","title":"Pens","match":[{"category":"Stationery","subcategory":"Pens"}]},
+  {"slug":"desk","title":"Desk accessories","match":[{"category":"Tech & Office","subcategory":"Desk"}]}
+ ]},
+ {"slug":"promo-events","title":"Promo & Events","children":[
+  {"slug":"lanyards","title":"Lanyards","match":[{"category":"Events & Promo","subcategory":"Lanyards"}]},
+  {"slug":"umbrellas","title":"Umbrellas","match":[{"category":"Events & Promo","subcategory":"Umbrellas"}]},
+  {"slug":"id-cards","title":"ID cards","match":[{"category":"Events & Promo","subcategory":"ID cards"}]},
+  {"slug":"badges","title":"Badges","match":[{"category":"Events & Promo","subcategory":"Badges"}]}
+ ]},
+ {"slug":"print-signage","title":"Print & Signage","children":[
+  {"slug":"printing","title":"Printing","match":[{"category":"Printing"}]},
+  {"slug":"signage","title":"Signage & outdoor","match":[{"category":"Signage & Outdoor"}]}
+ ]},
+ {"slug":"co-brand","title":"Co. Brand","children":[
+  {"slug":"design-services","title":"Design services","match":[{"category":"Design"}]},
+  {"slug":"on-site-visit","title":"On-site designer visit","link":"/quote"},
+  {"slug":"share-designs","title":"Share your designs","link":"/sell"}
+ ]}
+]

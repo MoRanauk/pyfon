@@ -9,6 +9,7 @@ const router = Router();
 
 const listQuery = z.object({
   category: z.string().trim().max(80).optional(),
+  node: z.string().trim().regex(/^[a-z0-9-]+$/).max(80).optional(),
   q: z.string().trim().max(80).optional(),
   type: z.enum(['product', 'service']).optional(),
   featured: z.enum(['true', 'false']).optional(),
@@ -75,6 +76,51 @@ router.get('/:storefront/categories', asyncHandler(async (req, res) => {
   res.json({ categories: rows.map((r) => ({ name: r.name, slug: r.slug, itemCount: r.item_count })) });
 }));
 
+// The menu tree: groups, categories, sub-categories, any depth.
+// Empty branches are hidden, except links (for example /sell).
+router.get('/:storefront/tree', asyncHandler(async (req, res) => {
+  const code = await requireStorefront(req);
+  const nodes = (await query('SELECT id, parent_id, slug, title, link FROM taxonomy_nodes ORDER BY position, id')).rows;
+  const links = (await query(
+    `SELECT n.node_id, i.id AS item_id, i.featured,
+            (SELECT file_name FROM item_images WHERE item_id = i.id ORDER BY position LIMIT 1) AS file
+     FROM item_nodes n JOIN catalog_items i ON i.id = n.item_id
+     WHERE i.status = 'active' AND ${IN_STOREFRONT}`,
+    [code],
+  )).rows;
+
+  const byId = new Map(nodes.map((n) => [String(n.id), { ...n, children: [], items: new Map() }]));
+  const roots = [];
+  for (const n of byId.values()) {
+    const parent = n.parent_id == null ? null : byId.get(String(n.parent_id));
+    if (parent) parent.children.push(n);
+    else roots.push(n);
+  }
+  for (const l of links) {
+    const n = byId.get(String(l.node_id));
+    if (n) n.items.set(String(l.item_id), { featured: l.featured, file: l.file });
+  }
+
+  function build(n) {
+    const kids = n.children.map(build).filter(Boolean);
+    for (const c of n.children) for (const [k, v] of c.items) n.items.set(k, v);
+    if (!n.items.size && !n.link) return null;
+    const list = [...n.items.values()].filter((x) => x.file);
+    const pick = list.find((x) => x.featured) || list[0];
+    return {
+      key: n.slug,
+      title: n.title,
+      to: n.link || '/shop?node=' + n.slug,
+      count: n.items.size,
+      image: pick ? '/images/' + pick.file : '',
+      children: kids,
+    };
+  }
+
+  res.set('Cache-Control', 'public, max-age=60');
+  res.json({ tree: roots.map(build).filter(Boolean) });
+}));
+
 router.get('/:storefront/items', asyncHandler(async (req, res) => {
   const code = await requireStorefront(req);
   const parsed = listQuery.safeParse(req.query);
@@ -87,6 +133,15 @@ router.get('/:storefront/items', asyncHandler(async (req, res) => {
   if (f.category) {
     params.push(f.category);
     where += ` AND c.slug = $${params.length}`;
+  }
+  if (f.node) {
+    params.push(f.node);
+    where += ` AND EXISTS (SELECT 1 FROM item_nodes x WHERE x.item_id = i.id AND x.node_id IN (
+      WITH RECURSIVE d AS (
+        SELECT id FROM taxonomy_nodes WHERE slug = $${params.length}
+        UNION ALL
+        SELECT t.id FROM taxonomy_nodes t JOIN d ON t.parent_id = d.id
+      ) SELECT id FROM d))`;
   }
   if (f.type) {
     params.push(f.type);
