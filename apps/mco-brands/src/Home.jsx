@@ -61,12 +61,6 @@ export default function Home() {
     <>
       <div className="herowrap"><Slider slides={slides} /></div>
 
-      <div className="wrap trust">
-        <div><strong>&#128274; Secure ordering</strong><br /><span className="muted">Confirm every order with us on WhatsApp.</span></div>
-        <div><strong>&#8617; Checked before dispatch</strong><br /><span className="muted">Each job is approved by our partners.</span></div>
-        <div><strong>&#128172; Real support</strong><br /><span className="muted">Talk to a person about your design.</span></div>
-      </div>
-
       {error ? <div className="wrap section"><p role="alert">Could not load the shop: {error}</p></div> : null}
 
       <Section title="Shop by range">
