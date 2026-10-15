@@ -8,6 +8,24 @@ import { buildGroups, mix, priceText } from './groups.js';
 
 const STOCK = { in_stock: 'In stock', made_to_order: 'Made to order', out_of_stock: 'Out of stock' };
 
+// Turns the item's options into [{ name, values: [] }]. Accepts the shapes the importer may store.
+function optionGroups(options) {
+  if (!options) return [];
+  let out = [];
+  if (Array.isArray(options)) {
+    out = options.map((o) => {
+      if (typeof o === 'string') {
+        const [n, v] = o.split(':');
+        return { name: (n || '').trim(), values: (v || '').split('|').map((x) => x.trim()) };
+      }
+      return { name: o.name || o.group || o.label || '', values: (o.values || o.options || []).map(String) };
+    });
+  } else if (typeof options === 'object') {
+    out = Object.entries(options).map(([name, v]) => ({ name, values: Array.isArray(v) ? v.map(String) : [] }));
+  }
+  return out.filter((g) => g.name && g.values.length);
+}
+
 export default function Product() {
   const { sku } = useParams();
   const { all, cats } = useCatalog();
@@ -15,6 +33,9 @@ export default function Product() {
   const [item, setItem] = useState(null);
   const [error, setError] = useState('');
   const [main, setMain] = useState('');
+  const [sel, setSel] = useState({});
+  const [zoom, setZoom] = useState(false);
+  const [origin, setOrigin] = useState('50% 50%');
   const [qty, setQty] = useState(1);
   const [text, setText] = useState('');
   const [toast, setToast] = useState(false);
@@ -24,10 +45,11 @@ export default function Product() {
     setError('');
     setToast(false);
     setText('');
+    setZoom(false);
     window.scrollTo(0, 0);
     api.catalog.item(STORE, sku).then((d) => {
       setItem(d.item);
-      setMain(d.item.image);
+      setSel(Object.fromEntries(optionGroups(d.item.options).map((g) => [g.name, g.values[0]])));
       setQty(d.item.minOrderQty || 1);
     }).catch((e) => setError(e.message));
   }, [sku]);
@@ -37,6 +59,21 @@ export default function Product() {
     const t = setTimeout(() => setToast(false), 4500);
     return () => clearTimeout(t);
   }, [toast]);
+
+  const opts = useMemo(() => (item ? optionGroups(item.options) : []), [item]);
+  // Photos of the chosen options come first, then the product's own photos.
+  const gallery = useMemo(() => {
+    if (!item) return [];
+    const base = item.images && item.images.length ? item.images : [item.image];
+    const extra = [];
+    for (const g of opts) {
+      const l = item.optionImages && item.optionImages[g.name] && item.optionImages[g.name][sel[g.name]];
+      if (l) extra.push(...l);
+    }
+    return [...new Set([...extra, ...base])];
+  }, [item, opts, sel]);
+  const gkey = gallery.join('|');
+  useEffect(() => { setMain(gallery[0] || ''); setZoom(false); }, [gkey]); // eslint-disable-line
 
   const more = useMemo(
     () => (item ? all.filter((i) => i.categorySlug === item.categorySlug && i.sku !== item.sku).slice(0, 10) : []),
@@ -55,7 +92,8 @@ export default function Product() {
   const pers = (item.personalization || []).filter((p) => p !== 'none');
   const canOrder = item.type === 'product' && item.priceType === 'fixed' && item.priceKes != null && item.stockStatus !== 'out_of_stock';
   const min = item.minOrderQty || 1;
-  const images = item.images && item.images.length ? item.images : [item.image];
+  const shown = main || gallery[0] || item.image;
+  const chosen = opts.map((g) => g.name + ': ' + sel[g.name]).join(', ');
 
   const feats = (item.description || '').split(/(?<=[.!?])\s+/).map((s) => s.trim()).filter(Boolean);
   if (pers.length) feats.push('Personalise with: ' + pers.join(', ') + '.');
@@ -63,8 +101,15 @@ export default function Product() {
   feats.push('Every job is checked by our partners before dispatch.');
 
   function addToCart() {
-    add(item, Math.max(min, parseInt(qty, 10) || min), pers.includes('text') ? text.trim() : '');
+    const note = [chosen, pers.includes('text') ? text.trim() : ''].filter(Boolean).join(' | ');
+    add(item, Math.max(min, parseInt(qty, 10) || min), note);
     setToast(true);
+  }
+
+  function move(e) {
+    if (!zoom) return;
+    const r = e.currentTarget.getBoundingClientRect();
+    setOrigin(((e.clientX - r.left) / r.width * 100) + '% ' + ((e.clientY - r.top) / r.height * 100) + '%');
   }
 
   return (
@@ -72,15 +117,20 @@ export default function Product() {
       <p className="muted"><Link to="/shop">Shop</Link> / <Link to={'/shop?category=' + item.categorySlug}>{item.category}</Link></p>
 
       <div className="pdp">
-        <div className="gal">
-          {images.length > 1 ? (
-            <div className="thumbs">
-              {images.map((p) => (
-                <img key={p} src={img(p)} alt="" className={p === main ? 'on' : ''} onClick={() => setMain(p)} />
-              ))}
+        <div>
+          <div className="gal">
+            {gallery.length > 1 ? (
+              <div className="thumbs">
+                {gallery.map((p) => (
+                  <img key={p} src={img(p)} alt="" className={p === shown ? 'on' : ''} onClick={() => setMain(p)} />
+                ))}
+              </div>
+            ) : null}
+            <div className={'mainimg' + (zoom ? ' z' : '')} onDoubleClick={() => setZoom(!zoom)} onMouseMove={move} onMouseLeave={() => setZoom(false)}>
+              <img src={img(shown)} alt={item.name} style={{ transform: zoom ? 'scale(2.2)' : 'none', transformOrigin: origin }} />
             </div>
-          ) : null}
-          <div className="mainimg"><img src={img(main)} alt={item.name} /></div>
+          </div>
+          <p className="zhint">Double-click the photo to zoom.</p>
         </div>
 
         <div className="pinfo">
@@ -95,6 +145,17 @@ export default function Product() {
             ) : null}
           </p>
           <span className="badge">{STOCK[item.stockStatus] || item.stockStatus}{item.leadTimeDays ? ' \u00b7 about ' + item.leadTimeDays + ' days' : ''}</span>
+
+          {opts.map((g) => (
+            <div className="field" key={g.name}>
+              <span>{g.name}: <b>{sel[g.name]}</b></span>
+              <div className="opts">
+                {g.values.map((v) => (
+                  <button key={v} type="button" className={'opt' + (sel[g.name] === v ? ' on' : '')} onClick={() => setSel({ ...sel, [g.name]: v })}>{v}</button>
+                ))}
+              </div>
+            </div>
+          ))}
 
           {canOrder ? (
             <>

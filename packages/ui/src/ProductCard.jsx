@@ -13,7 +13,7 @@ export function ProductCard({ name, imageUrl, priceType, priceKes, compareAtKes,
       <a href={href || '#'} style={{ color: 'inherit', textDecoration: 'none' }}>
         {imageUrl ? <img src={imageUrl} alt={name} loading="lazy" style={{ width: '100%', aspectRatio: '1 / 1', objectFit: 'cover', display: 'block' }} /> : null}
         <div style={{ padding: '10px 12px' }}>
-          <h3 style={{ margin: '0 0 6px', fontSize: '15px', fontFamily: 'var(--pf-font-heading)' }}>{name}</h3>
+          <h3 style={{ margin: '0 0 6px', fontSize: '15px', fontFamily: 'var(--pf-font-body, system-ui, sans-serif)', fontWeight: 500 }}>{name}</h3>
           <p style={{ margin: 0, fontSize: '14px' }}>
             <strong>{price}</strong>
             {showOld ? <span style={{ marginLeft: '8px', color: 'var(--pf-muted)', textDecoration: 'line-through' }}>{formatKES(compareAtKes)}</span> : null}
@@ -28,3 +28,4 @@ export function ProductCard({ name, imageUrl, priceType, priceKes, compareAtKes,
     </article>
   );
 }
+

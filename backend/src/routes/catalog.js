@@ -173,8 +173,20 @@ router.get('/:storefront/items/:sku', asyncHandler(async (req, res) => {
     [code, req.params.sku],
   );
   if (!rows.length) throw new HttpError(404, 'not_found', 'Item not found');
+  const oi = await query(
+    `SELECT o.option_name, o.option_value, o.file_name
+     FROM item_option_images o JOIN catalog_items i ON i.id = o.item_id
+     WHERE i.sku = $1 ORDER BY o.option_name, o.option_value, o.position`,
+    [req.params.sku],
+  );
+  const optionImages = {};
+  for (const r of oi.rows) {
+    if (!optionImages[r.option_name]) optionImages[r.option_name] = {};
+    if (!optionImages[r.option_name][r.option_value]) optionImages[r.option_name][r.option_value] = [];
+    optionImages[r.option_name][r.option_value].push('/images/' + r.file_name);
+  }
   res.set('Cache-Control', 'public, max-age=60');
-  res.json({ item: shape(rows[0]) });
+  res.json({ item: { ...shape(rows[0]), optionImages } });
 }));
 
 export default router;

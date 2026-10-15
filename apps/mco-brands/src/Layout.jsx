@@ -46,7 +46,7 @@ function GroupBar({ tree, open, setOpen, hoverOk }) {
   return (
     <div className="wrap">
       <div className={'gslide' + (edge.l ? ' fl' : '') + (edge.r ? ' fr' : '')}>
-        {hoverOk && edge.l ? <button type="button" className="garrow gl" aria-label="Scroll left" onClick={() => nudge(-1)}>{'\u2039'}</button> : null}
+        {edge.l ? <button type="button" className="garrow gl" aria-label="Scroll left" onClick={() => nudge(-1)}>{'\u2039'}</button> : null}
         <div className="gbar" ref={ref} onScroll={measure}>
           {tree.map((gr) => (
             <Link
@@ -60,7 +60,7 @@ function GroupBar({ tree, open, setOpen, hoverOk }) {
             </Link>
           ))}
         </div>
-        {hoverOk && edge.r ? <button type="button" className="garrow gr" aria-label="Scroll right" onClick={() => nudge(1)}>{'\u203a'}</button> : null}
+        {edge.r ? <button type="button" className="garrow gr" aria-label="Scroll right" onClick={() => nudge(1)}>{'\u203a'}</button> : null}
       </div>
     </div>
   );
@@ -186,3 +186,4 @@ function Shell({ lite }) {
 
 export default function Layout() { return <Shell lite={false} />; }
 export function LiteLayout() { return <Shell lite />; }
+

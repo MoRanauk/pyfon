@@ -32,11 +32,11 @@ export function Reveal({ children, delay = 0, style }) {
   );
 }
 
-const FADE = 1400;
+const FADE = 2800;
 
 // Crossfading hero. slides = [{ image, node }]. The photo drifts slowly (zoom)
 // while the next slide dissolves in over it. Pauses on hover, swipe on touch.
-export function Slider({ slides, interval = 6000, height = 'clamp(360px, 50vw, 540px)' }) {
+export function Slider({ slides, interval = 9500, height = 'clamp(360px, 50vw, 540px)' }) {
   const n = slides.length;
   const [cur, setCur] = useState(0);
   const [prev, setPrev] = useState(-1);
@@ -150,3 +150,4 @@ export function Slider({ slides, interval = 6000, height = 'clamp(360px, 50vw, 5
     </div>
   );
 }
+
