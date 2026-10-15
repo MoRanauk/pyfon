@@ -1,7 +1,7 @@
 import { createContext, useContext, useEffect, useState } from 'react';
 import { api, STORE } from './api.js';
 
-const Ctx = createContext({ cats: [], all: [], ready: false, error: '' });
+const Ctx = createContext({ cats: [], all: [], tree: [], ready: false, error: '' });
 
 // Loads the whole storefront catalog once (60 per page) for every page to share.
 async function loadAll() {
@@ -18,12 +18,14 @@ async function loadAll() {
 }
 
 export function CatalogProvider({ children }) {
-  const [state, setState] = useState({ cats: [], all: [], ready: false, error: '' });
+  const [state, setState] = useState({ cats: [], all: [], tree: [], ready: false, error: '' });
   useEffect(() => {
     let live = true;
-    Promise.all([api.catalog.categories(STORE), loadAll()])
-      .then(([c, all]) => { if (live) setState({ cats: c.categories, all, ready: true, error: '' }); })
-      .catch((e) => { if (live) setState({ cats: [], all: [], ready: true, error: e.message }); });
+    // The tree loads on its own: if it fails, the shop still works.
+    const treeP = api.catalog.tree(STORE).then((r) => r.tree || []).catch(() => []);
+    Promise.all([api.catalog.categories(STORE), loadAll(), treeP])
+      .then(([c, all, tree]) => { if (live) setState({ cats: c.categories, all, tree, ready: true, error: '' }); })
+      .catch((e) => { if (live) setState({ cats: [], all: [], tree: [], ready: true, error: e.message }); });
     return () => { live = false; };
   }, []);
   return <Ctx.Provider value={state}>{children}</Ctx.Provider>;

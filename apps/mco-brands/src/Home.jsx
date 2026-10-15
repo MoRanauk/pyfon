@@ -1,18 +1,32 @@
 import { useEffect, useMemo, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { Reveal, Slider } from '@pyfon/ui';
-import { img } from './api.js';
+import { api, STORE, img } from './api.js';
 import { useCatalog } from './CatalogState.jsx';
-import { buildGroups, groupItems, showcase, mix, priceText } from './groups.js';
+import { mix, priceText } from './groups.js';
+import { slugOf } from './tree.js';
 import { Card, Section, Rail } from './Shared.jsx';
 
 const COLORS = ['#e9d8a6', '#cfe0d4', '#f2c9c0', '#cdd8ee', '#f3d3a8', '#ddd0ee'];
 
 export default function Home() {
-  const { cats, all, error } = useCatalog();
-  const groups = useMemo(() => buildGroups(cats), [cats]);
+  const { cats, all, tree, error } = useCatalog();
+  // Groups shown as tiles and tabs (Explore and Co. Brand are not shopping ranges).
+  const groups = useMemo(() => tree.filter((g) => g.title !== 'Explore' && g.title !== 'Co. Brand'), [tree]);
   const [tab, setTab] = useState('');
+  const [tabItems, setTabItems] = useState([]);
   useEffect(() => { if (!tab && groups.length) setTab(groups[0].key); }, [groups, tab]);
+
+  // Load 8 items for the chosen collection tab.
+  useEffect(() => {
+    const g = groups.find((x) => x.key === tab);
+    if (!g) return undefined;
+    let live = true;
+    api.catalog.items(STORE, { node: slugOf(g), limit: 8 })
+      .then((d) => { if (live) setTabItems(d.items); })
+      .catch(() => { if (live) setTabItems([]); });
+    return () => { live = false; };
+  }, [tab, groups]);
 
   const d = useMemo(() => {
     const products = all.filter((i) => i.type === 'product' && i.image);
@@ -28,9 +42,6 @@ export default function Home() {
       drink: drinkItems.find((i) => i.featured) || drinkItems[0] || null
     };
   }, [all, cats]);
-
-  const tabGroup = groups.find((g) => g.key === tab);
-  const tabItems = tabGroup ? mix(groupItems(tabGroup, all), 8) : [];
 
   const intro = (
     <div className="hs">
@@ -65,15 +76,12 @@ export default function Home() {
 
       <Section title="Shop by range">
         <div className="gtiles">
-          {groups.map((g, i) => {
-            const pick = showcase(g, all, 1)[0];
-            return (
-              <Link key={g.key} className="ctile" style={{ background: COLORS[i % COLORS.length] }} to={'/c/' + g.key}>
-                {pick ? <img src={img(pick.image)} alt="" loading="lazy" /> : null}
-                <span className="pill">{g.title}</span>
-              </Link>
-            );
-          })}
+          {groups.map((g, i) => (
+            <Link key={g.key} className="ctile" style={{ background: COLORS[i % COLORS.length] }} to={'/c/' + g.key}>
+              {g.image ? <img src={img(g.image)} alt="" loading="lazy" /> : null}
+              <span className="pill">{g.title}</span>
+            </Link>
+          ))}
         </div>
       </Section>
 
@@ -118,7 +126,7 @@ export default function Home() {
       </section>
 
       {d.picked.length ? (
-        <Section title="Picked for you">
+        <Section title="Picked for you" action={<Link to="/for-you">See more</Link>}>
           <Rail>{d.picked.map((it) => <Card key={it.sku} it={it} />)}</Rail>
         </Section>
       ) : null}

@@ -5,5 +5,10 @@ export const STORE = 'mco';
 export const tokens = tokenStore('mco');
 export const api = createClient({ baseUrl: API_URL, interfaceCode: 'mco', getToken: tokens.get });
 
-// The backend returns image paths like /images/file.png. Add the API address.
-export const img = (p) => (p ? API_URL + p : '');
+// Turns an image path from the backend into a full address.
+// Accepts full links, /images/x.png paths, or a bare file name.
+export const img = (p) => {
+  if (!p) return '';
+  if (/^https?:/.test(p)) return p;
+  return API_URL + (p.startsWith('/') ? p : '/images/' + p);
+};

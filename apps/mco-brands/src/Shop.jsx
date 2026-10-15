@@ -1,22 +1,32 @@
 import { useEffect, useState } from 'react';
-import { useSearchParams } from 'react-router-dom';
+import { Link, useSearchParams } from 'react-router-dom';
 import { api, STORE } from './api.js';
+import { useCatalog } from './CatalogState.jsx';
+import { findBySlug, kids } from './tree.js';
 import { Card } from './Shared.jsx';
 
 export default function Shop() {
   const [sp, setSp] = useSearchParams();
-  const category = sp.get('category') || '';
+  const { tree, ready } = useCatalog();
+  const rawCat = sp.get('category') || '';
+  const nodeParam = sp.get('node') || '';
   const q = sp.get('q') || '';
   const type = sp.get('type') || '';
   const page = Number(sp.get('page') || 1);
+  // Old links use ?category=slug. If that slug is also a menu node, treat it as a node.
+  const catNode = !nodeParam && rawCat ? findBySlug(tree, rawCat) : null;
+  const node = nodeParam || (catNode ? rawCat : '');
+  const category = catNode ? '' : rawCat;
+  const nodeInfo = node ? findBySlug(tree, node) : null;
   const [data, setData] = useState(null);
   const [error, setError] = useState('');
 
   useEffect(() => {
+    if (!ready) return;
     setData(null);
     setError('');
-    api.catalog.items(STORE, { category, q, type, page, limit: 24 }).then(setData).catch((e) => setError(e.message));
-  }, [category, q, type, page]);
+    api.catalog.items(STORE, { category, node, q, type, page, limit: 24 }).then(setData).catch((e) => setError(e.message));
+  }, [ready, category, node, q, type, page]);
 
   function go(p) {
     const next = new URLSearchParams(sp);
@@ -26,11 +36,21 @@ export default function Shop() {
   }
 
   const pages = data ? Math.max(1, Math.ceil(data.total / data.limit)) : 1;
-  const heading = q ? 'Results for "' + q + '"' : type === 'service' ? 'Print and design services' : category ? 'Shop: ' + category : 'All products and services';
+  const heading = q ? 'Results for "' + q + '"'
+    : type === 'service' ? 'Print and design services'
+    : nodeInfo ? nodeInfo.title
+    : category ? 'Shop: ' + category
+    : 'All products and services';
+  const chips = nodeInfo ? kids(nodeInfo) : [];
 
   return (
     <div className="wrap section">
       <h2>{heading}</h2>
+      {chips.length ? (
+        <div className="gchips">
+          {chips.map((c) => <Link key={c.key} className="chip" to={c.to}>{c.title}</Link>)}
+        </div>
+      ) : null}
       {error ? <p role="alert">Could not load items: {error}</p> : null}
       {!data && !error ? <p className="muted">Loading...</p> : null}
       {data && !data.items.length ? <p className="muted">Nothing found. Try another search.</p> : null}

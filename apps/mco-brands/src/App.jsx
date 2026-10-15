@@ -4,6 +4,8 @@ import Home from './Home.jsx';
 import Shop from './Shop.jsx';
 import Product from './Product.jsx';
 import Group from './Group.jsx';
+import Recent from './Recent.jsx';
+import ForYou from './ForYou.jsx';
 import Cart from './Cart.jsx';
 import Account from './Account.jsx';
 import Quote from './Quote.jsx';
@@ -27,6 +29,8 @@ export default function App() {
         <Route path="/" element={<Home />} />
         <Route path="/shop" element={<Shop />} />
         <Route path="/c/:key" element={<Group />} />
+        <Route path="/recent" element={<Recent />} />
+        <Route path="/for-you" element={<ForYou />} />
         <Route path="/p/:sku" element={<Product />} />
         <Route path="/quote" element={<Quote />} />
         <Route path="/sell" element={<Sell />} />

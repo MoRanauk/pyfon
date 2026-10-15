@@ -1,20 +1,32 @@
 import { useEffect, useState } from 'react';
-import { Link, useParams } from 'react-router-dom';
+import { Link, useNavigate, useParams } from 'react-router-dom';
+import { api, STORE, img } from './api.js';
 import { useCatalog } from './CatalogState.jsx';
-import { buildGroups, groupItems, showcase } from './groups.js';
-import { copyFor } from './tree.js';
-import { FloatPair, Words } from './FloatPair.jsx';
-import { Card } from './Shared.jsx';
+import { findByKey, kids, slugOf } from './tree.js';
+import { Card, Section, Rail } from './Shared.jsx';
+
+const COLORS = ['#e9d8a6', '#cfe0d4', '#f2c9c0', '#cdd8ee', '#f3d3a8', '#ddd0ee'];
 
 export default function Group() {
   const { key } = useParams();
-  const { cats, all, ready } = useCatalog();
-  const [sel, setSel] = useState('');
-  useEffect(() => { setSel(''); window.scrollTo(0, 0); }, [key]);
+  const { tree, ready } = useCatalog();
+  const nav = useNavigate();
+  const node = findByKey(tree, key);
+  const [items, setItems] = useState(null);
+
+  // Load a few popular items of this group.
+  useEffect(() => {
+    if (!node) return undefined;
+    let live = true;
+    setItems(null);
+    api.catalog.items(STORE, { node: slugOf(node), limit: 12 })
+      .then((d) => { if (live) setItems(d.items); })
+      .catch(() => { if (live) setItems([]); });
+    return () => { live = false; };
+  }, [node]);
 
   if (!ready) return <div className="wrap section"><p className="muted">Loading...</p></div>;
-  const g = buildGroups(cats).find((x) => x.key === key);
-  if (!g) {
+  if (!node) {
     return (
       <div className="wrap section">
         <h2>Page not found</h2>
@@ -22,26 +34,37 @@ export default function Group() {
       </div>
     );
   }
-  const c = copyFor(g.key);
-  const items = groupItems(g, all).filter((i) => !sel || i.categorySlug === sel);
 
+  const list = kids(node);
   return (
-    <div className="wrap section">
-      <section className="ghero" style={{ background: c.color }}>
-        <div>
-          <h1>{g.title}</h1>
-          <p>{c.blurb}</p>
-          <div className="ghero-words"><Words lines={c.lines} /></div>
-        </div>
-        <FloatPair items={showcase(g, all, 8)} lines={c.lines} words={false} height={320} />
-      </section>
-      <div className="chips">
-        <button type="button" className={'chip' + (!sel ? ' on' : '')} onClick={() => setSel('')}>All</button>
-        {g.cats.map((x) => (
-          <button key={x.slug} type="button" className={'chip' + (sel === x.slug ? ' on' : '')} onClick={() => setSel(x.slug)}>{x.name}</button>
-        ))}
+    <>
+      <div className="wrap section">
+        <h2>{node.title}</h2>
+        {list.length ? (
+          <label className="gdrop">
+            Browse {node.title}
+            <select value="" onChange={(e) => { if (e.target.value) nav(e.target.value); }}>
+              <option value="">Choose...</option>
+              {list.map((n) => <option key={n.key} value={n.to}>{n.title}</option>)}
+            </select>
+          </label>
+        ) : null}
+        {list.length ? (
+          <div className="gtiles">
+            {list.map((n, i) => (
+              <Link key={n.key} className="ctile" style={{ background: COLORS[i % COLORS.length] }} to={n.to}>
+                {n.image ? <img src={img(n.image)} alt="" loading="lazy" /> : null}
+                <span className="pill">{n.title}</span>
+              </Link>
+            ))}
+          </div>
+        ) : null}
       </div>
-      <div className="grid" style={{ marginTop: 24 }}>{items.map((it) => <Card key={it.sku} it={it} />)}</div>
-    </div>
+      {items && items.length ? (
+        <Section title={'Popular in ' + node.title} action={<Link to={node.to}>See all</Link>}>
+          <Rail>{items.map((it) => <Card key={it.sku} it={it} />)}</Rail>
+        </Section>
+      ) : null}
+    </>
   );
 }
