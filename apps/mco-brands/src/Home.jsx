@@ -1,54 +1,65 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { Link } from 'react-router-dom';
-import { formatKES } from '@pyfon/ui';
-import { api, img, STORE } from './api.js';
-import { Card, Section } from './Shared.jsx';
+import { Reveal, Slider } from '@pyfon/ui';
+import { img } from './api.js';
+import { useCatalog } from './CatalogState.jsx';
+import { buildGroups, groupItems, showcase, mix, priceText } from './groups.js';
+import { Card, Section, Rail } from './Shared.jsx';
+
+const COLORS = ['#e9d8a6', '#cfe0d4', '#f2c9c0', '#cdd8ee', '#f3d3a8', '#ddd0ee'];
 
 export default function Home() {
-  const [cats, setCats] = useState([]);
-  const [featured, setFeatured] = useState([]);
-  const [picked, setPicked] = useState([]);
+  const { cats, all, error } = useCatalog();
+  const groups = useMemo(() => buildGroups(cats), [cats]);
   const [tab, setTab] = useState('');
-  const [tabItems, setTabItems] = useState([]);
-  const [drink, setDrink] = useState(null);
-  const [drinkSlug, setDrinkSlug] = useState('');
-  const [error, setError] = useState('');
+  useEffect(() => { if (!tab && groups.length) setTab(groups[0].key); }, [groups, tab]);
 
-  useEffect(() => {
-    Promise.all([
-      api.catalog.categories(STORE),
-      api.catalog.items(STORE, { featured: 'true', limit: 12 }),
-      api.catalog.items(STORE, { type: 'product', limit: 8, page: 2 })
-    ])
-      .then(([c, f, p]) => {
-        setCats(c.categories);
-        setFeatured(f.items);
-        setPicked(p.items);
-        if (c.categories.length) setTab(c.categories[0].slug);
-        const dk = c.categories.find((x) => x.name.toLowerCase() === 'drinkware');
-        if (dk) {
-          setDrinkSlug(dk.slug);
-          api.catalog.items(STORE, { category: dk.slug, featured: 'true', limit: 1 }).then((d) => setDrink(d.items[0] || null));
-        }
-      })
-      .catch((e) => setError(e.message));
-  }, []);
+  const d = useMemo(() => {
+    const products = all.filter((i) => i.type === 'product' && i.image);
+    const featured = products.filter((i) => i.featured);
+    const rest = products.filter((i) => !i.featured);
+    const dk = cats.find((c) => c.name.toLowerCase() === 'drinkware');
+    const drinkItems = dk ? products.filter((i) => i.categorySlug === dk.slug) : [];
+    return {
+      hero: mix([...featured, ...rest], 7),
+      featured: mix(featured, 12),
+      picked: mix(rest, 10),
+      drinkSlug: dk ? dk.slug : '',
+      drink: drinkItems.find((i) => i.featured) || drinkItems[0] || null
+    };
+  }, [all, cats]);
 
-  useEffect(() => {
-    if (!tab) return;
-    api.catalog.items(STORE, { category: tab, limit: 8 }).then((d) => setTabItems(d.items)).catch(() => setTabItems([]));
-  }, [tab]);
+  const tabGroup = groups.find((g) => g.key === tab);
+  const tabItems = tabGroup ? mix(groupItems(tabGroup, all), 8) : [];
+
+  const intro = (
+    <div className="hs">
+      <small>M &amp; Co. Brands</small>
+      <h1>Your name, your logo, your design. On everything.</h1>
+      <p>Mugs, bags, hoodies, gifts and print jobs, made for you and branded the way you want.</p>
+      <Link className="btn" to="/shop">Shop the range</Link>
+      <Link className="btn alt" to="/quote">Request a quote</Link>
+    </div>
+  );
+
+  const slides = d.hero.length
+    ? d.hero.map((it, i) => ({
+        image: img(it.image),
+        node: i === 0 ? intro : (
+          <div className="hs">
+            <small>{it.category}</small>
+            <h1>{it.name}</h1>
+            <div className="price">{priceText(it)}</div>
+            <Link className="btn" to={'/p/' + it.sku}>{it.priceType === 'quote' ? 'Ask for a quote' : 'Shop now'}</Link>
+            <Link className="btn alt" to={'/shop?category=' + it.categorySlug}>More in {it.category}</Link>
+          </div>
+        )
+      }))
+    : [{ image: '', node: intro }];
 
   return (
     <>
-      <section className="hero">
-        <div className="wrap">
-          <h1>Your name, your logo, your design. On everything.</h1>
-          <p>Mugs, bottles, notebooks, gifts and print jobs, made for you and branded the way you want.</p>
-          <Link className="btn" to="/shop">Shop the range</Link>
-          <Link className="btn alt" to="/shop?type=service">Request a quote</Link>
-        </div>
-      </section>
+      <div className="herowrap"><Slider slides={slides} /></div>
 
       <div className="wrap trust">
         <div><strong>&#128274; Secure ordering</strong><br /><span className="muted">Confirm every order with us on WhatsApp.</span></div>
@@ -58,49 +69,70 @@ export default function Home() {
 
       {error ? <div className="wrap section"><p role="alert">Could not load the shop: {error}</p></div> : null}
 
-      <Section title="Shop product range">
-        <div className="tiles">
-          {cats.map((c) => (
-            <Link key={c.slug} className="tile" to={'/shop?category=' + c.slug}>
-              <strong>{c.name}</strong>
-              <small>{c.itemCount} items</small>
-            </Link>
-          ))}
+      <Section title="Shop by range">
+        <div className="gtiles">
+          {groups.map((g, i) => {
+            const pick = showcase(g, all, 1)[0];
+            return (
+              <Link key={g.key} className="ctile" style={{ background: COLORS[i % COLORS.length] }} to={'/c/' + g.key}>
+                {pick ? <img src={img(pick.image)} alt="" loading="lazy" /> : null}
+                <span className="pill">{g.title}</span>
+              </Link>
+            );
+          })}
         </div>
       </Section>
 
-      {featured.length ? (
+      {d.featured.length ? (
         <Section title="Featured products" action={<Link to="/shop">See all</Link>}>
-          <div className="rail">{featured.map((it) => <Card key={it.sku} it={it} />)}</div>
+          <Rail>{d.featured.map((it) => <Card key={it.sku} it={it} />)}</Rail>
         </Section>
       ) : null}
 
-      {drink ? (
+      {d.drink ? (
         <section className="section" style={{ background: 'var(--pf-surface)' }}>
-          <div className="wrap story">
-            <img src={img(drink.image)} alt={drink.name} />
-            <div>
-              <p className="muted" style={{ margin: 0 }}>Drinkware</p>
-              <h2 style={{ fontFamily: 'var(--pf-font-heading)' }}>{drink.name}</h2>
-              <p>{drink.description}</p>
-              <p><strong>{drink.priceType === 'quote' ? 'Request a quote' : formatKES(drink.priceKes)}</strong></p>
-              <Link className="btn" to={'/p/' + drink.sku}>View this piece</Link>
-              <Link to={'/shop?category=' + drinkSlug}>See all drinkware</Link>
-            </div>
+          <div className="wrap">
+            <Reveal>
+              <div className="story">
+                <img src={img(d.drink.image)} alt={d.drink.name} />
+                <div>
+                  <p className="muted" style={{ margin: 0 }}>Drinkware</p>
+                  <h2 style={{ fontFamily: 'var(--pf-font-heading)' }}>{d.drink.name}</h2>
+                  <p>{d.drink.description}</p>
+                  <p><strong>{priceText(d.drink)}</strong></p>
+                  <Link className="btn" to={'/p/' + d.drink.sku}>View this piece</Link>
+                  <Link to={'/shop?category=' + d.drinkSlug}>See all drinkware</Link>
+                </div>
+              </div>
+            </Reveal>
           </div>
         </section>
       ) : null}
 
-      {picked.length ? (
+      <section className="section">
+        <div className="wrap">
+          <Reveal>
+            <div className="qband">
+              <div>
+                <h2>Printing, branding and signage for your business</h2>
+                <p>Banners, uniforms, paperwork, vehicle branding. Tell us what you need and we quote fast.</p>
+              </div>
+              <Link className="btn" to="/quote">Get a quote</Link>
+            </div>
+          </Reveal>
+        </div>
+      </section>
+
+      {d.picked.length ? (
         <Section title="Picked for you">
-          <div className="grid">{picked.map((it) => <Card key={it.sku} it={it} />)}</div>
+          <Rail>{d.picked.map((it) => <Card key={it.sku} it={it} />)}</Rail>
         </Section>
       ) : null}
 
       <Section title="Collections">
         <div className="tabs">
-          {cats.map((c) => (
-            <button key={c.slug} type="button" className={c.slug === tab ? 'on' : ''} onClick={() => setTab(c.slug)}>{c.name}</button>
+          {groups.map((g) => (
+            <button key={g.key} type="button" className={g.key === tab ? 'on' : ''} onClick={() => setTab(g.key)}>{g.title}</button>
           ))}
         </div>
         <div className="grid">{tabItems.map((it) => <Card key={it.sku} it={it} />)}</div>
@@ -108,11 +140,13 @@ export default function Home() {
 
       <section className="section">
         <div className="wrap">
-          <div className="banner">
-            <h2 style={{ marginTop: 0, fontFamily: 'var(--pf-font-heading)' }}>Create a free account</h2>
-            <p className="muted">Track your orders and quote requests in one place.</p>
-            <Link className="btn" to="/account">Sign up</Link>
-          </div>
+          <Reveal>
+            <div className="banner">
+              <h2 style={{ marginTop: 0, fontFamily: 'var(--pf-font-heading)' }}>Create a free account</h2>
+              <p className="muted">Track your orders and quote requests in one place.</p>
+              <Link className="btn" to="/account">Sign up</Link>
+            </div>
+          </Reveal>
         </div>
       </section>
     </>
