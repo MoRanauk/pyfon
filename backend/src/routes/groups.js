@@ -9,6 +9,7 @@ import { partnerApprovalRoutes } from './partnerApprovals.js';
 import { partnerUploadRoutes } from './partnerUploads.js';
 import { ticketRoutes, devTicketRoutes } from './tickets.js';
 import { reportRoutes } from './reports.js';
+import { devSettingsRoutes } from './devSettings.js';
 
 function group(role) {
   const router = Router();
@@ -36,3 +37,4 @@ partnerRoutes.use(ticketRoutes);
 export const devRoutes = group('developer');
 devRoutes.use(devTicketRoutes);
 devRoutes.use(reportRoutes);
+devRoutes.use('/settings', devSettingsRoutes);

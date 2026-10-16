@@ -455,3 +455,17 @@ h1,h2,h3{font-weight:500}
 .banner{max-width:560px;margin:16px auto}
 .sumrow{max-width:100%}
 @media(max-width:700px){.cartline{justify-content:center;text-align:center}}
+
+/* ---- F1: dealers strip and Co. Brand page (to undo, delete from here to the end) ---- */
+.ctr{text-align:center}
+.dealers{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:16px;max-width:1000px;margin:16px auto 0}
+.dealer{background:#fff;border:1px solid var(--pf-border);border-radius:16px;padding:20px;text-align:center;display:flex;flex-direction:column;align-items:center;gap:8px}
+.dealer img,.dealer .dmark{width:72px;height:72px;border-radius:999px;object-fit:cover;background:var(--pf-surface)}
+.dealer .dmark{display:flex;align-items:center;justify-content:center;font-family:'Fraunces',Georgia,serif;font-size:28px;color:var(--pf-navy)}
+.dealer h3{margin:0;font-size:16px}
+.dealer p{margin:0;font-size:13px}
+.paths{max-width:960px;margin-left:auto;margin-right:auto}
+.paths .card2{text-align:center}
+.pick{font:inherit;color:inherit;cursor:pointer}
+.pick.on{border:2px solid var(--pf-navy)}
+.formcol textarea{padding:9px 10px;border:1px solid var(--pf-border);border-radius:var(--pf-radius);font-size:15px;font-family:inherit;background:#fff}

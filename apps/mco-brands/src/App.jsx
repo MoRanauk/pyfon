@@ -11,6 +11,7 @@ import Account from './Account.jsx';
 import Quote from './Quote.jsx';
 import Sell from './Sell.jsx';
 import Info from './Info.jsx';
+import CoBrand from './CoBrand.jsx';
 
 function NotFound() {
   return (
@@ -33,7 +34,7 @@ export default function App() {
         <Route path="/for-you" element={<ForYou />} />
         <Route path="/p/:sku" element={<Product />} />
         <Route path="/quote" element={<Quote />} />
-        <Route path="/sell" element={<Sell />} />
+        <Route path="/sell" element={<Sell />} /><Route path="/co-brand" element={<CoBrand />} />
         <Route path="/info/:slug" element={<Info />} />
         <Route path="*" element={<NotFound />} />
       </Route>

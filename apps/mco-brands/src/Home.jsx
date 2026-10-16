@@ -6,6 +6,7 @@ import { useCatalog } from './CatalogState.jsx';
 import { mix, priceText } from './groups.js';
 import { slugOf } from './tree.js';
 import { Card, Section, Rail } from './Shared.jsx';
+import DealerStrip from './Dealers.jsx';
 
 const COLORS = ['#e9d8a6', '#cfe0d4', '#f2c9c0', '#cdd8ee', '#f3d3a8', '#ddd0ee'];
 
@@ -131,7 +132,7 @@ export default function Home() {
         </Section>
       ) : null}
 
-      <Section title="Collections">
+      <DealerStrip /><Section title="Collections">
         <div className="tabs">
           {groups.map((g) => (
             <button key={g.key} type="button" className={g.key === tab ? 'on' : ''} onClick={() => setTab(g.key)}>{g.title}</button>
