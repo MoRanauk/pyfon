@@ -203,7 +203,7 @@ customerOrderRoutes.post('/quote-requests', writeLimiter, asyncHandler(async (re
 
 customerOrderRoutes.get('/orders', asyncHandler(async (req, res) => {
   const { rows } = await query(
-    `SELECT o.id, o.ref, o.total_kes, o.created_at, j.ref AS job_ref, j.current_step, j.status AS job_status
+    `SELECT o.id, o.ref, o.total_kes, o.created_at, o.delivery_method, o.delivery_fee_kes, o.delivery_address, o.delivery_notes, j.ref AS job_ref, j.current_step, j.status AS job_status
        FROM orders o LEFT JOIN jobs j ON j.order_id = o.id
       WHERE o.customer_id = $1 ORDER BY o.created_at DESC LIMIT 50`,
     [req.user.id]
@@ -213,7 +213,7 @@ customerOrderRoutes.get('/orders', asyncHandler(async (req, res) => {
   const linesByOrder = new Map();
   if (orderIds.length) {
     const lines = await query(
-      `SELECT id, order_id, sku, name, qty FROM order_lines WHERE order_id = ANY($1) ORDER BY id`,
+      `SELECT id, order_id, sku, name, qty, unit_price_kes, options, personalization FROM order_lines WHERE order_id = ANY($1) ORDER BY id`,
       [orderIds]
     );
     const lineIds = lines.rows.map((l) => l.id);
@@ -233,7 +233,7 @@ customerOrderRoutes.get('/orders', asyncHandler(async (req, res) => {
     for (const l of lines.rows) {
       const k = String(l.order_id);
       if (!linesByOrder.has(k)) linesByOrder.set(k, []);
-      linesByOrder.get(k).push({ lineId: l.id, sku: l.sku, name: l.name, qty: l.qty, files: filesByLine.get(String(l.id)) || [] });
+      linesByOrder.get(k).push({ lineId: l.id, sku: l.sku, name: l.name, qty: l.qty, unitPriceKes: l.unit_price_kes, options: l.options || {}, personalization: l.personalization || {}, files: filesByLine.get(String(l.id)) || [] });
     }
   }
 
@@ -243,15 +243,15 @@ customerOrderRoutes.get('/orders', asyncHandler(async (req, res) => {
       totalKes: r.total_kes,
       createdAt: r.created_at,
       progress: friendly(r),
-      lines: linesByOrder.get(String(r.id)) || [],
+      delivery: { method: r.delivery_method, label: (findDelivery(r.delivery_method) || {}).label || r.delivery_method, feeKes: r.delivery_fee_kes, address: r.delivery_address, notes: r.delivery_notes }, lines: linesByOrder.get(String(r.id)) || [],
     })),
   });
 }));
 
 customerOrderRoutes.get('/quote-requests', asyncHandler(async (req, res) => {
   const { rows } = await query(
-    `SELECT q.id, q.ref, q.kind, q.status, q.quoted_price_kes, q.created_at, j.current_step, j.status AS job_status
-       FROM quote_requests q LEFT JOIN jobs j ON j.quote_request_id = q.id
+    `SELECT q.id, q.ref, q.kind, q.status, q.quoted_price_kes, q.created_at, q.quantity, q.company_name, q.spec, q.notes, ci.name AS item_name, j.current_step, j.status AS job_status
+       FROM quote_requests q LEFT JOIN jobs j ON j.quote_request_id = q.id LEFT JOIN catalog_items ci ON ci.id = q.item_id
       WHERE q.customer_id = $1 ORDER BY q.created_at DESC LIMIT 50`,
     [req.user.id]
   );
@@ -276,7 +276,7 @@ customerOrderRoutes.get('/quote-requests', asyncHandler(async (req, res) => {
       ref: r.ref,
       kind: r.kind,
       status: r.status,
-      quotedPriceKes: r.quoted_price_kes,
+      quotedPriceKes: r.quoted_price_kes, item: r.item_name || null, quantity: r.quantity, companyName: r.company_name, spec: r.spec || {}, notes: r.notes || null,
       createdAt: r.created_at,
       progress: friendly(r),
       files: filesByQuote.get(String(r.id)) || [],

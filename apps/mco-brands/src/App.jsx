@@ -12,6 +12,7 @@ import Quote from './Quote.jsx';
 import Sell from './Sell.jsx';
 import Info from './Info.jsx';
 import CoBrand from './CoBrand.jsx';
+import Orders from './Orders.jsx';
 
 function NotFound() {
   return (
@@ -41,6 +42,7 @@ export default function App() {
       <Route element={<LiteLayout />}>
         <Route path="/cart" element={<Cart />} />
         <Route path="/account" element={<Account />} />
+        <Route path="/orders" element={<Orders />} />
       </Route>
     </Routes>
   );

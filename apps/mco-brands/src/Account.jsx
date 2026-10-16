@@ -39,6 +39,7 @@ export default function Account() {
         <h1>Your account</h1>
         <p>Signed in as <strong>{displayName(user)}</strong>.</p>
         <button type="button" className="btn" onClick={logout}>Sign out</button>
+        <p><Link to="/orders">My orders and quotes</Link></p>
         <p><Link to="/cart">Go to my cart</Link></p>
       </div>
     );
