@@ -112,10 +112,5 @@
  {"slug":"print-signage","title":"Print & Signage","children":[
   {"slug":"printing","title":"Printing","match":[{"category":"Printing"}]},
   {"slug":"signage","title":"Signage & outdoor","match":[{"category":"Signage & Outdoor"}]}
- ]},
- {"slug":"co-brand","title":"Co. Brand","children":[
-  {"slug":"design-services","title":"Design services","match":[{"category":"Design"}]},
-  {"slug":"on-site-visit","title":"On-site designer visit","link":"/quote"},
-  {"slug":"share-designs","title":"Share your designs","link":"/sell"}
  ]}
 ]

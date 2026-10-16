@@ -9,7 +9,7 @@ import { HttpError } from './errors.js';
 import { requestLogger } from './middleware/requestLogger.js';
 import authRoutes from './routes/auth.js';
 import catalogRoutes from './routes/catalog.js';
-import { customerRoutes, partnerRoutes, devRoutes } from './routes/groups.js';
+import { customerRoutes, partnerRoutes, devRoutes, vendorRoutes } from './routes/groups.js';
 import { publicDealerRoutes } from './routes/publicDealers.js';
 
 const app = express();
@@ -55,6 +55,7 @@ app.use('/v1/catalog', catalogRoutes);
 app.use('/v1/customer', customerRoutes);
 app.use('/v1/partner', partnerRoutes);
 app.use('/v1/dev', devRoutes);
+app.use('/v1/vendor', vendorRoutes);
 app.use('/v1/dealers', publicDealerRoutes);
 
 app.use((req, res) => {

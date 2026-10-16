@@ -63,7 +63,7 @@ export default function SideMenu({ open, onClose, tree, user }) {
           {!cur ? (
             <div className="dlinks">
               <Link to="/sell" onClick={onClose}>Sell with us</Link>
-              <Link to="/quote" onClick={onClose}>Get a quote</Link>
+              <Link to="/co-brand" onClick={onClose}>Co. Brand</Link>
               <Link to="/info/delivery" onClick={onClose}>Delivery</Link>
               <Link to="/info/contact" onClick={onClose}>Contact us</Link>
             </div>

@@ -469,3 +469,13 @@ h1,h2,h3{font-weight:500}
 .pick{font:inherit;color:inherit;cursor:pointer}
 .pick.on{border:2px solid var(--pf-navy)}
 .formcol textarea{padding:9px 10px;border:1px solid var(--pf-border);border-radius:var(--pf-radius);font-size:15px;font-family:inherit;background:#fff}
+
+/* ---- F2: layout fixes (to undo, delete from here to the end) ---- */
+.dealers{grid-template-columns:repeat(auto-fit,minmax(220px,300px));justify-content:center}
+.paths{max-width:1100px}
+.pick{display:flex;flex-direction:column;justify-content:flex-start;align-items:center;text-align:center}
+
+/* ---- F2: layout fixes (to undo, delete from here to the end) ---- */
+.dealers{grid-template-columns:repeat(auto-fit,minmax(220px,300px));justify-content:center}
+.paths{max-width:1100px}
+.pick{display:flex;flex-direction:column;justify-content:flex-start;align-items:center;text-align:center}

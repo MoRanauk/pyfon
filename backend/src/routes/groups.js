@@ -10,6 +10,7 @@ import { partnerUploadRoutes } from './partnerUploads.js';
 import { ticketRoutes, devTicketRoutes } from './tickets.js';
 import { reportRoutes } from './reports.js';
 import { devSettingsRoutes } from './devSettings.js';
+import { vendorJobRoutes } from './vendorJobs.js';
 
 function group(role) {
   const router = Router();
@@ -38,3 +39,6 @@ export const devRoutes = group('developer');
 devRoutes.use(devTicketRoutes);
 devRoutes.use(reportRoutes);
 devRoutes.use('/settings', devSettingsRoutes);
+
+export const vendorRoutes = group('vendor');
+vendorRoutes.use(vendorJobRoutes);

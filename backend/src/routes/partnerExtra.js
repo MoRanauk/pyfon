@@ -73,6 +73,11 @@ partnerExtraRoutes.post('/jobs/:ref/production', writeLimiter, asyncHandler(asyn
   const ref = jobRef(req);
   const body = parse(z.object({ mode: z.enum(['in_house', 'dealer']), vendorCode: z.string().trim().min(2).max(30).optional() }), req.body);
   if (body.mode === 'dealer' && !body.vendorCode) throw new HttpError(400, 'vendor_required', 'Enter the dealer code');
+  if (body.mode === 'dealer') {
+    const dv = await query("SELECT code FROM vendors WHERE upper(code) = upper($1) AND status = 'active'", [body.vendorCode]);
+    if (!dv.rows[0]) throw new HttpError(400, 'unknown_dealer', 'Unknown dealer code');
+    body.vendorCode = dv.rows[0].code;
+  }
   const vendor = body.mode === 'dealer' ? body.vendorCode : null;
   const workspace = workspaceOf(req);
   const covered = await withTransaction(async (client) => {
@@ -80,7 +85,7 @@ partnerExtraRoutes.post('/jobs/:ref/production', writeLimiter, asyncHandler(asyn
     if (j.current_step !== 'production' || j.step_status !== 'active') {
       throw new HttpError(409, 'not_editable', 'This can only be set before the first signature on the production step');
     }
-    await client.query('UPDATE jobs SET production_mode = $2, vendor_code = $3 WHERE id = $1', [j.id, body.mode, vendor]);
+    await client.query('UPDATE jobs SET production_mode = $2, vendor_code = $3, vendor_status = DEFAULT WHERE id = $1', [j.id, body.mode, vendor]);
     return actingFor(client, req, workspace);
   });
   await audit(req, {

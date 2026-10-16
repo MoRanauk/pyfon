@@ -149,7 +149,7 @@ function Shell({ lite }) {
               <SearchBar />
               <nav className="hlinks">
                 <Link to="/co-brand">Co. Brand</Link><Link to="/sell">Sell with us</Link>
-                <Link to="/quote">Get a quote</Link>
+                
                 <Link to="/account">{user ? displayName(user).split(' ')[0] : 'Login'}</Link>
                 {!user ? <Link className="signup" to="/account?mode=up">Sign up</Link> : null}
               </nav>

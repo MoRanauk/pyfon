@@ -10,7 +10,7 @@ const PHONE = /^\+?[0-9 ]{9,15}$/;
 export default function Quote() {
   const { user } = useAuth();
   const [params] = useSearchParams();
-  const [kind, setKind] = useState('service');
+  const [kind, setKind] = useState(['service', 'bulk', 'corporate', 'design'].includes(params.get('kind')) ? params.get('kind') : 'service');
   const [sku, setSku] = useState(params.get('sku') || '');
   const [options, setOptions] = useState([]);
   const [f, setF] = useState({ contactName: '', contactPhone: '', contactEmail: '', companyName: '', quantity: '', size: '', material: '', finish: '', turnaround: '', notes: '' });

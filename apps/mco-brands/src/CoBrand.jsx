@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { TextField } from '@pyfon/ui';
 import { api } from './api.js';
 import { useAuth } from './AuthState.jsx';
@@ -9,11 +9,13 @@ const PHONE = /^\+?[0-9 ]{9,15}$/;
 const KINDS = [
   { code: 'visit', title: 'A designer visits you', text: 'Our designer comes to your office or shop, sees the space and your products, and sketches ideas with you.' },
   { code: 'share', title: 'Share your design', text: 'Already have a logo or artwork? Tell us what to brand and we check it before we print.' },
-  { code: 'design', title: 'We design it for you', text: 'Give us a name, quote, logo or photo and we create the design.' }
+  { code: 'design', title: 'We design it for you', text: 'Give us a name, quote, logo or photo and we create the design.' },
+  { code: 'quote', title: 'Need a price quote?', text: 'Printing, signage, bulk or corporate orders. Tell us what you need and we quote.' }
 ];
 
 export default function CoBrand() {
   const { user } = useAuth();
+  const nav = useNavigate();
   const [kind, setKind] = useState('visit');
   const [name, setName] = useState('');
   const [phone, setPhone] = useState('');
@@ -70,7 +72,7 @@ export default function CoBrand() {
       <p className="muted">Your brand on everything, designed with you. Choose how you want to start.</p>
       <div className="paths">
         {KINDS.map((k) => (
-          <button type="button" key={k.code} className={'card2 pick' + (kind === k.code ? ' on' : '')} onClick={() => setKind(k.code)}>
+          <button type="button" key={k.code} className={'card2 pick' + (kind === k.code ? ' on' : '')} onClick={() => (k.code === 'quote' ? nav('/quote') : setKind(k.code))}>
             <h3>{k.title}</h3>
             <p className="muted">{k.text}</p>
           </button>

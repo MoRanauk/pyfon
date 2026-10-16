@@ -13,14 +13,14 @@ export default function SiteFooter({ groups }) {
           <div>
             <h4>Shop</h4>
             {groups.map((g) => <Link key={g.key} to={'/c/' + g.key}>{g.title}</Link>)}
-            <Link to="/quote">Bulk orders</Link>
+            <Link to="/quote?kind=bulk">Bulk orders</Link>
           </div>
           <div>
             <h4>About</h4>
             <Link to="/info/about">About us</Link>
             <Link to="/info/how">How it works</Link>
             <Link to="/sell">Sell with us</Link>
-            <Link to="/quote">Get a quote</Link>
+            <Link to="/co-brand">Co. Brand</Link>
           </div>
           <div>
             <h4>Help</h4>

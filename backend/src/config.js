@@ -6,6 +6,7 @@ export const INTERFACE_KINDS = {
   'm3-production': 'partner',
   'm3-finance': 'partner',
   dev: 'developer',
+  vendor: 'vendor',
 };
 export const INTERFACES = Object.keys(INTERFACE_KINDS);
 
