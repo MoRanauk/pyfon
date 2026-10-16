@@ -8,6 +8,8 @@ import { parse } from '../validate.js';
 import { audit } from '../audit.js';
 import { createJob } from '../jobs/createJob.js';
 import { orderWhatsappUrl, quoteWhatsappUrl } from '../whatsapp.js';
+import { findDelivery } from '../delivery.js';
+import { enqueueMessage } from '../messages/queue.js';
 import { shapeFile } from './customerFiles.js';
 
 export const customerOrderRoutes = Router();
@@ -22,6 +24,8 @@ const orderSchema = z.object({
   contactPhone: phone,
   contactEmail: z.string().trim().email().max(150).optional(),
   deliveryNotes: shortText(500).optional(),
+  deliveryMethod: z.string().trim().min(1).max(30).default('pickup'),
+  deliveryAddress: shortText(300).optional(),
   lines: z.array(z.object({
     sku: z.string().trim().min(1).max(40),
     qty: z.number().int().min(1).max(100000),
@@ -60,6 +64,18 @@ function friendly(row) {
   return FRIENDLY[row.current_step] || 'Received';
 }
 
+const kes = (n) => 'KES ' + Number(n).toLocaleString('en-KE');
+
+function orderText({ name, ref, itemsKes, totalKes, delivery }) {
+  const first = String(name).trim().split(/\s+/)[0];
+  let del = 'Delivery: we will confirm the cost with you.';
+  if (delivery.feeKes === 0) del = 'Delivery: ' + delivery.label + ' (no charge).';
+  else if (delivery.feeKes > 0) del = 'Delivery: ' + delivery.label + ', ' + kes(delivery.feeKes) + '.';
+  return 'Hello ' + first + ', Pyfon Brands has received your order ' + ref + '. Items: ' + kes(itemsKes) + '. ' + del
+    + (delivery.feeKes == null ? '' : ' Total: ' + kes(totalKes) + '.')
+    + ' We will confirm price, payment and delivery with you here on WhatsApp.';
+}
+
 async function findItems(skus, storefront) {
   const { rows } = await query(
     `SELECT ci.id, ci.sku, ci.name, ci.type, ci.price_type, ci.price_kes, ci.min_order_qty, ci.stock_status
@@ -77,6 +93,12 @@ customerOrderRoutes.post('/orders', writeLimiter, asyncHandler(async (req, res) 
   const items = await findItems([...new Set(body.lines.map((l) => l.sku))], storefront);
 
   const problems = [];
+  const delivery = findDelivery(body.deliveryMethod);
+  if (!delivery) problems.push({ field: 'deliveryMethod', message: 'Choose a delivery option' });
+  else if (delivery.needsAddress && (body.deliveryAddress || '').length < 5) {
+    problems.push({ field: 'deliveryAddress', message: 'Enter your delivery address' });
+  }
+
   const lines = [];
   body.lines.forEach((l, i) => {
     const item = items.get(l.sku);
@@ -92,13 +114,15 @@ customerOrderRoutes.post('/orders', writeLimiter, asyncHandler(async (req, res) 
   });
   if (problems.length) throw new HttpError(400, 'order_invalid', 'Some items cannot be ordered', problems);
 
-  const totalKes = lines.reduce((sum, l) => sum + l.unitPriceKes * l.qty, 0);
+  const itemsKes = lines.reduce((sum, l) => sum + l.unitPriceKes * l.qty, 0);
+  const feeKes = delivery.feeKes;
+  const totalKes = itemsKes + (feeKes || 0);
 
   const result = await withTransaction(async (client) => {
     const o = await client.query(
-      `INSERT INTO orders (customer_id, storefront_code, contact_name, contact_phone, contact_email, delivery_notes, total_kes)
-       VALUES ($1, $2, $3, $4, $5, $6, $7) RETURNING id, ref`,
-      [req.user.id, storefront, body.contactName, body.contactPhone, body.contactEmail ?? null, body.deliveryNotes ?? null, totalKes]
+      `INSERT INTO orders (customer_id, storefront_code, contact_name, contact_phone, contact_email, delivery_notes, total_kes, delivery_method, delivery_fee_kes, delivery_address)
+       VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10) RETURNING id, ref`,
+      [req.user.id, storefront, body.contactName, body.contactPhone, body.contactEmail ?? null, body.deliveryNotes ?? null, totalKes, delivery.code, feeKes, body.deliveryAddress ?? null]
     );
     const order = o.rows[0];
     for (const l of lines) {
@@ -109,15 +133,29 @@ customerOrderRoutes.post('/orders', writeLimiter, asyncHandler(async (req, res) 
       );
     }
     const job = await createJob(client, { orderId: order.id });
+    await enqueueMessage(client, {
+      kind: 'order_received',
+      phone: body.contactPhone,
+      orderId: order.id,
+      body: orderText({ name: body.contactName, ref: order.ref, itemsKes, totalKes, delivery }),
+    });
     return { order, job };
   });
 
-  await audit(req, { action: 'order.placed', entityType: 'order', entityId: String(result.order.id), actorUserId: req.user.id, details: { ref: result.order.ref, job: result.job.ref, totalKes } });
+  await audit(req, { action: 'order.placed', entityType: 'order', entityId: String(result.order.id), actorUserId: req.user.id, details: { ref: result.order.ref, job: result.job.ref, totalKes, delivery: delivery.code } });
 
+  const deliveryLine = [delivery.label + (feeKes == null ? ' (cost to be confirmed)' : feeKes ? ' ' + kes(feeKes) : ''), body.deliveryAddress, body.deliveryNotes].filter(Boolean).join(' | ');
   res.status(201).json({
-    order: { ref: result.order.ref, totalKes, lines: lines.map((l) => ({ sku: l.sku, name: l.name, qty: l.qty, unitPriceKes: l.unitPriceKes })) },
+    order: {
+      ref: result.order.ref,
+      totalKes,
+      itemsKes,
+      deliveryFeeKes: feeKes,
+      deliveryLabel: delivery.label,
+      lines: lines.map((l) => ({ sku: l.sku, name: l.name, qty: l.qty, unitPriceKes: l.unitPriceKes, options: l.options })),
+    },
     job: { ref: result.job.ref },
-    whatsappUrl: orderWhatsappUrl({ ref: result.order.ref, storefront, contactName: body.contactName, totalKes, lines, deliveryNotes: body.deliveryNotes }),
+    whatsappUrl: orderWhatsappUrl({ ref: result.order.ref, storefront, contactName: body.contactName, totalKes, lines, deliveryNotes: deliveryLine }),
   });
 }));
 
@@ -144,6 +182,12 @@ customerOrderRoutes.post('/quote-requests', writeLimiter, asyncHandler(async (re
     );
     const quote = q.rows[0];
     const job = await createJob(client, { quoteRequestId: quote.id });
+    await enqueueMessage(client, {
+      kind: 'quote_received',
+      phone: body.contactPhone,
+      quoteRequestId: quote.id,
+      body: 'Hello ' + String(body.contactName).trim().split(/\s+/)[0] + ', Pyfon Brands has received your quote request ' + quote.ref + '. We will reply here on WhatsApp with a price.',
+    });
     return { quote, job };
   });
 

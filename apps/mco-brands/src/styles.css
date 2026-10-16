@@ -434,3 +434,12 @@ h1,h2,h3{font-weight:500}
 .opt{padding:8px 16px;border:1px solid var(--pf-border);border-radius:999px;background:#fff;color:var(--pf-text);cursor:pointer;font:inherit;font-size:14px}
 .opt.on{background:var(--pf-navy);color:#fff;border-color:var(--pf-navy)}
 @media(max-width:800px){.mainimg{cursor:auto}}
+
+/* ---- Checkout: delivery choice and totals ---- */
+.dlv{border:1px solid var(--pf-border);border-radius:12px;padding:8px 16px 12px;margin:0;background:#fff}
+.dlv legend{font-size:14px;font-weight:600;padding:0 6px}
+.formcol .dopt{display:flex;flex-direction:row;gap:12px;align-items:flex-start;padding:10px 0;cursor:pointer}
+.formcol .dopt+.dopt{border-top:1px solid var(--pf-border)}
+.dopt span{display:flex;flex-direction:column;gap:2px;font-size:14px}
+.dopt small{color:var(--pf-muted)}
+.sumrow{display:flex;justify-content:space-between;gap:16px;margin:4px 0}

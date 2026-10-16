@@ -101,8 +101,8 @@ export default function Product() {
   feats.push('Every job is checked by our partners before dispatch.');
 
   function addToCart() {
-    const note = [chosen, pers.includes('text') ? text.trim() : ''].filter(Boolean).join(' | ');
-    add(item, Math.max(min, parseInt(qty, 10) || min), note);
+    
+    add(item, Math.max(min, parseInt(qty, 10) || min), pers.includes('text') ? text.trim() : '', sel);
     setToast(true);
   }
 
@@ -230,3 +230,4 @@ export default function Product() {
     </div>
   );
 }
+
