@@ -225,7 +225,7 @@ customerOrderRoutes.get('/orders', asyncHandler(async (req, res) => {
   const linesByOrder = new Map();
   if (orderIds.length) {
     const lines = await query(
-      `SELECT id, order_id, sku, name, qty, unit_price_kes, options, personalization FROM order_lines WHERE order_id = ANY($1) ORDER BY id`,
+      `SELECT id, order_id, sku, name, qty, unit_price_kes, options, personalization, design_name, design_url FROM order_lines WHERE order_id = ANY($1) ORDER BY id`,
       [orderIds]
     );
     const lineIds = lines.rows.map((l) => l.id);
@@ -245,7 +245,7 @@ customerOrderRoutes.get('/orders', asyncHandler(async (req, res) => {
     for (const l of lines.rows) {
       const k = String(l.order_id);
       if (!linesByOrder.has(k)) linesByOrder.set(k, []);
-      linesByOrder.get(k).push({ lineId: l.id, sku: l.sku, name: l.name, qty: l.qty, unitPriceKes: l.unit_price_kes, options: l.options || {}, personalization: l.personalization || {}, files: filesByLine.get(String(l.id)) || [] });
+      linesByOrder.get(k).push({ lineId: l.id, sku: l.sku, name: l.name, qty: l.qty, unitPriceKes: l.unit_price_kes, options: l.options || {}, personalization: l.personalization || {}, designName: l.design_name || null, designUrl: l.design_url || null, files: filesByLine.get(String(l.id)) || [] });
     }
   }
 

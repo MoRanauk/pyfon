@@ -36,6 +36,7 @@ function OrderCard({ o }) {
             <li key={l.lineId}>
               {l.name} x {l.qty}{l.unitPriceKes != null ? ' (' + kes(l.unitPriceKes) + ' each)' : ''}
               {extra.length ? <div className="muted">{extra.join(' | ')}</div> : null}
+              {l.designName ? <div className="muted">Design: {l.designName}</div> : null}
               {l.files && l.files.length ? <div className="muted">{l.files.length} file(s) attached</div> : null}
             </li>
           );

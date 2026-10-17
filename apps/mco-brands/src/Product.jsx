@@ -38,6 +38,7 @@ export default function Product() {
   const [origin, setOrigin] = useState('50% 50%');
   const [qty, setQty] = useState(1);
   const [text, setText] = useState('');
+  const [design, setDesign] = useState(null);
   const [toast, setToast] = useState(false);
 
   useEffect(() => {
@@ -45,6 +46,7 @@ export default function Product() {
     setError('');
     setToast(false);
     setText('');
+    setDesign(null);
     setZoom(false);
     window.scrollTo(0, 0);
     api.catalog.item(STORE, sku).then((d) => {
@@ -102,7 +104,7 @@ export default function Product() {
 
   function addToCart() {
     
-    add(item, Math.max(min, parseInt(qty, 10) || min), pers.includes('text') ? text.trim() : '', sel);
+    add(item, Math.max(min, parseInt(qty, 10) || min), pers.includes('text') ? text.trim() : '', sel, design);
     setToast(true);
   }
 
@@ -159,6 +161,20 @@ export default function Product() {
 
           {canOrder ? (
             <>
+              {item.designs && item.designs.length ? (
+                <div className="field">
+                  <span>Choose a design to print: <b>{design ? design.name : 'None (I will send my own)'}</b></span>
+                  <div className="dgrid">
+                    <button type="button" className={'dnone' + (!design ? ' on' : '')} onClick={() => setDesign(null)}>None</button>
+                    {item.designs.map((d) => (
+                      <button key={d.id} type="button" className={'dpick' + (design && design.id === d.id ? ' on' : '')} onClick={() => setDesign(d)} title={d.name}>
+                        <img src={img(d.url)} alt={d.name} />
+                        <small>{d.name}</small>
+                      </button>
+                    ))}
+                  </div>
+                </div>
+              ) : null}
               {pers.includes('text') ? (
                 <label className="field">Text to print (optional)
                   <input value={text} maxLength={200} onChange={(e) => setText(e.target.value)} placeholder="A name, a quote or a short message" />

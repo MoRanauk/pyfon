@@ -86,6 +86,7 @@ async function main() {
     await client.query('DELETE FROM item_nodes');
     await client.query('DELETE FROM taxonomy_nodes');
     await insert(client, tree, null, 0);
+    await client.query('INSERT INTO item_nodes (item_id, node_id) SELECT p.item_id, n.id FROM item_menu_picks p JOIN taxonomy_nodes n ON n.slug = p.node_slug ON CONFLICT DO NOTHING');
     // Orphans: active products that no node shows. Fix them in taxonomy.json.
     const lost = await client.query(
       `SELECT sku, name FROM catalog_items i WHERE i.status = 'active'

@@ -20,13 +20,13 @@ export function CartProvider({ children }) {
   }, [lines]);
 
   // options = { Size: 'Small' }. Same product with different options or text = separate cart lines.
-  const add = (item, qty, text, options) =>
+  const add = (item, qty, text, options, design) =>
     setLines((prev) => {
       const opts = options || {};
-      const key = item.sku + '|' + (text || '') + '|' + JSON.stringify(opts);
+      const key = item.sku + '|' + (text || '') + '|' + JSON.stringify(opts) + '|' + (design ? design.id : '');
       const found = prev.find((l) => l.key === key);
       if (found) return prev.map((l) => (l.key === key ? { ...l, qty: Math.min(l.qty + qty, 100000) } : l));
-      return [...prev, { key, sku: item.sku, name: item.name, priceKes: item.priceKes, image: item.image, minOrderQty: item.minOrderQty || 1, qty, text: text || '', options: opts }];
+      return [...prev, { key, sku: item.sku, name: item.name, priceKes: item.priceKes, image: item.image, minOrderQty: item.minOrderQty || 1, qty, text: text || '', options: opts, design: design ? { id: design.id, name: design.name, url: design.url } : null }];
     });
   const setQty = (key, qty) =>
     setLines((prev) => prev.map((l) => (l.key === key ? { ...l, qty: Math.max(l.minOrderQty || 1, Math.min(100000, qty || 1)) } : l)));

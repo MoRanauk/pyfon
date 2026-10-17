@@ -495,3 +495,58 @@ partnerCatalogRoutes.post('/items/:sku/designs/:id/restore', limiter, asyncHandl
   await audit(req, { action: 'catalog.design_restored', entityType: 'catalog_item', entityId: sku, actorUserId: req.user.id, details: { designId: id } });
   res.json({ ok: true });
 }));
+
+// ---------- menu placement ----------
+partnerCatalogRoutes.get('/menu', asyncHandler(async (req, res) => {
+  const { rows } = await query('SELECT id, parent_id, slug, title, link FROM taxonomy_nodes ORDER BY position, id');
+  const byId = new Map(rows.map((r) => [String(r.id), r]));
+  const trail = (r) => {
+    const parts = [r.title];
+    let p = r.parent_id == null ? null : byId.get(String(r.parent_id));
+    while (p) { parts.unshift(p.title); p = p.parent_id == null ? null : byId.get(String(p.parent_id)); }
+    return parts.join(' > ');
+  };
+  res.json({ nodes: rows.filter((r) => !r.link).map((r) => ({ slug: r.slug, path: trail(r) })) });
+}));
+
+partnerCatalogRoutes.get('/items/:sku/menu', asyncHandler(async (req, res) => {
+  const sku = skuParam(req);
+  const { rows } = await query(
+    'SELECT n.slug FROM item_nodes x JOIN taxonomy_nodes n ON n.id = x.node_id JOIN catalog_items i ON i.id = x.item_id WHERE i.sku = $1 ORDER BY n.slug',
+    [sku]
+  );
+  res.json({ slugs: rows.map((r) => r.slug) });
+}));
+
+partnerCatalogRoutes.put('/items/:sku/menu', limiter, asyncHandler(async (req, res) => {
+  const sku = skuParam(req);
+  const { slugs } = parse(z.object({ slugs: z.array(z.string().regex(/^[a-z0-9-]+$/).max(80)).max(12) }), req.body);
+  const unique = [...new Set(slugs)];
+  await withTransaction(async (client) => {
+    const it = await getItem(client, sku, true);
+    const nodes = unique.length
+      ? await client.query('SELECT id, slug FROM taxonomy_nodes WHERE slug = ANY($1::text[]) AND link IS NULL', [unique])
+      : { rows: [] };
+    if (nodes.rows.length !== unique.length) throw new HttpError(400, 'unknown_menu', 'One of those menu places does not exist');
+    await client.query('DELETE FROM item_menu_picks WHERE item_id = $1', [it.id]);
+    await client.query('DELETE FROM item_nodes WHERE item_id = $1', [it.id]);
+    for (const n of nodes.rows) {
+      await client.query('INSERT INTO item_menu_picks (item_id, node_slug) VALUES ($1, $2)', [it.id, n.slug]);
+      await client.query('INSERT INTO item_nodes (item_id, node_id) VALUES ($1, $2)', [it.id, n.id]);
+    }
+  });
+  await audit(req, { action: 'catalog.menu_set', entityType: 'catalog_item', entityId: sku, actorUserId: req.user.id, details: { slugs: unique } });
+  res.json({ ok: true, slugs: unique });
+}));
+
+// ---------- designs chosen on a job (for Creative and Production) ----------
+partnerCatalogRoutes.get('/jobs/:ref/designs', asyncHandler(async (req, res) => {
+  if (!/^JOB-\d{6,}$/.test(req.params.ref)) throw new HttpError(404, 'job_not_found', 'Job not found');
+  const { rows } = await query(
+    `SELECT l.name, l.qty, l.options, l.personalization, l.design_name, l.design_url
+       FROM jobs j JOIN order_lines l ON l.order_id = j.order_id
+      WHERE j.ref = $1 AND l.design_name IS NOT NULL ORDER BY l.id`,
+    [req.params.ref]
+  );
+  res.json({ designs: rows.map((r) => ({ item: r.name, qty: r.qty, options: r.options, personalization: r.personalization, designName: r.design_name, designUrl: r.design_url })) });
+}));

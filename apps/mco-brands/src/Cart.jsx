@@ -42,7 +42,8 @@ export default function Cart() {
           sku: l.sku,
           qty: l.qty,
           options: l.options || {},
-          personalization: l.text ? { text: l.text } : {}
+          personalization: l.text ? { text: l.text } : {},
+          designId: l.design ? l.design.id : undefined
         }))
       };
       if (email.trim()) body.contactEmail = email.trim();
@@ -99,6 +100,7 @@ export default function Cart() {
                 <strong>{l.name}</strong>
                 {opts ? <div className="muted">{opts}</div> : null}
                 {l.text ? <div className="muted">Text: {l.text}</div> : null}
+                {l.design ? <div className="muted">Design: {l.design.name}</div> : null}
                 <div className="muted">{formatKES(l.priceKes)} each</div>
               </div>
               <input type="number" min={l.minOrderQty || 1} value={l.qty} onChange={(e) => setQty(l.key, parseInt(e.target.value, 10))} aria-label="Quantity" />
