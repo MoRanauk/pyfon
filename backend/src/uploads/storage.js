@@ -35,10 +35,10 @@ export async function checkFile(buffer) {
 
 const resourceTypeFor = (mime) => (ALLOWED[mime]?.raw ? 'raw' : 'image');
 
-export async function storeFile(buffer, info) {
+export async function storeFile(buffer, info, folder) {
   const id = crypto.randomUUID();
   const options = {
-    folder: 'pyfon/uploads',
+    folder: folder || 'pyfon/uploads',
     public_id: info.raw ? id + '.' + info.ext : id,
     resource_type: resourceTypeFor(info.mime),
     overwrite: false,

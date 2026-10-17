@@ -11,6 +11,7 @@ import { ticketRoutes, devTicketRoutes } from './tickets.js';
 import { reportRoutes } from './reports.js';
 import { devSettingsRoutes } from './devSettings.js';
 import { vendorJobRoutes } from './vendorJobs.js';
+import { partnerCatalogRoutes } from './partnerCatalog.js';
 
 function group(role) {
   const router = Router();
@@ -29,6 +30,7 @@ customerRoutes.use(ticketRoutes);
 
 // Order matters: extra routes (guards) and approvals come before the job routes.
 export const partnerRoutes = group('partner');
+partnerRoutes.use('/catalog', partnerCatalogRoutes);
 partnerRoutes.use(partnerExtraRoutes);
 partnerRoutes.use(partnerApprovalRoutes);
 partnerRoutes.use(partnerJobRoutes);

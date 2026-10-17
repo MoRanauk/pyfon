@@ -31,6 +31,7 @@ const orderSchema = z.object({
     qty: z.number().int().min(1).max(100000),
     options: z.record(z.string().max(40), z.string().max(80)).default({}),
     personalization: z.object({ text: shortText(200).optional() }).default({}),
+    designId: z.string().regex(/^\d{1,18}$/).optional(),
   })).min(1).max(30),
 });
 
@@ -99,6 +100,12 @@ customerOrderRoutes.post('/orders', writeLimiter, asyncHandler(async (req, res) 
     problems.push({ field: 'deliveryAddress', message: 'Enter your delivery address' });
   }
 
+  const designIds = [...new Set(body.lines.map((l) => l.designId).filter(Boolean))];
+  const designs = new Map();
+  if (designIds.length) {
+    const dq = await query("SELECT id, item_id, name, url FROM item_designs WHERE id = ANY($1::bigint[]) AND status = 'active'", [designIds]);
+    for (const r of dq.rows) designs.set(String(r.id), r);
+  }
   const lines = [];
   body.lines.forEach((l, i) => {
     const item = items.get(l.sku);
@@ -110,7 +117,12 @@ customerOrderRoutes.post('/orders', writeLimiter, asyncHandler(async (req, res) 
     if (l.qty < (item.min_order_qty || 1)) {
       return problems.push({ field: 'lines.' + i + '.qty', message: 'Minimum order quantity is ' + item.min_order_qty });
     }
-    lines.push({ itemId: item.id, sku: item.sku, name: item.name, unitPriceKes: item.price_kes, qty: l.qty, options: l.options, personalization: l.personalization });
+    let dz = null;
+    if (l.designId) {
+      dz = designs.get(l.designId);
+      if (!dz || String(dz.item_id) !== String(item.id)) return problems.push({ field: 'lines.' + i + '.designId', message: 'That design is not available for this item' });
+    }
+    lines.push({ itemId: item.id, sku: item.sku, name: item.name, unitPriceKes: item.price_kes, qty: l.qty, options: l.options, personalization: l.personalization, designId: dz ? dz.id : null, designName: dz ? dz.name : null, designUrl: dz ? dz.url : null });
   });
   if (problems.length) throw new HttpError(400, 'order_invalid', 'Some items cannot be ordered', problems);
 
@@ -127,9 +139,9 @@ customerOrderRoutes.post('/orders', writeLimiter, asyncHandler(async (req, res) 
     const order = o.rows[0];
     for (const l of lines) {
       await client.query(
-        `INSERT INTO order_lines (order_id, item_id, sku, name, unit_price_kes, qty, options, personalization)
+        `INSERT INTO order_lines (order_id, item_id, sku, name, unit_price_kes, qty, options, personalization, design_id, design_name, design_url)
          VALUES ($1, $2, $3, $4, $5, $6, $7, $8)`,
-        [order.id, l.itemId, l.sku, l.name, l.unitPriceKes, l.qty, JSON.stringify(l.options), JSON.stringify(l.personalization)]
+        [order.id, l.itemId, l.sku, l.name, l.unitPriceKes, l.qty, JSON.stringify(l.options), JSON.stringify(l.personalization), l.designId, l.designName, l.designUrl]
       );
     }
     const job = await createJob(client, { orderId: order.id });

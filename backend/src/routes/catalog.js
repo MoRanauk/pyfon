@@ -20,7 +20,7 @@ const listQuery = z.object({
 const IN_STOREFRONT = 'EXISTS (SELECT 1 FROM item_storefronts s WHERE s.item_id = i.id AND s.storefront_code = $1)';
 
 function imageUrls(files) {
-  return files && files.length ? files.map((f) => '/images/' + f) : ['/images/placeholder.png'];
+  return files && files.length ? files.map((f) => (/^https?:/.test(f) ? f : '/images/' + f)) : ['/images/placeholder.png'];
 }
 
 function shape(r) {
@@ -41,7 +41,7 @@ function shape(r) {
     personalization: r.personalization,
     stockStatus: r.stock_status,
     leadTimeDays: r.lead_time_days,
-    tags: r.tags,
+    tags: r.tags, features: r.features || [],
     featured: r.featured,
     image: images[0],
     images,
@@ -51,8 +51,8 @@ function shape(r) {
 const SELECT_ITEM = `
   SELECT i.sku, i.type, i.name, c.name AS category, c.slug AS category_slug, i.subcategory, i.description,
          i.price_type, i.price_kes, i.compare_at_price_kes, i.min_order_qty, i.options, i.personalization,
-         i.stock_status, i.lead_time_days, i.tags, i.featured,
-         COALESCE((SELECT array_agg(file_name ORDER BY position) FROM item_images WHERE item_id = i.id), '{}') AS images
+         i.stock_status, i.lead_time_days, i.tags, i.featured, i.features,
+         COALESCE((SELECT array_agg(file_name ORDER BY position) FROM item_images WHERE item_id = i.id AND status = 'active'), '{}') AS images
   FROM catalog_items i
   JOIN categories c ON c.id = i.category_id`;
 
@@ -83,7 +83,7 @@ router.get('/:storefront/tree', asyncHandler(async (req, res) => {
   const nodes = (await query('SELECT id, parent_id, slug, title, link FROM taxonomy_nodes ORDER BY position, id')).rows;
   const links = (await query(
     `SELECT n.node_id, i.id AS item_id, i.featured,
-            (SELECT file_name FROM item_images WHERE item_id = i.id ORDER BY position LIMIT 1) AS file
+            (SELECT file_name FROM item_images WHERE item_id = i.id AND status = 'active' ORDER BY position LIMIT 1) AS file
      FROM item_nodes n JOIN catalog_items i ON i.id = n.item_id
      WHERE i.status = 'active' AND ${IN_STOREFRONT}`,
     [code],
@@ -112,7 +112,7 @@ router.get('/:storefront/tree', asyncHandler(async (req, res) => {
       title: n.title,
       to: n.link || '/shop?node=' + n.slug,
       count: n.items.size,
-      image: pick ? '/images/' + pick.file : '',
+      image: pick ? (/^https?:/.test(pick.file) ? pick.file : '/images/' + pick.file) : '',
       children: kids,
     };
   }
@@ -183,10 +183,16 @@ router.get('/:storefront/items/:sku', asyncHandler(async (req, res) => {
   for (const r of oi.rows) {
     if (!optionImages[r.option_name]) optionImages[r.option_name] = {};
     if (!optionImages[r.option_name][r.option_value]) optionImages[r.option_name][r.option_value] = [];
-    optionImages[r.option_name][r.option_value].push('/images/' + r.file_name);
+    optionImages[r.option_name][r.option_value].push(/^https?:/.test(r.file_name) ? r.file_name : '/images/' + r.file_name);
   }
   res.set('Cache-Control', 'public, max-age=60');
-  res.json({ item: { ...shape(rows[0]), optionImages } });
+    const ds = await query(
+    `SELECT d.id, d.name, d.url FROM item_designs d JOIN catalog_items i ON i.id = d.item_id
+      WHERE i.sku = $1 AND d.status = 'active' ORDER BY d.position, d.id`,
+    [req.params.sku],
+  );
+  const designs = ds.rows.map((d) => ({ id: String(d.id), name: d.name, url: d.url }));
+  res.json({ item: { ...shape(rows[0]), optionImages, designs } });
 }));
 
 export default router;

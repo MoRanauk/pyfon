@@ -1,0 +1,11 @@
+ALTER TABLE item_images ADD COLUMN IF NOT EXISTS id bigint GENERATED ALWAYS AS IDENTITY;
+ALTER TABLE item_images DROP CONSTRAINT IF EXISTS item_images_pkey;
+ALTER TABLE item_images ADD PRIMARY KEY (id);
+ALTER TABLE item_images ADD COLUMN IF NOT EXISTS status text NOT NULL DEFAULT 'active' CHECK (status IN ('active', 'archived'));
+ALTER TABLE item_images ADD COLUMN IF NOT EXISTS archived_at timestamptz;
+ALTER TABLE item_images ADD COLUMN IF NOT EXISTS archived_by text;
+ALTER TABLE item_images ADD COLUMN IF NOT EXISTS archive_reason text;
+ALTER TABLE item_images ADD COLUMN IF NOT EXISTS created_at timestamptz NOT NULL DEFAULT now();
+CREATE UNIQUE INDEX IF NOT EXISTS item_images_active_pos ON item_images (item_id, position) WHERE status = 'active';
+ALTER TABLE item_designs ADD COLUMN IF NOT EXISTS archived_at timestamptz;
+ALTER TABLE item_designs ADD COLUMN IF NOT EXISTS archived_by text;

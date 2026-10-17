@@ -249,8 +249,10 @@ async function main() {
       else updated++;
       await client.query('DELETE FROM item_storefronts WHERE item_id = $1', [id]);
       await client.query('INSERT INTO item_storefronts (item_id, storefront_code) SELECT $1, unnest($2::text[])', [id, it.storefronts]);
-      await client.query('DELETE FROM item_images WHERE item_id = $1', [id]);
-      if (it.images.length) {
+      const cur = await client.query("SELECT file_name FROM item_images WHERE item_id = $1 AND status = 'active' ORDER BY position", [id]);
+      const same = cur.rows.some((x) => /^https?:/.test(x.file_name)) || cur.rows.map((x) => x.file_name).join('|') === it.images.join('|');
+      if (it.images.length && !same) await client.query("UPDATE item_images SET status = 'archived', archived_at = now(), archived_by = 'csv-import', archive_reason = 'Replaced by CSV import' WHERE item_id = $1 AND status = 'active'", [id]);
+      if (it.images.length && !same) {
         await client.query(
           'INSERT INTO item_images (item_id, position, file_name) SELECT $1, t.ord::smallint, t.f FROM unnest($2::text[]) WITH ORDINALITY AS t(f, ord)',
           [id, it.images],

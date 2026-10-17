@@ -28,7 +28,7 @@ function jobRef(req) {
 async function shape(j) {
   const base = { ref: j.ref, jobStatus: j.status, step: j.current_step, dealerStatus: j.vendor_status, createdAt: j.created_at };
   if (j.order_id) {
-    const lines = await query('SELECT id, name, qty, options, personalization FROM order_lines WHERE order_id = $1 ORDER BY id', [j.order_id]);
+    const lines = await query('SELECT id, name, qty, options, personalization, design_name, design_url FROM order_lines WHERE order_id = $1 ORDER BY id', [j.order_id]);
     const ids = lines.rows.map((l) => l.id);
     const files = await query(
       'SELECT purpose, url, original_name, mime_type FROM attachments WHERE job_id = $1 OR order_line_id = ANY($2::bigint[]) ORDER BY id',
@@ -37,7 +37,7 @@ async function shape(j) {
     return {
       ...base,
       kind: 'order',
-      items: lines.rows.map((l) => ({ name: l.name, qty: l.qty, options: l.options, personalization: l.personalization })),
+      items: lines.rows.map((l) => ({ name: l.name, qty: l.qty, options: l.options, personalization: l.personalization, design: l.design_name ? { name: l.design_name, url: l.design_url } : null })),
       files: files.rows
     };
   }
