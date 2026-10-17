@@ -503,3 +503,33 @@ h1,h2,h3{font-weight:500}
 .dpick small{display:block;font-size:11px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .dnone{padding:0 14px;height:84px}
 .dpick.on,.dnone.on{border-color:#0b2a4a;box-shadow:0 0 0 2px #c9a227}
+
+/* ---- F5: order tracking line and floating video (to undo, delete from here to the end) ---- */
+.track{list-style:none;margin:14px 0;padding:0;display:flex;text-align:center}
+.tstep{flex:1;position:relative;display:flex;flex-direction:column;align-items:center;font-size:12px;color:#8a8a8a;padding:0 2px}
+.tstep .dot{width:16px;height:16px;border-radius:50%;background:#d9d9d9;border:2px solid #d9d9d9;z-index:1}
+.tstep::before{content:'';position:absolute;top:8px;left:-50%;width:100%;height:3px;background:#d9d9d9}
+.tstep:first-child::before{display:none}
+.tstep.done,.tstep.current{color:#0b2a4a}
+.tstep.done .dot{background:#0b2a4a;border-color:#0b2a4a}
+.tstep.done::before,.tstep.current::before{background:#0b2a4a}
+.tstep.current .dot{background:#c9a227;border-color:#c9a227;box-shadow:0 0 0 4px rgba(201,162,39,.3)}
+.tstep.current .tlabel{font-weight:700}
+.tlabel{margin-top:6px}
+.tdate{font-size:11px;color:#6b6b6b}
+.tnote{font-size:11px;margin-top:2px}
+@media (max-width:640px){
+  .track{flex-direction:column;align-items:flex-start;text-align:left}
+  .tstep{flex-direction:row;flex-wrap:wrap;align-items:center;gap:8px;padding:6px 0;width:100%}
+  .tstep::before{top:-50%;left:7px;width:3px;height:100%}
+  .tstep:first-child::before{display:none}
+  .tlabel{margin-top:0}
+}
+.fvid{position:fixed;left:12px;bottom:12px;width:190px;background:#000;border-radius:12px;overflow:hidden;box-shadow:0 6px 20px rgba(0,0,0,.35);z-index:60}
+.fvid video{display:block;width:100%;max-height:320px;object-fit:contain;background:#000}
+.fvx{position:absolute;top:4px;right:4px;width:26px;height:26px;border:0;border-radius:50%;background:rgba(0,0,0,.6);color:#fff;cursor:pointer;font-size:14px;line-height:26px;padding:0}
+.fvtitle{color:#fff;font-size:11px;padding:4px 8px 0;background:#0b2a4a;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.fvbar{display:flex;gap:4px;padding:6px 8px;background:#0b2a4a}
+.fvbar button{flex:1;border:0;border-radius:6px;background:rgba(255,255,255,.15);color:#fff;cursor:pointer;padding:4px 0;font-size:13px}
+.fvmini{position:fixed;left:12px;bottom:12px;width:48px;height:48px;border-radius:50%;border:2px solid #c9a227;background:#0b2a4a;color:#fff;cursor:pointer;z-index:60;font-size:18px}
+@media (max-width:640px){.fvid{width:150px}}

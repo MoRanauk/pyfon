@@ -11,6 +11,7 @@ import { orderWhatsappUrl, quoteWhatsappUrl } from '../whatsapp.js';
 import { findDelivery } from '../delivery.js';
 import { enqueueMessage } from '../messages/queue.js';
 import { shapeFile } from './customerFiles.js';
+import { buildStages } from '../jobs/tracking.js';
 
 export const customerOrderRoutes = Router();
 
@@ -66,15 +67,18 @@ function friendly(row) {
 }
 
 const kes = (n) => 'KES ' + Number(n).toLocaleString('en-KE');
+const siteUrl = () => (process.env.SITE_URL || String(process.env.CORS_ORIGINS || '').split(',')[0] || '').trim().replace(/\/+$/, '');
 
-function orderText({ name, ref, itemsKes, totalKes, delivery }) {
+function orderText({ name, ref, itemsKes, totalKes, delivery, email }) {
   const first = String(name).trim().split(/\s+/)[0];
   let del = 'Delivery: we will confirm the cost with you.';
   if (delivery.feeKes === 0) del = 'Delivery: ' + delivery.label + ' (no charge).';
   else if (delivery.feeKes > 0) del = 'Delivery: ' + delivery.label + ', ' + kes(delivery.feeKes) + '.';
-  return 'Hello ' + first + ', Pyfon Brands has received your order ' + ref + '. Items: ' + kes(itemsKes) + '. ' + del
+  return 'Hello ' + first + ', thank you for ordering with Pyfon Brands. Your order ' + ref + ' is received. Items: ' + kes(itemsKes) + '. ' + del
     + (delivery.feeKes == null ? '' : ' Total: ' + kes(totalKes) + '.')
-    + ' We will confirm price, payment and delivery with you here on WhatsApp.';
+    + ' Track your order progress here: ' + siteUrl() + '/orders.'
+    + (email ? ' We will also email you when it is delivered.' : '')
+    + ' Thank you for choosing Pyfon Brands.';
 }
 
 async function findItems(skus, storefront) {
@@ -140,7 +144,7 @@ customerOrderRoutes.post('/orders', writeLimiter, asyncHandler(async (req, res) 
     for (const l of lines) {
       await client.query(
         `INSERT INTO order_lines (order_id, item_id, sku, name, unit_price_kes, qty, options, personalization, design_id, design_name, design_url)
-         VALUES ($1, $2, $3, $4, $5, $6, $7, $8)`,
+         VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11)`,
         [order.id, l.itemId, l.sku, l.name, l.unitPriceKes, l.qty, JSON.stringify(l.options), JSON.stringify(l.personalization), l.designId, l.designName, l.designUrl]
       );
     }
@@ -149,7 +153,7 @@ customerOrderRoutes.post('/orders', writeLimiter, asyncHandler(async (req, res) 
       kind: 'order_received',
       phone: body.contactPhone,
       orderId: order.id,
-      body: orderText({ name: body.contactName, ref: order.ref, itemsKes, totalKes, delivery }),
+      body: orderText({ name: body.contactName, ref: order.ref, itemsKes, totalKes, delivery, email: body.contactEmail }),
     });
     return { order, job };
   });
@@ -215,12 +219,46 @@ customerOrderRoutes.post('/quote-requests', writeLimiter, asyncHandler(async (re
 
 customerOrderRoutes.get('/orders', asyncHandler(async (req, res) => {
   const { rows } = await query(
-    `SELECT o.id, o.ref, o.total_kes, o.created_at, o.delivery_method, o.delivery_fee_kes, o.delivery_address, o.delivery_notes, j.ref AS job_ref, j.current_step, j.status AS job_status
+    `SELECT o.id, o.ref, o.total_kes, o.created_at, o.delivery_method, o.delivery_fee_kes, o.delivery_address, o.delivery_notes, j.ref AS job_ref, j.current_step, j.status AS job_status, j.completed_at
        FROM orders o LEFT JOIN jobs j ON j.order_id = o.id
       WHERE o.customer_id = $1 ORDER BY o.created_at DESC LIMIT 50`,
     [req.user.id]
   );
   const orderIds = rows.map((r) => r.id);
+
+  const stepsByOrder = new Map();
+  const readyByOrder = new Map();
+  if (orderIds.length) {
+    const st = await query(
+      `SELECT j.order_id, s.step, s.status, s.signed_off_at
+         FROM jobs j JOIN job_steps s ON s.job_id = j.id WHERE j.order_id = ANY($1)`,
+      [orderIds]
+    );
+    for (const s of st.rows) {
+      const k = String(s.order_id);
+      if (!stepsByOrder.has(k)) stepsByOrder.set(k, {});
+      stepsByOrder.get(k)[s.step] = { status: s.status, signedOffAt: s.signed_off_at };
+    }
+    const rd = await query(
+      `SELECT j.order_id, min(g.signed_at) AS at
+         FROM job_signatures g JOIN jobs j ON j.id = g.job_id
+        WHERE j.order_id = ANY($1) AND g.step = 'finance_delivery' AND g.role = 'owner' AND g.voided_at IS NULL
+        GROUP BY j.order_id`,
+      [orderIds]
+    );
+    for (const x of rd.rows) readyByOrder.set(String(x.order_id), x.at);
+  }
+  const trackingFor = (r) => {
+    if (!r.job_ref || r.job_status === 'cancelled') return null;
+    return buildStages({
+      createdAt: r.created_at,
+      deliveryMethod: r.delivery_method,
+      jobStatus: r.job_status,
+      steps: stepsByOrder.get(String(r.id)) || {},
+      readyAt: readyByOrder.get(String(r.id)) || null,
+      completedAt: r.completed_at || null,
+    });
+  };
 
   const linesByOrder = new Map();
   if (orderIds.length) {
@@ -255,7 +293,8 @@ customerOrderRoutes.get('/orders', asyncHandler(async (req, res) => {
       totalKes: r.total_kes,
       createdAt: r.created_at,
       progress: friendly(r),
-      delivery: { method: r.delivery_method, label: (findDelivery(r.delivery_method) || {}).label || r.delivery_method, feeKes: r.delivery_fee_kes, address: r.delivery_address, notes: r.delivery_notes }, lines: linesByOrder.get(String(r.id)) || [],
+      delivery: { method: r.delivery_method, label: (findDelivery(r.delivery_method) || {}).label || r.delivery_method, feeKes: r.delivery_fee_kes, address: r.delivery_address, notes: r.delivery_notes }, tracking: trackingFor(r),
+      lines: linesByOrder.get(String(r.id)) || [],
     })),
   });
 }));

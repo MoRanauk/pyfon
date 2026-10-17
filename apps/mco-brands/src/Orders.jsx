@@ -22,13 +22,29 @@ function when(d) {
   try { return new Date(d).toLocaleDateString('en-KE', { day: 'numeric', month: 'short', year: 'numeric' }); } catch (e) { return ''; }
 }
 
+function TrackingLine({ t }) {
+  return (
+    <ol className="track">
+      {t.stages.map((s) => (
+        <li key={s.key} className={'tstep ' + s.state}>
+          <span className="dot" />
+          <span className="tlabel">{s.label}</span>
+          {s.state !== 'todo' && s.at ? <span className="tdate">{when(s.at)}</span> : null}
+          {s.state === 'current' ? <span className="tnote">{s.note}</span> : null}
+        </li>
+      ))}
+    </ol>
+  );
+}
+
 function OrderCard({ o }) {
   const d = o.delivery || {};
   const fee = d.feeKes == null ? 'cost to be confirmed' : d.feeKes === 0 ? 'no charge' : kes(d.feeKes);
   return (
     <div className="ocard">
       <h3>{o.ref} <span className="muted">{when(o.createdAt)}</span></h3>
-      <p><strong>{o.progress}</strong></p>
+      <p><strong>{o.tracking ? o.tracking.currentLabel : o.progress}</strong></p>
+      {o.tracking ? <TrackingLine t={o.tracking} /> : null}
       <ul>
         {o.lines.map((l) => {
           const extra = pairs(l.options).concat(pairs(l.personalization));

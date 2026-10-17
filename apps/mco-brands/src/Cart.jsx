@@ -63,7 +63,7 @@ export default function Cart() {
     const o = done.order || {};
     return (
       <div className="wrap section">
-        <h2>Order saved</h2>
+        <h2>Thank you! Your order is received</h2>
         {o.ref ? <p>Your order reference is <strong>{o.ref}</strong>.</p> : null}
         {o.totalKes != null ? (
           <p>
@@ -71,8 +71,9 @@ export default function Cart() {
             {o.deliveryFeeKes == null ? '' : ' = ' + formatKES(o.totalKes)}.
           </p>
         ) : null}
-        <p>Last step: send the order to us on WhatsApp so we can confirm price and payment.</p>
-        <a className="btn" href={done.url} target="_blank" rel="noreferrer">Send on WhatsApp</a>
+        <p>You can follow every stage of your order on the site. We will confirm payment and delivery with you.</p>
+        <a className="btn" href="/orders">Track my order</a>
+        <p><a className="linkbtn" href={done.url} target="_blank" rel="noreferrer">Message us on WhatsApp</a></p>
         <p><Link to="/shop">Keep shopping</Link></p>
       </div>
     );

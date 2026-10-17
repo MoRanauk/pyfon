@@ -62,3 +62,37 @@ export async function removeFile(publicId, mime) {
     console.error('Cloudinary cleanup failed:', err && err.message);
   }
 }
+
+// ---- video uploads (MP4 or WebM only, max 20 MB). Kept separate so customers can never upload videos. ----
+export async function checkVideo(buffer) {
+  const found = await fileTypeFromBuffer(buffer);
+  if (!found || !['video/mp4', 'video/webm'].includes(found.mime)) {
+    throw new HttpError(415, 'video_type_not_allowed', 'Only MP4 or WebM videos are allowed');
+  }
+  if (buffer.length > 20 * MB) throw new HttpError(413, 'file_too_large', 'Video is too big (max 20 MB). Compress it or make it shorter.');
+  return { mime: found.mime, ext: found.ext };
+}
+
+export async function storeVideo(buffer, info, folder) {
+  try {
+    const result = await new Promise((resolve, reject) => {
+      const stream = cloudinary.uploader.upload_stream(
+        { folder: folder || 'pyfon/videos', public_id: crypto.randomUUID(), resource_type: 'video', overwrite: false },
+        (err, res) => (err ? reject(err) : resolve(res))
+      );
+      stream.end(buffer);
+    });
+    return { publicId: result.public_id, url: result.secure_url, bytes: buffer.length, mime: info.mime };
+  } catch (err) {
+    console.error('Cloudinary video upload failed:', err && err.message);
+    throw new HttpError(502, 'storage_failed', 'Could not store the video. Please try again.');
+  }
+}
+
+export async function removeVideo(publicId) {
+  try {
+    await cloudinary.uploader.destroy(publicId, { resource_type: 'video' });
+  } catch (err) {
+    console.error('Cloudinary video cleanup failed:', err && err.message);
+  }
+}
