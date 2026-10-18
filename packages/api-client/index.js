@@ -71,7 +71,7 @@ export function createClient({ baseUrl, interfaceCode, getToken }) {
     post,
     request,
     auth: {
-      register: (email, password, full_name) => post('/v1/auth/register', { email, password, full_name }),
+      register: (email, password, full_name, phone) => post('/v1/auth/register', { email, password, full_name, phone: phone || undefined }),
       login: (email, password) => post('/v1/auth/login', { email, password }),
       me: () => get('/v1/auth/me'),
       changePassword: (current_password, new_password) => post('/v1/auth/change-password', { current_password, new_password })

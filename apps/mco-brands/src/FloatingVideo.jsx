@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from 'react';
 import { API_URL, STORE } from './api.js';
 
-// Small floating video on the home page. Plays the shop's playlist one video after another.
+// Floating video on the home page. Plays the shop's playlist one video after another.
 // Starts muted (browsers only allow muted autoplay) and does not auto-download on data saver or 2G.
 const KEY = 'pyfon_video_closed';
 const saver = () => {
@@ -16,6 +16,7 @@ export default function FloatingVideo() {
     try { return sessionStorage.getItem(KEY) === '1'; } catch (e) { return false; }
   });
   const [mini, setMini] = useState(false);
+  const [big, setBig] = useState(false);
   const [muted, setMuted] = useState(true);
   const [playing, setPlaying] = useState(false);
   const ref = useRef(null);
@@ -68,26 +69,30 @@ export default function FloatingVideo() {
   }
 
   return (
-    <div className="fvid" role="complementary" aria-label="Pyfon Brands video">
-      <video
-        key={cur.id}
-        ref={ref}
-        src={cur.url}
-        poster={cur.poster || undefined}
-        playsInline
-        loop={list.length === 1}
-        preload={saver() ? 'none' : 'metadata'}
-        onPlay={() => setPlaying(true)}
-        onPause={() => setPlaying(false)}
-        onEnded={ended}
-      />
-      <button type="button" className="fvx" aria-label="Close video" onClick={close}>{'\u2715'}</button>
-      <div className="fvtitle">{cur.title}</div>
-      <div className="fvbar">
-        <button type="button" aria-label={playing ? 'Pause' : 'Play'} onClick={toggle}>{playing ? '\u275A\u275A' : '\u25B6'}</button>
-        <button type="button" aria-label={muted ? 'Unmute' : 'Mute'} onClick={() => setMuted(!muted)}>{muted ? '\u{1F507}' : '\u{1F50A}'}</button>
-        <button type="button" aria-label="Minimize" onClick={() => { setPlaying(false); setMini(true); }}>{'\u2013'}</button>
+    <>
+      {big ? <div className="fvback" onClick={() => setBig(false)} /> : null}
+      <div className={big ? 'fvid big' : 'fvid'} role="complementary" aria-label="Pyfon Brands video">
+        <video
+          key={cur.id}
+          ref={ref}
+          src={cur.url}
+          poster={cur.poster || undefined}
+          playsInline
+          loop={list.length === 1}
+          preload={saver() ? 'none' : 'metadata'}
+          onPlay={() => setPlaying(true)}
+          onPause={() => setPlaying(false)}
+          onEnded={ended}
+        />
+        <button type="button" className="fvx" aria-label="Close video" onClick={close}>{'\u2715'}</button>
+        <div className="fvtitle">{cur.title}</div>
+        <div className="fvbar">
+          <button type="button" aria-label={playing ? 'Pause' : 'Play'} onClick={toggle}>{playing ? '\u275A\u275A' : '\u25B6'}</button>
+          <button type="button" aria-label={muted ? 'Unmute' : 'Mute'} onClick={() => setMuted(!muted)}>{muted ? '\u{1F507}' : '\u{1F50A}'}</button>
+          <button type="button" aria-label={big ? 'Make smaller' : 'Maximize'} onClick={() => setBig(!big)}>{big ? '\u25A3' : '\u25A1'}</button>
+          <button type="button" aria-label="Minimize" onClick={() => { setPlaying(false); setBig(false); setMini(true); }}>{'\u2013'}</button>
+        </div>
       </div>
-    </div>
+    </>
   );
 }

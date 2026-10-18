@@ -21,8 +21,8 @@ export function AuthProvider({ children }) {
     setUser(d.user);
     return d;
   }
-  async function register(email, password, fullName) {
-    await api.auth.register(email, password, fullName);
+  async function register(email, password, fullName, phone) {
+    await api.auth.register(email, password, fullName, phone);
     return login(email, password);
   }
   function logout() {
