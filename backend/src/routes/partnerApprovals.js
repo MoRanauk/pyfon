@@ -37,7 +37,7 @@ function shape(r) {
 }
 
 const createSchema = z.object({
-  action: z.enum(['price_change', 'product_delete', 'invoice_discount']),
+  action: z.enum(['price_change', 'product_delete', 'invoice_discount', 'csv_import']),
   payload: z.record(z.any()),
 });
 

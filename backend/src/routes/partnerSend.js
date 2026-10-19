@@ -54,7 +54,7 @@ async function deliver(b, full) {
         body: JSON.stringify({ chatId: to + '@c.us', text: full }), signal: AbortSignal.timeout(15000),
       });
     } catch (e) { throw new HttpError(502, 'send_failed', 'Could not reach OpenWA: ' + e.message); }
-    if (!r.ok) throw new HttpError(502, 'send_failed', 'OpenWA said HTTP ' + r.status);
+    if (!r.ok) { const why = (await r.text().catch(() => '')).slice(0, 200); throw new HttpError(502, 'send_failed', 'OpenWA said HTTP ' + r.status + (why ? ': ' + why : '')); }
     return to;
   }
   const url = process.env.SMS_GATEWAY_URL;

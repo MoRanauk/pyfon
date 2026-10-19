@@ -1,5 +1,6 @@
 import { z } from 'zod';
 import { HttpError } from '../errors.js';
+import { applyCsv } from '../csv/importer.js';
 
 const sku = z.string().trim().min(1).max(40);
 const kes = z.number().int().min(0).max(10000000);
@@ -53,6 +54,23 @@ export const ACTIONS = {
       if (p.discountKes > gross) throw new HttpError(400, 'discount_too_big', 'The discount is bigger than the invoice');
       await client.query('UPDATE invoices SET discount_kes = $2, total_kes = $3 WHERE id = $1', [inv.id, p.discountKes, gross - p.discountKes]);
       return { invoice: inv.number, oldDiscountKes: inv.discount_kes, newDiscountKes: p.discountKes, totalKes: gross - p.discountKes };
+    },
+  },
+  csv_import: {
+    schema: z.object({ batchId: z.string().regex(/^\d{1,18}$/) }).strict(),
+    async check(client, p) {
+      const { rows } = await client.query("SELECT * FROM csv_import_batches WHERE id = $1 AND status = 'pending'", [p.batchId]);
+      if (!rows[0]) throw new HttpError(404, 'batch_not_found', 'That upload is not waiting for approval');
+      return rows[0];
+    },
+    summary: (p, b) => 'Import product file "' + b.file_name + '" (' + b.rows_total + ' rows' + (b.overwrite_manager ? ', overwriting edited products' : '') + ')',
+    async execute(client, p) {
+      const { rows } = await client.query("SELECT * FROM csv_import_batches WHERE id = $1 AND status = 'pending' FOR UPDATE", [p.batchId]);
+      const b = rows[0];
+      if (!b) throw new HttpError(404, 'batch_not_found', 'That upload is not waiting for approval');
+      const r = await applyCsv(client, b.csv_text, b.overwrite_manager, 'batch ' + b.id, b.file_name);
+      await client.query("UPDATE csv_import_batches SET status = 'applied', applied_at = now() WHERE id = $1", [b.id]);
+      return { file: b.file_name, created: r.created, updated: r.updated, skipped: r.skipped.length };
     },
   },
   product_delete: {

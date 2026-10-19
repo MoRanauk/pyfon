@@ -16,6 +16,7 @@ import ProductEdit from './ProductEdit.jsx';
 import Videos from './Videos.jsx';
 import Invoice from './Invoice.jsx';
 import Approvals from './Approvals.jsx';
+import CsvImport from './CsvImport.jsx';
 import Activity from './Activity.jsx';
 import InvoiceSheet from './InvoiceSheet.jsx';
 import Customers from './Customers.jsx';
@@ -53,6 +54,7 @@ export default function App() {
         <Route path="/products/:sku" element={<ProductEdit />} />
         <Route path="/videos" element={<Videos />} />
         <Route path="/approvals" element={<Approvals />} />
+        <Route path="/csv" element={<CsvImport />} />
         <Route path="/activity" element={<Activity />} />
         <Route path="/invoice/:id" element={<InvoiceSheet />} />
         <Route path="/customers" element={<Customers />} />

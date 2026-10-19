@@ -224,6 +224,7 @@ async function main() {
   const client = await pool.connect();
   try {
     await client.query('BEGIN');
+    await client.query("SELECT set_config('pyfon.csv_import', 'on', true)");
     let created = 0;
     let updated = 0;
     for (const it of items) {

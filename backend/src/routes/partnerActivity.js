@@ -30,6 +30,7 @@ const VERB = {
   'upload.created': 'uploaded a file for', 'upload.linked': 'linked a file to',
   'settings.whatsapp_mode_changed': 'changed the WhatsApp mode',
   'connect.sent': 'sent a message via',
+  'catalog.csv_submitted': 'uploaded a product file for approval', 'catalog.csv_exported': 'exported the product list',
 };
 
 const schema = z.object({
