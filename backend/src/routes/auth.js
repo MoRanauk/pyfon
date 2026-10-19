@@ -23,7 +23,7 @@ const resetLimiter = rateLimit({ windowMs: 15 * 60 * 1000, limit: 15, standardHe
 const email = z.string().trim().toLowerCase().email().max(200);
 const newPassword = z.string().min(10, 'Use at least 10 characters').max(128);
 
-const registerSchema = z.object({ email, password: newPassword, full_name: z.string().trim().min(2).max(100), phone: z.string().trim().max(20).optional() });
+const registerSchema = z.object({ email, password: newPassword, full_name: z.string().trim().min(2).max(100), phone: z.string().trim().min(8, 'Enter your phone number').max(20) });
 const loginSchema = z.object({ email, password: z.string().min(1).max(128) });
 const changeSchema = z.object({ current_password: z.string().min(1).max(128), new_password: newPassword });
 const forgotSchema = z.object({ email, channel: z.enum(['email', 'sms', 'whatsapp']).default('email') });
@@ -34,6 +34,13 @@ const codeHash = (c) => crypto.createHmac('sha256', config.jwtSecret).update(c).
 
 const profile = (u) => ({ id: u.id, email: u.email, fullName: u.full_name, role: u.role, stage: u.partner_stage });
 
+function cleanPhone(raw) {
+  const s = String(raw).replace(/[\s()-]/g, '');
+  if (!/^\+[1-9]\d{7,14}$/.test(s)) return null;
+  if (s.startsWith('+254')) return /^\+254[17]\d{8}$/.test(s) ? normalizePhone('0' + s.slice(4)) : null;
+  return s;
+}
+
 router.post('/register', registerLimiter, asyncHandler(async (req, res) => {
   if (INTERFACE_KINDS[req.interfaceCode] !== 'customer') {
     throw new HttpError(403, 'not_allowed_here', 'Registration is only available on the customer stores');
@@ -41,8 +48,8 @@ router.post('/register', registerLimiter, asyncHandler(async (req, res) => {
   const data = parse(registerSchema, req.body);
   let phone = null;
   if (data.phone) {
-    phone = normalizePhone(data.phone);
-    if (!phone) throw new HttpError(400, 'bad_phone', 'Enter a Kenyan phone number like 0712345678');
+    phone = cleanPhone(data.phone);
+    if (!phone) throw new HttpError(400, 'bad_phone', 'Enter a valid phone number with its country code');
   }
   const hash = await hashPassword(data.password);
   let user;

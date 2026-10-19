@@ -24,8 +24,8 @@ function Icon({ n }) { return <svg viewBox="0 0 24 24" aria-hidden="true" danger
 
 const PARTNER_NAV = [
   ['/', 'home', 'Dashboard', true], ['/orders', 'grid', 'Orders flow'], ['/queue', 'list', 'My queue'],
-  ['/products', 'box', 'Products'], ['/approvals', 'list', 'Approvals'], ['/activity', 'list', 'Activity log'], ['/videos', 'video', 'Videos'], ['/customers', 'chat', 'Customers'],
-  ['/team', 'users', 'Team'], ['/tools', 'tools', 'Workspace tools'], ['/settings', 'gear', 'Settings'], ['/help', 'help', 'Help'],
+  ['/products', 'box', 'Products'], ['/approvals', 'list', 'Approvals'], ['/activity', 'list', 'Activity log'], ['/videos', 'video', 'Videos'], ['/connect', 'chat', 'Connect'],
+  ['/tools', 'tools', 'Workspace tools'], ['/settings', 'gear', 'Settings'], ['/help', 'help', 'Help'],
 ];
 const DEV_NAV = [
   ['/', 'home', 'Dashboard', true], ['/videos', 'video', 'Videos'], ['/tools', 'tools', 'Workspace tools'],

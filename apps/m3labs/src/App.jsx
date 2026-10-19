@@ -19,7 +19,7 @@ import Approvals from './Approvals.jsx';
 import Activity from './Activity.jsx';
 import InvoiceSheet from './InvoiceSheet.jsx';
 import Customers from './Customers.jsx';
-import Team from './Team.jsx';
+import Connect from './Connect.jsx';
 import Tools from './Tools.jsx';
 import Settings from './Settings.jsx';
 import Help from './Help.jsx';
@@ -56,7 +56,9 @@ export default function App() {
         <Route path="/activity" element={<Activity />} />
         <Route path="/invoice/:id" element={<InvoiceSheet />} />
         <Route path="/customers" element={<Customers />} />
-        <Route path="/team" element={<Team />} />
+        <Route path="/connect" element={<Connect />} />
+        <Route path="/team" element={<Navigate to="/connect" replace />} />
+        <Route path="/messages" element={<Navigate to="/connect" replace />} />
         <Route path="/tools" element={<Tools />} />
         <Route path="/settings" element={<Settings />} />
         <Route path="/help" element={<Help />} />

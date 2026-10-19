@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import PhoneField, { phoneOk, phoneForServer, emailOk } from './PhoneField.jsx';
 import { Link } from 'react-router-dom';
 import { TextField } from '@pyfon/ui';
 import { api } from './api.js';
@@ -19,7 +20,7 @@ export default function Sell() {
     e.preventDefault();
     setErr('');
     if (f.name.trim().length < 2) return setErr('Enter your name or business name.');
-    if (!PHONE.test(f.phone.trim())) return setErr('Enter a valid phone number, 9 to 15 digits.');
+    if (!phoneOk(f.phone)) return setErr('Choose your country and enter a valid phone number.');
     if (f.about.trim().length < 10) return setErr('Tell us a little about what you do.');
     const body = [
       'Name: ' + f.name.trim(),
@@ -81,7 +82,7 @@ export default function Sell() {
         ) : (
           <form onSubmit={submit}>
             <TextField label="Your name or business name" value={f.name} onChange={set('name')} />
-            <TextField label="Phone (WhatsApp)" value={f.phone} onChange={set('phone')} />
+            <PhoneField label="Phone (WhatsApp)" onChange={(v) => setF((s) => ({ ...s, phone: v }))} />
             <label className="fld">I am a
               <select value={f.role} onChange={set('role')}>
                 <option>Dealer or maker</option>

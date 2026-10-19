@@ -15,6 +15,8 @@ import { partnerCatalogRoutes } from './partnerCatalog.js';
 import { partnerInflowRoutes } from './partnerInflow.js';
 import { partnerInvoiceRoutes } from './partnerInvoices.js';
 import { partnerActivityRoutes } from './partnerActivity.js';
+import { partnerMessageRoutes } from './partnerMessages.js';
+import { partnerConnectRoutes } from './partnerConnect.js';
 import { siteVideoAdminRoutes } from './siteVideos.js';
 
 function group(role) {
@@ -40,6 +42,8 @@ partnerRoutes.use(partnerExtraRoutes);
 partnerRoutes.use(partnerInflowRoutes);
 partnerRoutes.use(partnerInvoiceRoutes);
 partnerRoutes.use(partnerActivityRoutes);
+partnerRoutes.use(partnerMessageRoutes);
+partnerRoutes.use(partnerConnectRoutes);
 partnerRoutes.use(partnerApprovalRoutes);
 partnerRoutes.use(partnerJobRoutes);
 partnerRoutes.use(partnerUploadRoutes);

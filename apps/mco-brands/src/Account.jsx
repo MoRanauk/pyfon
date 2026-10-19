@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import PhoneField, { phoneOk, phoneForServer, emailOk } from './PhoneField.jsx';
 import { Link, useNavigate, useSearchParams } from 'react-router-dom';
 import { TextField, PasswordField, ResetByCode } from '@pyfon/ui';
 import { api } from './api.js';
@@ -27,6 +28,7 @@ export default function Account() {
     setErr('');
     setInfo('');
     if (mode === 'up' && fullName.trim().length < 2) return setErr('Enter your name.');
+    if (mode === 'up' && !phoneOk(phone)) return setErr('Choose your country and enter a valid phone number.');
     if (mode === 'up' && password.length < 10) return setErr('Password must be at least 10 characters.');
     setBusy(true);
     try {
@@ -77,7 +79,7 @@ export default function Account() {
       <form onSubmit={submit}>
         {mode === 'up' ? <TextField label="Full name" value={fullName} onChange={(e) => setFullName(e.target.value)} /> : null}
         <TextField label="Email" type="email" value={email} onChange={(e) => setEmail(e.target.value)} />
-        {mode === 'up' ? <TextField label="Phone (optional, for SMS or WhatsApp password codes)" type="tel" value={phone} onChange={(e) => setPhone(e.target.value)} /> : null}
+        {mode === 'up' ? <PhoneField label="Phone (for order updates and password codes)" onChange={setPhone} /> : null}
         <PasswordField label="Password" value={password} onChange={(e) => setPassword(e.target.value)} />
         {info ? <p role="status" style={{ color: '#1b6e3c', margin: 0 }}>{info}</p> : null}
         {err ? <p role="alert" style={{ color: '#b00020', margin: 0 }}>{err}</p> : null}

@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react';
+import PhoneField, { phoneOk, phoneForServer, emailOk } from './PhoneField.jsx';
 import { Link, useSearchParams } from 'react-router-dom';
 import { TextField } from '@pyfon/ui';
 import { api, STORE } from './api.js';
@@ -18,6 +19,7 @@ export default function Quote() {
   const [busy, setBusy] = useState(false);
   const [done, setDone] = useState(null);
   const set = (k) => (e) => setF({ ...f, [k]: e.target.value });
+  useEffect(() => { if (user) setF((s) => ({ ...s, contactEmail: s.contactEmail || user.email || '', contactName: s.contactName || user.fullName || user.full_name || '' })); }, [user]);
 
   useEffect(() => {
     const first = params.get('sku');
@@ -36,17 +38,18 @@ export default function Quote() {
     e.preventDefault();
     setErr('');
     if (f.contactName.trim().length < 2) return setErr('Enter your name.');
-    if (!PHONE.test(f.contactPhone.trim())) return setErr('Enter a valid phone number, 9 to 15 digits.');
+    if (!phoneOk(f.contactPhone)) return setErr('Choose your country and enter a valid phone number.');
+    if (!emailOk(f.contactEmail)) return setErr('Enter a valid email address.');
     if (kind === 'corporate' && !f.companyName.trim()) return setErr('Enter the company name.');
     if (kind === 'bulk' && !parseInt(f.quantity, 10)) return setErr('Enter the quantity.');
     if (kind === 'service' && !sku) return setErr('Choose a service.');
     const spec = {};
     ['size', 'material', 'finish', 'turnaround'].forEach((k) => { if (f[k].trim()) spec[k] = f[k].trim(); });
-    const body = { kind, contactName: f.contactName.trim(), contactPhone: f.contactPhone.trim(), spec };
+    const body = { kind, contactName: f.contactName.trim(), contactPhone: phoneForServer(f.contactPhone), spec };
     if (sku && kind === 'service') body.sku = sku;
     if (parseInt(f.quantity, 10) > 0) body.quantity = parseInt(f.quantity, 10);
     if (f.companyName.trim()) body.companyName = f.companyName.trim();
-    if (f.contactEmail.trim()) body.contactEmail = f.contactEmail.trim();
+    body.contactEmail = f.contactEmail.trim();
     if (f.notes.trim()) body.notes = f.notes.trim();
     setBusy(true);
     try {
@@ -102,8 +105,8 @@ export default function Quote() {
           </label>
         ) : null}
         <TextField label="Full name" value={f.contactName} onChange={set('contactName')} />
-        <TextField label="Phone (for WhatsApp)" value={f.contactPhone} onChange={set('contactPhone')} />
-        <TextField label="Email (optional)" value={f.contactEmail} onChange={set('contactEmail')} />
+        <PhoneField label="Phone (for WhatsApp)" onChange={(v) => setF((s) => ({ ...s, contactPhone: v }))} />
+        <TextField label="Email" type="email" value={f.contactEmail} onChange={set('contactEmail')} />
         {kind === 'corporate' ? <TextField label="Company name" value={f.companyName} onChange={set('companyName')} /> : null}
         <TextField label={kind === 'bulk' ? 'Quantity' : 'Quantity (optional)'} type="number" value={f.quantity} onChange={set('quantity')} />
         <TextField label="Size (optional)" value={f.size} onChange={set('size')} />

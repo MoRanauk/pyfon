@@ -1,4 +1,5 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
+import PhoneField, { phoneOk, phoneForServer, emailOk } from './PhoneField.jsx';
 import { Link } from 'react-router-dom';
 import { formatKES, TextField } from '@pyfon/ui';
 import { api, img } from './api.js';
@@ -21,6 +22,7 @@ export default function Cart() {
   const [err, setErr] = useState('');
   const [busy, setBusy] = useState(false);
   const [done, setDone] = useState(null);
+  useEffect(() => { if (user) { setEmail((v) => v || user.email || ''); setName((v) => v || user.fullName || user.full_name || ''); } }, [user]);
 
   const del = DELIVERY.find((d) => d.code === method) || DELIVERY[0];
   const fee = del.feeKes;
@@ -30,13 +32,14 @@ export default function Cart() {
     e.preventDefault();
     setErr('');
     if (name.trim().length < 2) return setErr('Enter your name.');
-    if (!PHONE.test(phone.trim())) return setErr('Enter a valid phone number, 9 to 15 digits.');
+    if (!phoneOk(phone)) return setErr('Choose your country and enter a valid phone number.');
+    if (!emailOk(email)) return setErr('Enter a valid email address.');
     if (del.needsAddress && address.trim().length < 5) return setErr('Enter your delivery address.');
     setBusy(true);
     try {
       const body = {
         contactName: name.trim(),
-        contactPhone: phone.trim(),
+        contactPhone: phoneForServer(phone),
         deliveryMethod: method,
         lines: lines.map((l) => ({
           sku: l.sku,
@@ -46,7 +49,7 @@ export default function Cart() {
           designId: l.design ? l.design.id : undefined
         }))
       };
-      if (email.trim()) body.contactEmail = email.trim();
+      body.contactEmail = email.trim();
       if (del.needsAddress) body.deliveryAddress = address.trim();
       if (notes.trim()) body.deliveryNotes = notes.trim();
       const d = await api.customer.createOrder(body);
@@ -124,8 +127,8 @@ export default function Cart() {
         <form onSubmit={submit} className="formcol">
           <h3>Your details</h3>
           <TextField label="Full name" value={name} onChange={(e) => setName(e.target.value)} />
-          <TextField label="Phone (for WhatsApp)" value={phone} onChange={(e) => setPhone(e.target.value)} placeholder="0712 345 678" />
-          <TextField label="Email (optional)" value={email} onChange={(e) => setEmail(e.target.value)} />
+          <PhoneField label="Phone (for WhatsApp)" onChange={setPhone} />
+          <TextField label="Email" type="email" value={email} onChange={(e) => setEmail(e.target.value)} />
 
           <fieldset className="dlv">
             <legend>Delivery</legend>
