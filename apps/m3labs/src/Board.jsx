@@ -49,7 +49,7 @@ export default function Board() {
           <h2>Waiting for your approval</h2>
           {reqs.map((r) => (
             <div className="row" key={r.id}>
-              <span><Link to={'/jobs/' + r.jobRef}>{r.jobRef}</Link> \u00b7 {STEP_LABEL[r.step] || r.step} \u00b7 asked by {r.requestedBy}</span>
+              <span><Link to={'/jobs/' + r.jobRef}>{r.jobRef}</Link> &middot; {STEP_LABEL[r.step] || r.step} &middot; asked by {r.requestedBy}</span>
               <span>
                 <button type="button" onClick={() => decide(r.id, 'approve')}>Approve</button>{' '}
                 <button type="button" className="ghost" onClick={() => decide(r.id, 'decline')}>Decline</button>
@@ -66,7 +66,7 @@ export default function Board() {
           <Link className={'job' + (hoursSince(j.createdAt) > 24 ? ' late' : '')} key={j.ref} to={'/jobs/' + j.ref}>
             <b>{j.ref}</b>
             <span>{j.orderRef ? 'Order ' + j.orderRef + ' \u00b7 ' + kes(j.totalKes) : 'Quote ' + j.quoteRef + (j.quoteKind ? ' (' + j.quoteKind + ')' : '')}</span>
-            <span>{STEP_LABEL[j.currentStep]} \u00b7 {STATUS_LABEL[j.stepStatus] || j.stepStatus}{j.firstSigner ? ' (signed by ' + j.firstSigner + ')' : ''}</span>
+            <span>{STEP_LABEL[j.currentStep]} &middot; {STATUS_LABEL[j.stepStatus] || j.stepStatus}{j.firstSigner ? ' (signed by ' + j.firstSigner + ')' : ''}</span>
             <span className="muted">Waiting {age(j.createdAt)}</span>
           </Link>
         ))}

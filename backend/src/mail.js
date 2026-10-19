@@ -53,7 +53,7 @@ async function brevo(path, body) {
   }
 }
 
-export async function sendEmail({ to, subject, text }) {
+export async function sendEmail({ to, subject, text, html }) {
   const from = process.env.BREVO_SENDER_EMAIL;
   if (!key() || !from) {
     console.warn(JSON.stringify({ level: 'warn', message: 'Email not configured, nothing sent', to, subject }));
@@ -65,6 +65,7 @@ export async function sendEmail({ to, subject, text }) {
     to: [{ email: to }],
     subject,
     textContent: text,
+    ...(html ? { htmlContent: html } : {}),
   });
 }
 

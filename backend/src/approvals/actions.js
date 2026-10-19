@@ -33,6 +33,28 @@ export const ACTIONS = {
       return { sku: p.sku, oldPriceKes: item.price_kes, newPriceKes: p.priceKes, oldCompareAtKes: item.compare_at_price_kes, newCompareAtKes: newCompare };
     },
   },
+  invoice_discount: {
+    schema: z.object({ invoiceId: z.string().regex(/^\d{1,18}$/), discountKes: kes }).strict(),
+    async check(client, p) {
+      const { rows } = await client.query("SELECT * FROM invoices WHERE id = $1 AND status = 'issued'", [p.invoiceId]);
+      const inv = rows[0];
+      if (!inv) throw new HttpError(404, 'invoice_not_found', 'No live invoice with that id');
+      const gross = inv.lines.reduce((s, l) => s + l.unitPriceKes * l.qty, 0) + inv.other_charges_kes;
+      if (p.discountKes > gross) throw new HttpError(400, 'discount_too_big', 'The discount is bigger than the invoice');
+      if (p.discountKes === inv.discount_kes) throw new HttpError(409, 'no_change', 'That is already the discount');
+      return inv;
+    },
+    summary: (p, inv) => 'Discount on invoice ' + inv.number + ': change from KES ' + inv.discount_kes + ' to KES ' + p.discountKes,
+    async execute(client, p) {
+      const { rows } = await client.query("SELECT * FROM invoices WHERE id = $1 AND status = 'issued' FOR UPDATE", [p.invoiceId]);
+      const inv = rows[0];
+      if (!inv) throw new HttpError(404, 'invoice_not_found', 'No live invoice with that id');
+      const gross = inv.lines.reduce((s, l) => s + l.unitPriceKes * l.qty, 0) + inv.other_charges_kes;
+      if (p.discountKes > gross) throw new HttpError(400, 'discount_too_big', 'The discount is bigger than the invoice');
+      await client.query('UPDATE invoices SET discount_kes = $2, total_kes = $3 WHERE id = $1', [inv.id, p.discountKes, gross - p.discountKes]);
+      return { invoice: inv.number, oldDiscountKes: inv.discount_kes, newDiscountKes: p.discountKes, totalKes: gross - p.discountKes };
+    },
+  },
   product_delete: {
     schema: z.object({ sku }).strict(),
     async check(client, p) {

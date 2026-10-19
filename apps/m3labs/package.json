@@ -4,6 +4,7 @@
   "version": "0.1.0",
   "type": "module",
   "scripts": {
+    "dev": "vite --port 5174 --strictPort",
     "dev:creative": "vite --mode m3-creative --port 5174 --strictPort",
     "dev:production": "vite --mode m3-production --port 5175 --strictPort",
     "dev:finance": "vite --mode m3-finance --port 5176 --strictPort",

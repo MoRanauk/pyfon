@@ -12,6 +12,9 @@ import { reportRoutes } from './reports.js';
 import { devSettingsRoutes } from './devSettings.js';
 import { vendorJobRoutes } from './vendorJobs.js';
 import { partnerCatalogRoutes } from './partnerCatalog.js';
+import { partnerInflowRoutes } from './partnerInflow.js';
+import { partnerInvoiceRoutes } from './partnerInvoices.js';
+import { partnerActivityRoutes } from './partnerActivity.js';
 import { siteVideoAdminRoutes } from './siteVideos.js';
 
 function group(role) {
@@ -34,6 +37,9 @@ export const partnerRoutes = group('partner');
 partnerRoutes.use('/catalog', partnerCatalogRoutes);
 partnerRoutes.use('/videos', siteVideoAdminRoutes);
 partnerRoutes.use(partnerExtraRoutes);
+partnerRoutes.use(partnerInflowRoutes);
+partnerRoutes.use(partnerInvoiceRoutes);
+partnerRoutes.use(partnerActivityRoutes);
 partnerRoutes.use(partnerApprovalRoutes);
 partnerRoutes.use(partnerJobRoutes);
 partnerRoutes.use(partnerUploadRoutes);
@@ -47,3 +53,4 @@ devRoutes.use('/videos', siteVideoAdminRoutes);
 
 export const vendorRoutes = group('vendor');
 vendorRoutes.use(vendorJobRoutes);
+

@@ -45,8 +45,8 @@ export default function JobDetail() {
 
       {order ? (
         <section className="card">
-          <h2>Order {order.ref} \u00b7 {kes(order.totalKes)}</h2>
-          <p>{order.contactName} \u00b7 <a href={'tel:' + order.contactPhone}>{order.contactPhone}</a>{order.contactEmail ? ' \u00b7 ' + order.contactEmail : ''}</p>
+          <h2>Order {order.ref} &middot; {kes(order.totalKes)}</h2>
+          <p>{order.contactName} &middot; <a href={'tel:' + order.contactPhone}>{order.contactPhone}</a>{order.contactEmail ? ' \u00b7 ' + order.contactEmail : ''}</p>
           {order.deliveryNotes ? <p className="muted">Notes: {order.deliveryNotes}</p> : null}
           {order.lines.map((l, i) => (
             <div className="row" key={i}>
@@ -59,9 +59,9 @@ export default function JobDetail() {
 
       {quote ? (
         <section className="card">
-          <h2>Quote request {quote.ref} \u00b7 {quote.kind}</h2>
-          <p>{quote.contactName}{quote.companyName ? ' (' + quote.companyName + ')' : ''} \u00b7 <a href={'tel:' + quote.contactPhone}>{quote.contactPhone}</a></p>
-          <p>Quantity: {quote.quantity || '-'} \u00b7 Price: {quote.quotedPriceKes ? kes(quote.quotedPriceKes) : 'not set yet'}</p>
+          <h2>Quote request {quote.ref} &middot; {quote.kind}</h2>
+          <p>{quote.contactName}{quote.companyName ? ' (' + quote.companyName + ')' : ''} &middot; <a href={'tel:' + quote.contactPhone}>{quote.contactPhone}</a></p>
+          <p>Quantity: {quote.quantity || '-'} &middot; Price: {quote.quotedPriceKes ? kes(quote.quotedPriceKes) : 'not set yet'}</p>
           <p className="muted">{fmt(quote.spec)}</p>
           {quote.notes ? <p>Notes: {quote.notes}</p> : null}
         </section>
@@ -78,7 +78,7 @@ export default function JobDetail() {
         {signatures.length ? <h3>Signatures</h3> : null}
         {signatures.map((s, i) => (
           <p className="muted" key={i}>
-            {STEP_LABEL[s.step]}: {s.role === 'owner' ? 'signed' : 'co-signed'} by {s.partnerName} ({s.signerStage}){s.workspaceStage !== s.signerStage ? ' acting for ' + s.workspaceStage : ''} \u00b7 {new Date(s.signedAt).toLocaleString('en-KE')}
+            {STEP_LABEL[s.step]}: {s.role === 'owner' ? 'signed' : 'co-signed'} by {s.partnerName} ({s.signerStage}){s.workspaceStage !== s.signerStage ? ' acting for ' + s.workspaceStage : ''} &middot; {new Date(s.signedAt).toLocaleString('en-KE')}
           </p>
         ))}
         {rejections.length ? <h3>Rejections</h3> : null}

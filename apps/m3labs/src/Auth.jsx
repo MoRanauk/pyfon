@@ -1,5 +1,5 @@
 import { createContext, useContext, useEffect, useState } from 'react';
-import { api, tokens } from './api.js';
+import { api, tokens, STAGE } from './api.js';
 
 const Ctx = createContext(null);
 
@@ -8,7 +8,7 @@ export function AuthProvider({ children }) {
   const [ready, setReady] = useState(false);
 
   useEffect(() => {
-    if (!tokens.get()) { setReady(true); return; }
+    if (!STAGE || !tokens.get()) { setReady(true); return; }
     api.auth.me()
       .then((d) => setUser(d.user || d))
       .catch(() => tokens.clear())
@@ -20,8 +20,9 @@ export function AuthProvider({ children }) {
     if (d.mustChangePassword) {
       throw new Error('Your password is temporary. Tap "Change password" under the password box to set a new one.');
     }
-    if (!d.user || d.user.role !== 'partner') {
-      throw new Error('This portal is for partners only.');
+    const want = STAGE === 'dev' ? 'developer' : 'partner';
+    if (!d.user || d.user.role !== want) {
+      throw new Error(STAGE === 'dev' ? 'This desk is for the developer account only.' : 'This portal is for partners only.');
     }
     tokens.set(d.token);
     setUser(d.user);

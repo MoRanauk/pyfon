@@ -173,6 +173,8 @@ const listSchema = z.object({
   status: z.enum(['active', 'draft', 'all']).default('all'),
   page: z.coerce.number().int().min(1).max(1000).default(1),
   limit: z.coerce.number().int().min(1).max(50).default(30),
+  category: z.string().trim().regex(/^[a-z0-9-]+$/).max(80).optional(),
+  sub: text(60).optional(),
 });
 
 partnerCatalogRoutes.get('/items', asyncHandler(async (req, res) => {
@@ -184,11 +186,13 @@ partnerCatalogRoutes.get('/items', asyncHandler(async (req, res) => {
     params.push('%' + f.q.replace(/[\\%_]/g, '\\$&') + '%');
     conds.push('(i.name ILIKE $' + params.length + ' OR i.sku ILIKE $' + params.length + ' OR c.name ILIKE $' + params.length + ')');
   }
+  if (f.category) { params.push(f.category); conds.push("c.slug = $" + params.length); }
+  if (f.sub) { params.push(f.sub); conds.push("lower(trim(i.subcategory)) = lower($" + params.length + ")"); }
   const where = conds.length ? 'WHERE ' + conds.join(' AND ') : '';
   const total = await query('SELECT count(*)::int AS n FROM catalog_items i JOIN categories c ON c.id = i.category_id ' + where, params);
   params.push(f.limit, (f.page - 1) * f.limit);
   const { rows } = await query(
-    `SELECT i.sku, i.name, i.type, i.status, i.price_type, i.price_kes, c.name AS category,
+    `SELECT i.sku, i.name, i.type, i.status, i.price_type, i.price_kes, i.stock_status, i.subcategory, c.name AS category,
             (SELECT file_name FROM item_images WHERE item_id = i.id AND status = 'active' ORDER BY position LIMIT 1) AS image,
             (SELECT count(*)::int FROM item_images WHERE item_id = i.id AND status = 'active') AS image_count,
             (SELECT count(*)::int FROM item_designs WHERE item_id = i.id AND status = 'active') AS design_count
@@ -198,7 +202,7 @@ partnerCatalogRoutes.get('/items', asyncHandler(async (req, res) => {
   );
   res.json({
     items: rows.map((r) => ({
-      sku: r.sku, name: r.name, type: r.type, status: r.status, category: r.category, priceType: r.price_type, priceKes: r.price_kes,
+      sku: r.sku, name: r.name, type: r.type, status: r.status, category: r.category, subcategory: r.subcategory, stockStatus: r.stock_status, priceType: r.price_type, priceKes: r.price_kes,
       image: imgUrl(r.image), imageCount: r.image_count, designCount: r.design_count,
     })),
     page: f.page, limit: f.limit, total: total.rows[0].n,
@@ -549,4 +553,78 @@ partnerCatalogRoutes.get('/jobs/:ref/designs', asyncHandler(async (req, res) => 
     [req.params.ref]
   );
   res.json({ designs: rows.map((r) => ({ item: r.name, qty: r.qty, options: r.options, personalization: r.personalization, designName: r.design_name, designUrl: r.design_url })) });
+}));
+
+// ---------- category tree (renamed by id, so no route ever changes) ----------
+const nameBody = z.object({ name: z.string().trim().min(2).max(60) });
+const taken = (msg) => new HttpError(409, 'name_taken', msg);
+
+async function syncSubcategories() {
+  await query(`INSERT INTO subcategories (category_id, name)
+    SELECT DISTINCT ON (i.category_id, lower(trim(i.subcategory))) i.category_id, trim(i.subcategory)
+    FROM catalog_items i WHERE i.subcategory IS NOT NULL AND trim(i.subcategory) <> ''
+    ON CONFLICT DO NOTHING`);
+}
+
+partnerCatalogRoutes.get('/tree', asyncHandler(async (req, res) => {
+  await syncSubcategories();
+  const cats = await query('SELECT c.id, c.name, c.slug, count(i.id)::int AS n FROM categories c LEFT JOIN catalog_items i ON i.category_id = c.id GROUP BY c.id ORDER BY c.name');
+  const subs = await query('SELECT s.id, s.category_id, s.name, count(i.id)::int AS n FROM subcategories s LEFT JOIN catalog_items i ON i.category_id = s.category_id AND lower(trim(i.subcategory)) = lower(s.name) GROUP BY s.id ORDER BY s.name');
+  res.json({
+    categories: cats.rows.map((c) => ({
+      id: String(c.id), name: c.name, slug: c.slug, count: c.n,
+      subs: subs.rows.filter((s) => String(s.category_id) === String(c.id)).map((s) => ({ id: String(s.id), name: s.name, count: s.n })),
+    })),
+  });
+}));
+
+partnerCatalogRoutes.post('/groups/categories', limiter, asyncHandler(async (req, res) => {
+  const { name } = parse(nameBody, req.body);
+  const slug = slugify(name);
+  if (!slug) throw new HttpError(400, 'bad_category', 'Use letters or numbers in the name');
+  const clash = await query('SELECT name FROM categories WHERE slug = $1 OR lower(name) = lower($2)', [slug, name]);
+  if (clash.rows[0]) throw taken('There is already a category called "' + clash.rows[0].name + '"');
+  const r = await query('INSERT INTO categories (name, slug) VALUES ($1, $2) RETURNING id', [name, slug]);
+  await audit(req, { action: 'catalog.category_added', entityType: 'category', entityId: String(r.rows[0].id), actorUserId: req.user.id, details: { name } });
+  res.status(201).json({ ok: true });
+}));
+
+partnerCatalogRoutes.patch('/groups/categories/:id', limiter, asyncHandler(async (req, res) => {
+  const id = idParam(req);
+  const { name } = parse(nameBody, req.body);
+  const old = await query('SELECT name FROM categories WHERE id = $1', [id]);
+  if (!old.rows[0]) throw new HttpError(404, 'not_found', 'Category not found');
+  const clash = await query('SELECT 1 FROM categories WHERE lower(name) = lower($1) AND id <> $2', [name, id]);
+  if (clash.rows[0]) throw taken('There is already a category with that name');
+  await query('UPDATE categories SET name = $1 WHERE id = $2', [name, id]);
+  await audit(req, { action: 'catalog.category_renamed', entityType: 'category', entityId: id, actorUserId: req.user.id, details: { from: old.rows[0].name, to: name } });
+  res.json({ ok: true });
+}));
+
+partnerCatalogRoutes.post('/groups/categories/:id/subcategories', limiter, asyncHandler(async (req, res) => {
+  const id = idParam(req);
+  const { name } = parse(nameBody, req.body);
+  const cat = await query('SELECT id FROM categories WHERE id = $1', [id]);
+  if (!cat.rows[0]) throw new HttpError(404, 'not_found', 'Category not found');
+  try { await query('INSERT INTO subcategories (category_id, name) VALUES ($1, $2)', [id, name]); }
+  catch (e) { if (e && e.code === '23505') throw taken('That subcategory already exists in this category'); throw e; }
+  await audit(req, { action: 'catalog.subcategory_added', entityType: 'category', entityId: id, actorUserId: req.user.id, details: { name } });
+  res.status(201).json({ ok: true });
+}));
+
+partnerCatalogRoutes.patch('/groups/subcategories/:id', limiter, asyncHandler(async (req, res) => {
+  const id = idParam(req);
+  const { name } = parse(nameBody, req.body);
+  let from = '';
+  await withTransaction(async (client) => {
+    const s = await client.query('SELECT id, category_id, name FROM subcategories WHERE id = $1 FOR UPDATE', [id]);
+    if (!s.rows[0]) throw new HttpError(404, 'not_found', 'Subcategory not found');
+    from = s.rows[0].name;
+    const clash = await client.query('SELECT 1 FROM subcategories WHERE category_id = $1 AND lower(name) = lower($2) AND id <> $3', [s.rows[0].category_id, name, id]);
+    if (clash.rows[0]) throw taken('That subcategory already exists in this category');
+    await client.query('UPDATE subcategories SET name = $1 WHERE id = $2', [name, id]);
+    await client.query('UPDATE catalog_items SET subcategory = $1, updated_at = now() WHERE category_id = $2 AND lower(trim(subcategory)) = lower($3)', [name, s.rows[0].category_id, from]);
+  });
+  await audit(req, { action: 'catalog.subcategory_renamed', entityType: 'category', entityId: id, actorUserId: req.user.id, details: { from, to: name } });
+  res.json({ ok: true });
 }));
