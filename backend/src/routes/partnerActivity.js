@@ -11,7 +11,7 @@ const GROUPS = {
   approvals: ['approval.%'],
   invoices: ['invoice.%'],
   products: ['catalog.%', 'video.%'],
-  orders: ['order.%', 'quote.%', 'upload.%', 'ticket.%', 'vendor.%'],
+  orders: ['order.%', 'quote.%', 'upload.%', 'ticket.%', 'vendor.%', 'connect.%'],
   logins: ['auth.%'],
   system: ['user.%', 'settings.%'],
 };
@@ -29,6 +29,7 @@ const VERB = {
   'ticket.opened': 'opened', 'ticket.status': 'changed the status of', 'ticket.comment': 'commented on',
   'upload.created': 'uploaded a file for', 'upload.linked': 'linked a file to',
   'settings.whatsapp_mode_changed': 'changed the WhatsApp mode',
+  'connect.sent': 'sent a message via',
 };
 
 const schema = z.object({

@@ -17,6 +17,7 @@ import { partnerInvoiceRoutes } from './partnerInvoices.js';
 import { partnerActivityRoutes } from './partnerActivity.js';
 import { partnerMessageRoutes } from './partnerMessages.js';
 import { partnerConnectRoutes } from './partnerConnect.js';
+import { partnerSendRoutes } from './partnerSend.js';
 import { siteVideoAdminRoutes } from './siteVideos.js';
 
 function group(role) {
@@ -44,6 +45,7 @@ partnerRoutes.use(partnerInvoiceRoutes);
 partnerRoutes.use(partnerActivityRoutes);
 partnerRoutes.use(partnerMessageRoutes);
 partnerRoutes.use(partnerConnectRoutes);
+partnerRoutes.use(partnerSendRoutes);
 partnerRoutes.use(partnerApprovalRoutes);
 partnerRoutes.use(partnerJobRoutes);
 partnerRoutes.use(partnerUploadRoutes);

@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { P, STAGE_LABEL } from './api.js';
-import { get } from './http.js';
+import { get, post } from './http.js';
 import { waLink } from './store.js';
 import { useAuth, nameOf } from './Auth.jsx';
 import { Chat, Composer } from './ChatParts.jsx';
@@ -34,20 +34,40 @@ async function load(kind) {
 
 function Outbox({ c, user, onInapp }) {
   const [text, setText] = useState('Hello ' + c.name + ', this is ' + nameOf(user) + ' from Pyfon Brands.');
+  const [files, setFiles] = useState([]);
+  const [busy, setBusy] = useState('');
+  const [note, setNote] = useState(null);
   const wa = waLink(c.phone, text);
+  async function send(channel) {
+    setBusy(channel); setNote(null);
+    try {
+      await post(P + '/connect/send', { channel, to: { name: c.name, phone: c.phone || undefined, email: c.email || undefined }, text, files });
+      setNote({ ok: true, text: 'Sent by ' + channel + '.' });
+      setFiles([]);
+    } catch (e) {
+      setNote({ ok: false, channel, text: (e && e.message) || 'Not sent' });
+    }
+    setBusy('');
+  }
+  const btn = (channel, label) => (
+    <button type="button" className="btnlink" disabled={!!busy} onClick={() => send(channel)}>{busy === channel ? 'Sending...' : label}</button>
+  );
   const acts = (
     <>
       {c.inapp ? <button type="button" className="btnlink" onClick={onInapp}>In-app</button> : null}
-      {c.phone ? <a className="btnlink" href={'sms:' + c.phone + '?body=' + encodeURIComponent(text)}>SMS</a> : null}
-      {wa ? <a className="btnlink" href={wa} target="_blank" rel="noreferrer">WhatsApp</a> : null}
-      {c.email ? <a className="btnlink" href={'mailto:' + c.email + '?body=' + encodeURIComponent(text)}>Email</a> : null}
+      {c.phone ? btn('sms', 'SMS') : null}
+      {c.phone ? btn('whatsapp', 'WhatsApp') : null}
+      {c.email ? btn('email', 'Email') : null}
     </>
   );
   return (
     <div style={{ padding: '6px 0 2px' }}>
       <Composer text={text} setText={setText} actions={acts}
         onSticker={(s) => setText((t) => (t ? t + ' ' : '') + s)}
-        onFile={(f) => setText((t) => t + '\n' + f.name + ': ' + f.url)} />
+        onFile={(f) => setFiles((a) => [...a, { name: f.name, url: f.url }])} />
+      {files.length ? <p className="muted">Attached: {files.map((f) => f.name).join(', ')}</p> : null}
+      {note ? <p style={{ color: note.ok ? '#0a7a2f' : '#b00020' }}>{note.text}</p> : null}
+      {note && !note.ok && note.channel === 'whatsapp' && wa ? <p><a className="btnlink" href={wa} target="_blank" rel="noreferrer">Open WhatsApp on my phone instead</a></p> : null}
     </div>
   );
 }

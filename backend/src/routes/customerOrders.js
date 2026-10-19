@@ -23,7 +23,7 @@ const shortText = (max) => z.string().trim().max(max);
 const orderSchema = z.object({
   contactName: z.string().trim().min(2).max(100),
   contactPhone: phone,
-  contactEmail: z.string().trim().email().max(150).optional(),
+  contactEmail: z.string().trim().email().max(150),
   deliveryNotes: shortText(500).optional(),
   deliveryMethod: z.string().trim().min(1).max(30).default('pickup'),
   deliveryAddress: shortText(300).optional(),
@@ -43,7 +43,7 @@ const quoteSchema = z.object({
   companyName: shortText(150).optional(),
   contactName: z.string().trim().min(2).max(100),
   contactPhone: phone,
-  contactEmail: z.string().trim().email().max(150).optional(),
+  contactEmail: z.string().trim().email().max(150),
   notes: shortText(2000).optional(),
   spec: z.object({
     size: shortText(100).optional(),
