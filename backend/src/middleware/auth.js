@@ -16,11 +16,14 @@ async function load(req, { allowPasswordChange }) {
     throw new HttpError(403, 'wrong_interface', 'This session belongs to a different interface');
   }
   const { rows } = await query(
-    'SELECT id, email, full_name, role, partner_stage, is_active, must_change_password FROM users WHERE id = $1',
+    'SELECT id, email, full_name, role, partner_stage, is_active, must_change_password, sessions_valid_after FROM users WHERE id = $1',
     [payload.sub]
   );
   const u = rows[0];
   if (!u || !u.is_active) throw new HttpError(401, 'invalid_token', 'Your session is invalid or has expired');
+  if (u.sessions_valid_after && payload.iat && payload.iat * 1000 < new Date(u.sessions_valid_after).getTime() - 1000) {
+    throw new HttpError(401, 'invalid_token', 'Your session was ended. Please sign in again.');
+  }
   if (u.must_change_password && !allowPasswordChange) {
     throw new HttpError(403, 'password_change_required', 'Please change your temporary password first');
   }

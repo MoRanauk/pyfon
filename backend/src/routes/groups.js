@@ -19,6 +19,8 @@ import { partnerMessageRoutes } from './partnerMessages.js';
 import { partnerConnectRoutes } from './partnerConnect.js';
 import { partnerSendRoutes } from './partnerSend.js';
 import { partnerCsvRoutes } from './partnerCsv.js';
+import { devSystemRoutes } from './devSystem.js';
+import { devUserRoutes } from './devUsers.js';
 import { siteVideoAdminRoutes } from './siteVideos.js';
 
 function group(role) {
@@ -58,6 +60,9 @@ devRoutes.use(devTicketRoutes);
 devRoutes.use(reportRoutes);
 devRoutes.use('/settings', devSettingsRoutes);
 devRoutes.use('/videos', siteVideoAdminRoutes);
+devRoutes.use(partnerActivityRoutes);
+devRoutes.use('/system', devSystemRoutes);
+devRoutes.use('/system', devUserRoutes);
 
 export const vendorRoutes = group('vendor');
 vendorRoutes.use(vendorJobRoutes);

@@ -24,11 +24,11 @@ function Icon({ n }) { return <svg viewBox="0 0 24 24" aria-hidden="true" danger
 
 const PARTNER_NAV = [
   ['/', 'home', 'Dashboard', true], ['/orders', 'grid', 'Orders flow'], ['/queue', 'list', 'My queue'],
-  ['/products', 'box', 'Products'], ['/csv', 'box', 'Product file'], ['/approvals', 'list', 'Approvals'], ['/activity', 'list', 'Activity log'], ['/videos', 'video', 'Videos'], ['/connect', 'chat', 'Connect'],
+  ['/products', 'box', 'Products'], ['/csv', 'box', 'Product file'], ['/approvals', 'list', 'Approvals'], ['/activity', 'list', 'Activity log'], ['/videos', 'video', 'Videos'], ['/connect', 'chat', 'Connect'], ['/tickets', 'help', 'Tickets'],
   ['/tools', 'tools', 'Workspace tools'], ['/settings', 'gear', 'Settings'], ['/help', 'help', 'Help'],
 ];
 const DEV_NAV = [
-  ['/', 'home', 'Dashboard', true], ['/videos', 'video', 'Videos'], ['/tools', 'tools', 'Workspace tools'],
+  ['/', 'home', 'Dashboard', true], ['/health', 'gear', 'System health'], ['/logs', 'list', 'Logs and traces'], ['/users', 'users', 'Users'], ['/tickets', 'help', 'Tickets'], ['/activity', 'list', 'Activity log'], ['/videos', 'video', 'Videos'], ['/tools', 'tools', 'Workspace tools'],
   ['/settings', 'gear', 'Settings'], ['/help', 'help', 'Help'],
 ];
 

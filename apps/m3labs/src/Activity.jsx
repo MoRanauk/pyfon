@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useState } from 'react';
 import { get } from './http.js';
+import { STAGE } from './api.js';
 
 const TYPES = [['', 'Everything'], ['signoffs', 'Job sign-offs and co-signs'], ['approvals', 'Approvals'], ['invoices', 'Invoices'], ['products', 'Products and videos'], ['orders', 'Orders, quotes and tickets'], ['logins', 'Sign-ins and passwords'], ['system', 'Settings and accounts']];
 const DESK = { 'm3-creative': 'Creative desk', 'm3-production': 'Production desk', 'm3-finance': 'Finance desk', dev: 'Developer desk', mco: 'M & Co. shop', prestige: 'Prestige M shop', trim: 'TriM Atelier shop', vendor: 'Dealer portal' };
@@ -11,7 +12,7 @@ function qs(a, limit, offset) {
   const p = new URLSearchParams();
   Object.entries(a).forEach(([k, v]) => { if (v) p.set(k, v); });
   p.set('limit', String(limit)); p.set('offset', String(offset));
-  return '/v1/partner/activity?' + p.toString();
+  return (STAGE === 'dev' ? '/v1/dev' : '/v1/partner') + '/activity?' + p.toString();
 }
 
 export default function Activity() {

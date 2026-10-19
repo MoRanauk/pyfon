@@ -17,6 +17,10 @@ import Videos from './Videos.jsx';
 import Invoice from './Invoice.jsx';
 import Approvals from './Approvals.jsx';
 import CsvImport from './CsvImport.jsx';
+import Tickets from './Tickets.jsx';
+import DevHealth from './DevHealth.jsx';
+import DevLogs from './DevLogs.jsx';
+import DevUsers from './DevUsers.jsx';
 import Activity from './Activity.jsx';
 import InvoiceSheet from './InvoiceSheet.jsx';
 import Customers from './Customers.jsx';
@@ -55,6 +59,10 @@ export default function App() {
         <Route path="/videos" element={<Videos />} />
         <Route path="/approvals" element={<Approvals />} />
         <Route path="/csv" element={<CsvImport />} />
+        <Route path="/tickets" element={<Tickets />} />
+        <Route path="/health" element={<DevHealth />} />
+        <Route path="/logs" element={<DevLogs />} />
+        <Route path="/users" element={<DevUsers />} />
         <Route path="/activity" element={<Activity />} />
         <Route path="/invoice/:id" element={<InvoiceSheet />} />
         <Route path="/customers" element={<Customers />} />
