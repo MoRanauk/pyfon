@@ -1,14 +1,14 @@
 export const SHOP_TOURS = {
   '*': [
-    { at: '/', sel: '.hbar input', title: 'Search', text: 'Type what you want, like mug or notebook, to find it fast.' },
-    { at: '/', sel: '.gbar', title: 'Browse by group', text: 'Or browse the groups here. Slide sideways to see them all.' },
+    { at: '/', sel: '.hbar input, .hbar button[aria-label="Search"]', title: 'Search or browse', text: 'Type what you want, like mug or notebook. Or browse the groups under the header.' },
     { at: ['/', '/shop'], sel: 'a[href^="/p/"]', title: 'Pick a product', text: 'Press Next and I will open one for you.', click: { sel: 'a[href^="/p/"]' }, to: '/shop' },
     { at: '/p', sel: 'main h1', title: 'The product', text: 'Here are the photos, the price and the details.' },
     { at: '/p', sel: 'main select, main input', title: 'Choose options', text: 'Pick options such as colour or size. If the product allows it, you can add a name, text, logo or photo.' },
     { at: '/p', txt: 'add to cart', title: 'Add to cart', text: 'Press Next and I will add one for you. You can remove it in the cart.', click: { txt: 'add to cart' } },
     { at: '/p', sel: '.cartlink', title: 'Your cart', text: 'The number shows what is in your cart. Press Next to open it.', click: { sel: '.cartlink' } },
-    { at: '/cart', sel: 'main', title: 'Check your cart', text: 'Check the items and quantities. Remove anything you do not want.' },
-    { at: '/cart', sel: 'main input', title: 'Your details', text: 'Give your name, a working phone number and email so we can reach you. Pickup is free and Nairobi delivery is KES 300.' },
+    { at: '/cart', sel: 'main', title: 'Check your cart', text: 'Check the items and quantities. Use Remove for anything you do not want.' },
+    { at: '/cart', txt: 'sign in', opt: true, title: 'Sign in', text: 'Sign in or sign up so we can keep your order safe. Press Next and I will open it. Come back to the cart afterwards and I will carry on.', click: { txt: 'sign in' } },
+    { at: '/cart', sel: 'main input[type="tel"], main input[type="email"]', opt: true, title: 'Your details', text: 'Give your name, a working phone number and email so we can reach you. Pickup is free and Nairobi delivery is KES 300.' },
     { at: '/cart', txt: 'place order|checkout|whatsapp', title: 'Place your order', text: 'Press this yourself. We save your order and WhatsApp opens with a summary to send us. Thank you for shopping with us!' },
   ],
 };
