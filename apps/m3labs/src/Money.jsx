@@ -1,11 +1,9 @@
 import { useEffect, useState } from 'react';
 import { STAGE, kes } from './api.js';
 import { call, CATS, today, monthStart, downloadCsv } from './moneyApi.js';
-import { EntryTable, JobTable } from './MoneyTables.jsx';
+import { MONEY_CSS, Ledger, CategoryTable, JobTable } from './MoneyTables.jsx';
 
-const card = { background: '#fff', border: '1px solid #e3e3e3', borderRadius: '12px', padding: '14px', margin: '12px auto', maxWidth: '1000px', textAlign: 'left' };
-const inp = { padding: '8px', border: '1px solid #bbb', borderRadius: '8px', margin: '4px', minWidth: 0 };
-const btn = { padding: '8px 14px', border: 'none', borderRadius: '16px', background: '#0b2a4a', color: '#fff', cursor: 'pointer', margin: '4px' };
+const ago = (d) => new Date(Date.now() - d * 86400000).toISOString().slice(0, 10);
 const blank = { kind: 'income', date: today(), category: 'Sales', costType: 'direct', amount: '', job: '', party: '', note: '' };
 
 export default function Money() {
@@ -16,6 +14,9 @@ export default function Money() {
   const [jobs, setJobs] = useState([]);
   const [showDel, setShowDel] = useState(false);
   const [f, setF] = useState(blank);
+  const [tab, setTab] = useState('ledger');
+  const [form, setForm] = useState(false);
+  const [search, setSearch] = useState('');
   const [msg, setMsg] = useState('');
   const [err, setErr] = useState('');
   async function load() {
@@ -44,34 +45,49 @@ export default function Money() {
     if (reason) run(() => call('POST', '/approvals', { action: 'money_delete', payload: { entryId: id, reason } }), 'Delete request sent. All three partners must approve it under Approvals.');
   }
   if (STAGE === 'dev') return <p className="center">The Money book is on the partner desks.</p>;
+  const ranges = [['This month', monthStart(), today()], ['Last 30 days', ago(30), today()], ['This year', today().slice(0, 4) + '-01-01', today()]];
   const tiles = sum ? [['Income', sum.income], ['Direct costs', sum.direct], ['Gross profit', sum.gross], ['Overheads', sum.overhead], ['Net profit', sum.net]] : [];
   return (
-    <div style={{ textAlign: 'center' }}>
+    <div className="mb">
+      <style>{MONEY_CSS}</style>
       <h1>Money book</h1>
-      <div style={card}>
-        <b>Dates</b> <input type="date" style={inp} value={from} onChange={(e) => setFrom(e.target.value)} /> to <input type="date" style={inp} value={to} onChange={(e) => setTo(e.target.value)} />
-        <label style={{ marginLeft: '10px' }}><input type="checkbox" checked={showDel} onChange={(e) => setShowDel(e.target.checked)} /> show deleted</label>
+      <div className="bar">
+        <input type="date" value={from} onChange={(e) => setFrom(e.target.value)} />
+        <span>to</span>
+        <input type="date" value={to} onChange={(e) => setTo(e.target.value)} />
+        {ranges.map((r) => <button key={r[0]} type="button" className={'chip' + (from === r[1] && to === r[2] ? ' on' : '')} onClick={() => { setFrom(r[1]); setTo(r[2]); }}>{r[0]}</button>)}
       </div>
-      {err ? <p style={{ color: '#a02020' }}>{err}</p> : null}
-      {msg ? <p style={{ color: '#1b7a3a' }}>{msg}</p> : null}
-      <div style={{ display: 'flex', flexWrap: 'wrap', justifyContent: 'center' }}>
-        {tiles.map((t) => <div key={t[0]} style={{ ...card, margin: '6px', minWidth: '150px', maxWidth: 'none', textAlign: 'center' }}><small>{t[0]}</small><br /><b style={{ fontSize: '20px' }}>{kes(t[1])}</b></div>)}
+      <div className="bar">
+        <input placeholder="Search entries" value={search} onChange={(e) => setSearch(e.target.value)} />
+        <label><input type="checkbox" checked={showDel} onChange={(e) => setShowDel(e.target.checked)} /> show deleted</label>
+        <button type="button" className="chip" onClick={() => downloadCsv(entries)}>Download CSV</button>
+        <button type="button" className={'chip' + (form ? ' on' : '')} onClick={() => setForm(!form)}>{form ? 'Close form' : '+ New entry'}</button>
       </div>
-      <div style={card}>
-        <b>Add an entry</b>
-        <p style={{ margin: '4px 0', fontSize: '13px', color: '#666' }}>Direct costs belong to a job (materials, dealer payments). Overheads are running costs (rent, salaries). Entries cannot be edited: reverse a wrong one.</p>
-        <select style={inp} value={f.kind} onChange={(e) => setF({ ...f, kind: e.target.value, category: CATS[e.target.value][0] })}><option value="income">Income</option><option value="expense">Expense</option></select>
-        <input type="date" style={inp} value={f.date} onChange={set('date')} />
-        <select style={inp} value={f.category} onChange={set('category')}>{CATS[f.kind].map((c) => <option key={c}>{c}</option>)}</select>
-        {f.kind === 'expense' ? <select style={inp} value={f.costType} onChange={set('costType')}><option value="direct">Direct cost</option><option value="overhead">Overhead</option></select> : null}
-        <input type="number" min="1" style={inp} placeholder="Amount KES" value={f.amount} onChange={set('amount')} />
-        <input style={inp} placeholder="Job reference (optional)" value={f.job} onChange={set('job')} />
-        <input style={inp} placeholder="Customer, dealer or supplier" value={f.party} onChange={set('party')} />
-        <input style={{ ...inp, width: '90%' }} placeholder="Note" value={f.note} onChange={set('note')} />
-        <button type="button" style={btn} onClick={save}>Save entry</button>
+      {err ? <p style={{ color: '#a02020', textAlign: 'center' }}>{err}</p> : null}
+      {msg ? <p style={{ color: '#1b7a3a', textAlign: 'center' }}>{msg}</p> : null}
+      <div className="sum">
+        {tiles.map(([l, v]) => <div key={l}><small>{l}</small><b className={l === 'Net profit' ? (v < 0 ? 'out' : 'in') : ''}>{kes(v)}</b></div>)}
       </div>
-      <div style={card}><b>Entries</b> <button type="button" style={btn} onClick={() => downloadCsv(entries)}>Download CSV</button><EntryTable entries={entries} onReverse={reverse} onDelete={del} /></div>
-      <div style={card}><b>Profit per job</b><JobTable jobs={jobs} /></div>
+      {form ? (
+        <div className="form">
+          <select value={f.kind} onChange={(e) => setF({ ...f, kind: e.target.value, category: CATS[e.target.value][0] })}><option value="income">Income</option><option value="expense">Expense</option></select>
+          <input type="date" value={f.date} onChange={set('date')} />
+          <select value={f.category} onChange={set('category')}>{CATS[f.kind].map((c) => <option key={c}>{c}</option>)}</select>
+          {f.kind === 'expense' ? <select value={f.costType} onChange={set('costType')}><option value="direct">Direct cost</option><option value="overhead">Overhead</option></select> : null}
+          <input type="number" min="1" placeholder="Amount KES" value={f.amount} onChange={set('amount')} />
+          <input placeholder="Job reference (optional)" value={f.job} onChange={set('job')} />
+          <input placeholder="Customer, dealer or supplier" value={f.party} onChange={set('party')} />
+          <input className="wide" placeholder="Note" value={f.note} onChange={set('note')} />
+          <button type="button" className="chip on" onClick={save}>Save entry</button>
+          <p className="hint">Direct costs belong to a job (materials, dealer payments). Overheads are running costs (rent, salaries). Entries cannot be edited: use the reverse icon on a wrong one.</p>
+        </div>
+      ) : null}
+      <div className="bar">
+        {[['ledger', 'Ledger'], ['category', 'By category'], ['job', 'By job']].map(([k, l]) => <button key={k} type="button" className={'chip' + (tab === k ? ' on' : '')} onClick={() => setTab(k)}>{l}</button>)}
+      </div>
+      {tab === 'ledger' ? <Ledger entries={entries} query={search} onReverse={reverse} onDelete={del} /> : null}
+      {tab === 'category' ? <CategoryTable rows={sum ? sum.byCategory : []} /> : null}
+      {tab === 'job' ? <JobTable jobs={jobs} /> : null}
     </div>
   );
 }
