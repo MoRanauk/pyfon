@@ -3,7 +3,7 @@ export const DEV_NAV = [
   { name: 'Home', icon: 'home', items: [['/', 'Dashboard', true]] },
   { name: 'Monitor', icon: 'pulse', items: [
     ['/health', 'System health', true], ['/logs', 'Logs and traces', true],
-    ['/graphs', 'Traffic graphs', true], ['/errors', 'Error explainer', true], ['/reports', 'Reports', false],
+    ['/graphs', 'Traffic graphs', true], ['/errors', 'Error explainer', true], ['/reports', 'Reports', true],
     ['/uptime', 'Uptime and alerts', false],
   ] },
   { name: 'People', icon: 'users', items: [
