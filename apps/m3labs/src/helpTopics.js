@@ -9,7 +9,7 @@ export const HELP_TOPICS = {
   '/csv': { title: 'Product file', text: 'Upload the products CSV. Run a dry run first: it lists every error and changes nothing.' },
   '/videos': { title: 'Videos', text: 'Add or remove the videos shown on the shop.' },
   '/reports': { title: 'Reports', text: 'Sales by day, week or month, top products, jobs per stage and jobs waiting. You can download any table as CSV.' },
-  '/money': { title: 'Money book', text: 'Record income and costs. Link a cost to a job to see that job profit. Entries cannot be edited: reverse a wrong one, or ask to delete it, which needs all three partners.' },
+  '/money': { title: 'Money book', text: 'Record income and costs. Customer payments can be added from the invoice on the job page. Link an entry to a job to see that job profit. Entries cannot be edited: reverse a wrong one, or ask to delete it, which needs all three partners.' },
   '/activity': { title: 'Activity log', text: 'Who did what and when, including covering for another partner.' },
   '/connect': { title: 'Connect', text: 'Send an email or WhatsApp message to a customer or partner. Every message is logged.' },
   '/tools': { title: 'Workspace tools', text: 'Small helpers for daily work.' },
@@ -24,5 +24,7 @@ export const HELP_FAQ = [
   { q: 'How do I reject a stage?', a: 'Open the job, choose Reject and give a reason. The job goes back to the right stage.', k: 'reject return back' },
   { q: 'How do I change a price?', a: 'Edit the product and submit. All three partners must approve under Approvals.', k: 'price change cost' },
   { q: 'How do I change my password?', a: 'Click your name in the sidebar to open Settings, then choose change password.', k: 'password reset' },
+  { q: 'How do I record a customer payment?', a: 'Open the job, find Payment on the invoice and press Record payment as income. It appears in the Money book with the job reference.', k: 'payment paid income money invoice customer' },
+  { q: 'I recorded a wrong money entry', a: 'Entries cannot be edited. Press the return arrow to reverse it, then add the correct one. To delete one, press the cross: all three partners must approve.', k: 'money wrong mistake reverse delete entry edit' },
   { q: 'Something is broken', a: 'Open Tickets and describe what you did and what you saw. Add a screenshot if you can.', k: 'error bug problem broken report' },
 ];

@@ -24,6 +24,6 @@ export const DEV_NAV = [
     ['/links', 'Links', false], ['/tools', 'Workspace tools', true],
   ] },
   { name: 'System', icon: 'gear', items: [
-    ['/settings', 'Settings', true], ['/guide', 'Guides', false], ['/help', 'Help', true],
+    ['/settings', 'Settings', true], ['/guide', 'Guides', false],
   ] },
 ];
