@@ -9,6 +9,7 @@ export const HELP_TOPICS = {
   '/csv': { title: 'Product file', text: 'Upload the products CSV. Run a dry run first: it lists every error and changes nothing.' },
   '/videos': { title: 'Videos', text: 'Add or remove the videos shown on the shop.' },
   '/reports': { title: 'Reports', text: 'Sales by day, week or month, top products, jobs per stage and jobs waiting. You can download any table as CSV.' },
+  '/money': { title: 'Money book', text: 'Record income and costs. Link a cost to a job to see that job profit. Entries cannot be edited: reverse a wrong one, or ask to delete it, which needs all three partners.' },
   '/activity': { title: 'Activity log', text: 'Who did what and when, including covering for another partner.' },
   '/connect': { title: 'Connect', text: 'Send an email or WhatsApp message to a customer or partner. Every message is logged.' },
   '/tools': { title: 'Workspace tools', text: 'Small helpers for daily work.' },

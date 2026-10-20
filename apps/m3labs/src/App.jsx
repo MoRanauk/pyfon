@@ -24,6 +24,7 @@ import DevUsers from './DevUsers.jsx';
 import ErrorExplainer from './ErrorExplainer.jsx';
 import DevGraphs from './DevGraphs.jsx';
 import DevReports from './DevReports.jsx';
+import Money from './Money.jsx';
 import Activity from './Activity.jsx';
 import InvoiceSheet from './InvoiceSheet.jsx';
 import Customers from './Customers.jsx';
@@ -69,6 +70,7 @@ export default function App() {
         <Route path="/errors" element={<ErrorExplainer />} />
         <Route path="/graphs" element={<DevGraphs />} />
         <Route path="/reports" element={<DevReports />} />
+        <Route path="/money" element={<Money />} />
         <Route path="/activity" element={<Activity />} />
         <Route path="/invoice/:id" element={<InvoiceSheet />} />
         <Route path="/customers" element={<Customers />} />

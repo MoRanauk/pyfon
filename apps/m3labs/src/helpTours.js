@@ -27,6 +27,11 @@ export const HELP_TOURS = {
     { sel: '.page', title: 'Product file', text: 'Upload your products CSV here.' },
     { sel: '.page button', title: 'Dry run first', text: 'A dry run lists every error and changes nothing. Import only when it is clean.' },
   ],
+  '/money': [
+    { sel: '.page', title: 'Money book', text: 'Totals for the dates you choose: income, direct costs, gross profit, overheads and net profit.' },
+    { sel: '.page input', title: 'Add an entry', text: 'Choose income or expense, the amount, and a job reference if it belongs to a job.' },
+    { sel: '.page table', title: 'The entries', text: 'Entries cannot be edited. Reverse a wrong one, or ask to delete it, which needs all three partners.' },
+  ],
   '/reports': [
     { sel: '.page', title: 'Reports', text: 'Sales by day, week or month, top products, jobs per stage and jobs waiting.' },
     { sel: '.page button', title: 'Download', text: 'Any table can be downloaded as a CSV file.' },
