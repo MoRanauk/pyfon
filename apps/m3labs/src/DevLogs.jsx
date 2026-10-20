@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react';
+import { Link } from 'react-router-dom';
 import { get } from './http.js';
 
 const D = '/v1/dev/system';
@@ -48,7 +49,7 @@ export default function DevLogs() {
         {tr ? (
           <div>
             <p className="muted">{tr.requests.length} request line(s), {tr.audit.length} audit line(s)</p>
-            {tr.requests.map((r, i) => <p key={i}><b style={{ color: color(r.status) }}>{r.status}</b> {r.method} {r.path} &middot; {r.ms} ms &middot; {r.interface} &middot; {when(r.at)}</p>)}
+            {tr.requests.map((r, i) => <p key={i}><Link to={'/errors?q=' + r.status} title="What does this mean?" style={{ color: color(r.status), fontWeight: 700 }}>{r.status}</Link> {r.method} {r.path} &middot; {r.ms} ms &middot; {r.interface} &middot; {when(r.at)}</p>)}
             {tr.audit.map((a, i) => <p key={i} className="muted">{a.actor || 'Someone'}: {a.action} {a.entity_type || ''} {a.entity_id || ''} {JSON.stringify(a.details)}</p>)}
           </div>
         ) : null}
@@ -58,7 +59,7 @@ export default function DevLogs() {
       {rows ? rows.map((r) => (
         <div className="actrow" key={r.id}>
           <span className="actwhen">{when(r.at)}<br /><span className="muted">{r.iface || ''}</span></span>
-          <span><b style={{ color: color(r.status) }}>{r.status}</b> {r.method} {r.path} &middot; {r.ms} ms{r.who ? ' \u00b7 ' + r.who : ''}<br />
+          <span><Link to={'/errors?q=' + r.status} title="What does this mean?" style={{ color: color(r.status), fontWeight: 700 }}>{r.status}</Link> {r.method} {r.path} &middot; {r.ms} ms{r.who ? ' \u00b7 ' + r.who : ''}<br />
             <button type="button" className="linkbtn" onClick={() => trace(r.requestId)}>Trace {r.requestId}</button></span>
         </div>
       )) : null}

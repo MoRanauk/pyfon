@@ -219,3 +219,12 @@ button.chip.on{background:#0b2a4a;color:#fff}
 .actrow { display: flex; gap: 16px; background: #fff; border: 1px solid #e3e8ef; border-radius: 8px; padding: 10px 14px; margin: 6px 0; }
 .actwhen { min-width: 170px; font-size: 13px; }
 @media (max-width: 640px) { .actrow { flex-direction: column; gap: 4px; } }
+
+/* Developer top tabs */
+.toptabs { background: #fff; border-bottom: 1px solid #ddd; padding: 6px 12px; }
+.toptabs a { display: inline-block; padding: 6px 12px; margin-right: 4px; border-radius: 16px; text-decoration: none; color: #0b2a4a; white-space: nowrap; }
+.toptabs .tt-groups, .toptabs .tt-links { display: flex; overflow-x: auto; }
+.toptabs .tt-groups a { font-weight: 600; }
+.toptabs .tt-groups a.active, .toptabs .tt-links a.active { background: #0b2a4a; color: #fff; }
+.toptabs .tt-links { padding-top: 4px; }
+.toptabs .tt-links a { font-size: 14px; border: 1px solid #ddd; }

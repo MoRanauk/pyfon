@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useState } from 'react';
+import { Link } from 'react-router-dom';
 import { get } from './http.js';
 
 const D = '/v1/dev/system';
@@ -53,7 +54,7 @@ export default function DevHealth() {
           <section className="card">
             <h2>Most common errors</h2>
             {!t.bad.length ? <p className="muted">No errors. Good.</p> : null}
-            {t.bad.map((s, i) => <div className="mrow" key={i}><span className="grow">{s.status} {s.method} {s.path}</span><span>{s.n}x</span></div>)}
+            {t.bad.map((s, i) => <div className="mrow" key={i}><span className="grow"><Link to={'/errors?q=' + s.status} title="What does this mean?">{s.status}</Link> {s.method} {s.path}</span><span>{s.n}x</span></div>)}
           </section>
         </>
       ) : null}

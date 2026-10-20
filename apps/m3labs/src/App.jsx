@@ -21,6 +21,8 @@ import Tickets from './Tickets.jsx';
 import DevHealth from './DevHealth.jsx';
 import DevLogs from './DevLogs.jsx';
 import DevUsers from './DevUsers.jsx';
+import ErrorExplainer from './ErrorExplainer.jsx';
+import DevGraphs from './DevGraphs.jsx';
 import Activity from './Activity.jsx';
 import InvoiceSheet from './InvoiceSheet.jsx';
 import Customers from './Customers.jsx';
@@ -63,6 +65,8 @@ export default function App() {
         <Route path="/health" element={<DevHealth />} />
         <Route path="/logs" element={<DevLogs />} />
         <Route path="/users" element={<DevUsers />} />
+        <Route path="/errors" element={<ErrorExplainer />} />
+        <Route path="/graphs" element={<DevGraphs />} />
         <Route path="/activity" element={<Activity />} />
         <Route path="/invoice/:id" element={<InvoiceSheet />} />
         <Route path="/customers" element={<Customers />} />
