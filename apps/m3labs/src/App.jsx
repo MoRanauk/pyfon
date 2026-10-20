@@ -23,6 +23,7 @@ import DevLogs from './DevLogs.jsx';
 import DevUsers from './DevUsers.jsx';
 import ErrorExplainer from './ErrorExplainer.jsx';
 import DevGraphs from './DevGraphs.jsx';
+import DevUptime from './DevUptime.jsx';
 import DevReports from './DevReports.jsx';
 import Money from './Money.jsx';
 import Activity from './Activity.jsx';
@@ -69,6 +70,7 @@ export default function App() {
         <Route path="/users" element={<DevUsers />} />
         <Route path="/errors" element={<ErrorExplainer />} />
         <Route path="/graphs" element={<DevGraphs />} />
+        <Route path="/uptime" element={<DevUptime />} />
         <Route path="/reports" element={<DevReports />} />
         <Route path="/money" element={<Money />} />
         <Route path="/activity" element={<Activity />} />

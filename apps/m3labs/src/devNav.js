@@ -4,7 +4,7 @@ export const DEV_NAV = [
   { name: 'Monitor', icon: 'pulse', items: [
     ['/health', 'System health', true], ['/logs', 'Logs and traces', true],
     ['/graphs', 'Traffic graphs', true], ['/errors', 'Error explainer', true], ['/reports', 'Reports', true],
-    ['/uptime', 'Uptime and alerts', false],
+    ['/uptime', 'Uptime and alerts', true],
   ] },
   { name: 'People', icon: 'users', items: [
     ['/users', 'Users', true], ['/tickets', 'Tickets', true], ['/activity', 'Activity log', true],

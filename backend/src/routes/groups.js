@@ -23,6 +23,7 @@ import { partnerCsvRoutes } from './partnerCsv.js';
 import { devSystemRoutes } from './devSystem.js';
 import { devUserRoutes } from './devUsers.js';
 import { devGraphRoutes } from './devGraphs.js';
+import { devUptimeRoutes } from './devUptime.js';
 import { siteVideoAdminRoutes } from './siteVideos.js';
 
 function group(role) {
@@ -68,6 +69,7 @@ devRoutes.use(partnerActivityRoutes);
 devRoutes.use('/system', devSystemRoutes);
 devRoutes.use('/system', devUserRoutes);
 devRoutes.use('/system', devGraphRoutes);
+devRoutes.use('/system', devUptimeRoutes);
 
 export const vendorRoutes = group('vendor');
 vendorRoutes.use(vendorJobRoutes);
