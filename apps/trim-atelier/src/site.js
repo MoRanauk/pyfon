@@ -21,3 +21,11 @@ export const SITE = {
 };
 export const MENU = [];
 export const SWATCH = { red: '#c0262d', pink: '#f2a0b5', white: '#ffffff', yellow: '#f4cf45', purple: '#8a5bb5', orange: '#f08a3c', blue: '#4a7fc1', green: '#4f9a5b', cream: '#f3e6cf', gold: '#c9a14a', black: '#222222' };
+
+// Home slides. For real photos, put the files in apps/trim-atelier/public and set img: '/slide1.jpg'
+export const SLIDES = [
+  { img: '', bg: 'linear-gradient(135deg,#111 0%,#2b2217 55%,#4a3a22 100%)' },
+  { img: '', bg: 'linear-gradient(135deg,#1a1510 0%,#3a2d1b 50%,#6a5230 100%)' },
+  { img: '', bg: 'linear-gradient(135deg,#0d0d0d 0%,#241d14 50%,#5a4527 100%)' },
+];
+export const SLIDE_MS = 6000;

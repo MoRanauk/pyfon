@@ -1,9 +1,11 @@
+import Help from './Help.jsx';
 import { Link, Outlet, NavLink, useNavigate, useLocation } from 'react-router-dom';
 import { useEffect, useState } from 'react';
 import { Footer } from '@pyfon/ui';
 import { SITE } from './site.js';
 import { useCart, useAuth, useCatalog } from './store.jsx';
 import { groupCats, brandsOf } from './cats.js';
+import './tzhome.css';
 
 const wa = (t) => 'https://wa.me/' + SITE.whatsapp + '?text=' + encodeURIComponent(t);
 
@@ -33,7 +35,7 @@ export default function Layout() {
             <Link to="/cart">Cart{count ? <span className="cnt">{count}</span> : null}</Link>
           </div>
         </div>
-        <nav className="t-nav">
+        {loc.pathname !== '/' ? <nav className="t-nav">
           {cats.map((c) => (
             <div key={c.key} className="t-mi">
               <NavLink to={'/c/' + c.key}>{c.title}</NavLink>
@@ -49,9 +51,9 @@ export default function Layout() {
               </div>
             </div>
           ))}
-        </nav>
+        </nav> : null}
       </header>
-      <main style={{ minHeight: '60vh' }}><Outlet /></main>
+      <main key={loc.pathname} className="swipe-page" style={{ minHeight: '60vh' }}><Outlet /></main>
       <div className="ftr">
         <div className="wrap cols">
           <div><h4>Collection</h4>{cats.map((c) => <Link key={c.key} to={'/c/' + c.key}>{c.title}</Link>)}</div>
@@ -63,6 +65,7 @@ export default function Layout() {
           </div>
         </div>
       </div>
+      <Help />
       <Footer />
     </div>
   );

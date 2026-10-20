@@ -1,0 +1,27 @@
+body{overflow-x:hidden}
+.swipe-page{animation:thin .45s ease both}
+.swipe-page.swipe-out{animation:thout .32s ease both}
+@keyframes thin{from{transform:translateX(70px);opacity:0}to{transform:translateX(0);opacity:1}}
+@keyframes thout{from{transform:translateX(0);opacity:1}to{transform:translateX(-90px);opacity:0}}
+.th-hero{position:relative;min-height:82vh;display:flex;align-items:center;overflow:hidden;color:#FAF6EE;background:#111}
+.th-hero:before{content:'';position:absolute;inset:0;z-index:1;background:linear-gradient(90deg,rgba(0,0,0,.55),rgba(0,0,0,.08))}
+.th-sl{position:absolute;inset:0;opacity:0;transition:opacity 1.6s ease}
+.th-sl.on{opacity:1;animation:thzoom 9s ease-out forwards}
+@keyframes thzoom{from{transform:scale(1)}to{transform:scale(1.12)}}
+.th-hero .wrap{position:relative;z-index:2;width:100%}
+.th-hero h1{font-family:'Playfair Display',serif;font-weight:400;font-size:clamp(38px,6vw,68px);line-height:1.1;margin:12px 0 18px;max-width:760px}
+.th-hero p{max-width:520px;font-size:18px;line-height:1.6;opacity:.9;margin:0 0 30px}
+.th-eye{font-size:12px;letter-spacing:.3em;text-transform:uppercase;color:#B8975A}
+.th-dots{position:absolute;bottom:26px;left:0;right:0;display:flex;justify-content:center;gap:10px;z-index:3}
+.th-dots button{width:34px;height:3px;border:0;background:rgba(250,246,238,.35);cursor:pointer;padding:0}
+.th-dots button.on{background:#B8975A}
+.th-col h1{font-family:'Playfair Display',serif;font-weight:400;font-size:40px;margin:0 0 30px}
+.th-tiles{display:grid;grid-template-columns:repeat(3,1fr);gap:30px}
+.th-tile .pic{display:block;position:relative;aspect-ratio:4/5;overflow:hidden;background:linear-gradient(135deg,#2b2217,#6a5230);color:#FAF6EE;text-decoration:none}
+.th-tile .pic img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;transition:transform .8s}
+.th-tile:hover .pic img{transform:scale(1.06)}
+.th-tile .pic span{position:absolute;left:0;right:0;bottom:0;padding:34px 20px 20px;font-family:'Playfair Display',serif;font-size:24px;background:linear-gradient(transparent,rgba(0,0,0,.65))}
+.th-br{display:flex;flex-wrap:wrap;gap:6px 16px;margin-top:12px;font-size:12px;letter-spacing:.16em;text-transform:uppercase}
+.th-br a{color:#7a6a4a;text-decoration:none}
+@media(max-width:900px){.th-tiles{grid-template-columns:1fr 1fr}}
+@media(prefers-reduced-motion:reduce){.th-sl.on{animation:none}.swipe-page,.swipe-page.swipe-out{animation:none}}

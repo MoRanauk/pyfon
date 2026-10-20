@@ -1,3 +1,4 @@
+import Help from './Help.jsx';
 import { Link, Outlet, NavLink, useNavigate, useLocation } from 'react-router-dom';
 import { useEffect, useState } from 'react';
 import { Footer } from '@pyfon/ui';
@@ -86,6 +87,7 @@ export default function Layout() {
           </div>
         </div>
       </div>
+      <Help />
       <Footer />
     </div>
   );
