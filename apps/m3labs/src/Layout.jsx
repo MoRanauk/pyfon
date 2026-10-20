@@ -1,3 +1,4 @@
+import { askAi } from './askAi.js';
 import { useEffect, useState } from 'react';
 import { NavLink, useLocation, useNavigate } from 'react-router-dom';
 import { Footer, HelpButton } from '@pyfon/ui';
@@ -95,7 +96,7 @@ export default function Layout({ children }) {
         <TopTabs path={loc.pathname} />
         {covering ? <div className="cover">You are covering for the {STAGE_LABEL[STAGE]} partner. Every action is logged as acting for them.</div> : null}
         <main className="page wide">{children}</main>
-        <Footer /><HelpButton path={loc.pathname} topics={HELP_TOPICS} faq={HELP_FAQ} tours={HELP_TOURS} />
+        <Footer /><HelpButton ai={askAi} path={loc.pathname} topics={HELP_TOPICS} faq={HELP_FAQ} tours={HELP_TOURS} />
       </div>
     </div>
   );

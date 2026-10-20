@@ -1,4 +1,5 @@
 import { useState, useEffect, useRef } from 'react';
+import HarunoChat from './HarunoChat.jsx';
 
 const NAVY = '#0b2a4a';
 const GOLD = '#c9a227';
@@ -168,7 +169,7 @@ function Tour({ steps, start, path, go, journey, onClose }) {
   );
 }
 
-export default function HelpButton({ path = '/', topics = {}, faq = [], tours = {}, go = () => {}, lift = 0 }) {
+export default function HelpButton({ path = '/', topics = {}, faq = [], tours = {}, go = () => {}, lift = 0, ai = null }) {
   const direct = byRoute(path, tours);
   const steps = direct || tours['*'] || null;
   const journey = Boolean(steps) && !direct;
@@ -179,6 +180,7 @@ export default function HelpButton({ path = '/', topics = {}, faq = [], tours = 
   const [mode, setMode] = useState('');
   const [q, setQ] = useState('');
   const [found, setFound] = useState(null);
+  const [busy, setBusy] = useState(false);
   const [pos, setPos] = useState(loadPos);
   const posRef = useRef(pos);
   const drag = useRef(null);
@@ -236,7 +238,14 @@ export default function HelpButton({ path = '/', topics = {}, faq = [], tours = 
       const ew = words((e.q || '') + ' ' + (e.k || '') + ' ' + (e.a || ''));
       return { e, s: qw.filter((w) => ew.includes(w)).length };
     }).filter((x) => x.s > 0).sort((a, b) => b.s - a.s).slice(0, 3);
-    setFound(scored.map((x) => x.e));
+    if (busy) return;
+    const local = scored.map((x) => x.e);
+    if (!ai) { setFound(local); return; }
+    const rest = pool.filter((e) => !local.includes(e));
+    const notes = local.concat(rest).slice(0, 12).map((e) => ({ q: String(e.q || '').slice(0, 300), a: String(e.a || '').slice(0, 800) }));
+    setBusy(true);
+    setFound(null);
+    ai(q.slice(0, 300), notes).then((a) => setFound(a ? [{ q: 'Here is what I found:', a }] : local)).catch(() => setFound(local)).then(() => setBusy(false));
   }
   if (touring && steps) return <Tour key={start} steps={steps.slice(0, 10)} start={start} path={path} go={go} journey={journey} onClose={stop} />;
 
@@ -252,27 +261,17 @@ export default function HelpButton({ path = '/', topics = {}, faq = [], tours = 
       <button type="button" data-haruno="1" style={fab} aria-label="Haruno, your helper" title="Haruno (drag me anywhere)" onPointerDown={down} onPointerMove={move} onPointerUp={up} onPointerCancel={up} onClick={click}><Face size={48} /></button>
       {open ? (
         <div data-haruno="1" style={box} role="dialog" aria-label="Haruno">
-          <div style={{ display: 'flex', gap: '10px', alignItems: 'center' }}>
+          <div style={{ display: mode === 'ask' ? 'none' : 'flex', gap: '10px', alignItems: 'center' }}>
             <Face size={40} />
             <div style={{ lineHeight: 1.35 }}>My name is Haruno.<br />I am here to help you.</div>
           </div>
-          <p style={{ margin: '12px 0 8px', lineHeight: 1.4 }}>Would you like a guide on this page, or do you have a question?</p>
-          <div style={{ display: 'flex', gap: '6px' }}>
+          <p style={{ margin: '12px 0 8px', lineHeight: 1.4, display: mode === 'ask' ? 'none' : 'block' }}>Would you like a guide on this page, or do you have a question?</p>
+          <div style={{ display: mode === 'ask' ? 'none' : 'flex', gap: '6px' }}>
             <button type="button" style={S.tab(mode === 'guide')} onClick={begin}>A guide</button>
             <button type="button" style={S.tab(mode === 'ask')} onClick={() => setMode('ask')}>A question</button>
           </div>
           {mode === 'guide' && !steps ? <p style={{ margin: '10px 0 0' }}>I do not have a guide for this page yet. Try a question.</p> : null}
-          {mode === 'ask' ? (
-            <div style={{ marginTop: '10px' }}>
-              <div style={{ display: 'flex', gap: '6px' }}>
-                <input value={q} onChange={(e) => setQ(e.target.value)} onKeyDown={(e) => { if (e.key === 'Enter') ask(); }} placeholder="Type your question" style={{ flex: 1, minWidth: 0, padding: '8px', border: '1px solid #bbb', borderRadius: '8px' }} />
-                <button type="button" style={S.btn} onClick={ask}>Send</button>
-              </div>
-              {found ? (found.length ? found.map((e, i) => <p key={i} style={{ margin: '10px 0 0', lineHeight: 1.4 }}><b>{e.q}</b><br />{e.a}</p>)
-                : <p style={{ margin: '10px 0 0' }}>I could not find that one. Please message us on WhatsApp and the team will help you.</p>) : null}
-              <p style={{ margin: '10px 0 0', fontSize: '12px', color: '#666' }}>My answers come from built-in guides. Nothing leaves this site, and I never see your orders or account.</p>
-            </div>
-          ) : null}
+          {mode === 'ask' ? <HarunoChat onBack={() => setMode('')} ai={ai} faq={faq} topics={topics} face={<Face size={34} />} /> : null}
         </div>
       ) : null}
     </>
