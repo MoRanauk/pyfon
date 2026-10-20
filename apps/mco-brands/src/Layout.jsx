@@ -1,5 +1,7 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import { Link, Outlet, useLocation } from 'react-router-dom';
+import { Link, Outlet, useLocation, useNavigate } from 'react-router-dom';
+import { HelpButton } from '@pyfon/ui';
+import { SHOP_TOURS, SHOP_TOPICS, SHOP_FAQ } from './helpTours.js';
 import { useCart } from './CartState.jsx';
 import { useAuth, displayName } from './AuthState.jsx';
 import { useCatalog } from './CatalogState.jsx';
@@ -86,6 +88,7 @@ function Shell({ lite }) {
   const [mega, setMega] = useState({});
   const hoverOk = useHoverMenu();
   const loc = useLocation();
+  const go = useNavigate();
   const { count } = useCart();
   const { user } = useAuth();
 
@@ -180,6 +183,7 @@ function Shell({ lite }) {
       <SideMenu open={menu} onClose={() => setMenu(false)} tree={menuTree} user={user} />
       <main style={{ minHeight: '60vh' }}><Outlet /></main>
       <SiteFooter groups={footGroups} />
+      <HelpButton path={loc.pathname} topics={SHOP_TOPICS} faq={SHOP_FAQ} tours={SHOP_TOURS} go={go} lift={loc.pathname === '/' ? 130 : 0} />
     </SearchHintProvider>
   );
 }
