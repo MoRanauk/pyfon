@@ -2,6 +2,7 @@ import { useCallback, useEffect, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { STAGE, kes } from './api.js';
 import { get, post, patch } from './http.js';
+import { call, today } from './moneyApi.js';
 
 export default function Invoice() {
   const { ref } = useParams();
@@ -13,11 +14,17 @@ export default function Invoice() {
   const [reason, setReason] = useState('');
   const [f, setF] = useState({ discount: '0', date: '', mode: '', notes: '' });
   const base = '/v1/partner';
+  const [pay, setPay] = useState({ income: 0, cost: 0, amount: '' });
 
   const load = useCallback(async () => {
     try {
       const x = await get(base + '/jobs/' + ref + '/invoice');
       setD(x);
+      try {
+        const m = await call('GET', '/money/by-job?from=2000-01-01&to=' + today());
+        const row = m.jobs.find((j) => j.jobRef === ref);
+        setPay({ income: row ? Number(row.income) : 0, cost: row ? Number(row.cost) : 0, amount: '' });
+      } catch (e2) { setPay({ income: 0, cost: 0, amount: '' }); }
       if (x.invoice) setF({ discount: String(x.invoice.discountKes || 0), date: x.invoice.handoverDate || '', mode: x.invoice.handoverMode || '', notes: x.invoice.notes || '' });
     } catch (e) { setErr(e.message); }
   }, [ref]);
@@ -38,6 +45,7 @@ export default function Invoice() {
       <h2>{inv ? 'Invoice ' + inv.number : 'Invoice'}</h2>
       {msg ? <p className="ok">{msg}</p> : null}
       {err ? <p className="err">{err}</p> : null}
+      {pay.income || pay.cost ? <p className="muted"><b>Job money:</b> income {kes(pay.income)} &middot; costs {kes(pay.cost)} &middot; profit <b>{kes(pay.income - pay.cost)}</b></p> : null}
       {!src ? <p className="muted">{d.reason || 'Nothing to invoice yet.'}</p> : (
         <div>
           <p>{src.billName}{src.billPhone ? ' \u00b7 ' + src.billPhone : ''}{src.billEmail ? ' \u00b7 ' + src.billEmail : ''}</p>
@@ -68,6 +76,20 @@ export default function Invoice() {
           <input type="date" value={f.date} onChange={(e) => setF({ ...f, date: e.target.value })} />
           <input placeholder="Message to the customer (optional)" value={f.notes} onChange={(e) => setF({ ...f, notes: e.target.value })} />
           <button type="button" onClick={() => run(() => patch(base + '/invoices/' + inv.id, { discountKes: inv.discountKes || 0, handoverDate: f.date || null, handoverMode: f.mode || null, notes: f.notes || null }), 'Details saved')}>Save details</button>
+          <h3>Payment</h3>
+          <p className="muted">Paid so far {kes(pay.income)} of {kes(inv.totalKes)}{pay.income >= inv.totalKes ? ' (paid in full)' : ''}</p>
+          {pay.income < inv.totalKes ? (
+            <div>
+              <input type="number" min="1" placeholder={'Amount received (empty = balance due ' + (inv.totalKes - pay.income) + ')'} value={pay.amount} onChange={(e) => setPay({ ...pay, amount: e.target.value })} />
+              <button type="button" onClick={() => run(async () => {
+                const due = inv.totalKes - pay.income;
+                const a = pay.amount ? Number(pay.amount) : due;
+                if (!(a > 0) || !Number.isInteger(a)) throw new Error('Enter a whole amount above zero');
+                if (a > due) throw new Error('That is more than the balance due');
+                await call('POST', '/money/entries', { date: today(), kind: 'income', category: 'Sales', amountKes: a, jobRef: inv.jobRef, party: inv.billName, note: 'Payment for invoice ' + inv.number });
+              }, 'Payment recorded in the Money book')}>Record payment as income</button>
+            </div>
+          ) : null}
           <p className="muted">{inv.emailedAt ? 'Emailed ' + new Date(inv.emailedAt).toLocaleString('en-KE') : 'Not emailed yet'}</p>
           <button type="button" onClick={() => nav('/invoice/' + inv.id)}>Open invoice sheet</button>
           <button type="button" onClick={() => run(() => post(base + '/invoices/' + inv.id + '/email'), 'Invoice emailed')}>Email to customer</button>

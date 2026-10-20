@@ -51,14 +51,12 @@ export default function Money() {
     <div className="mb">
       <style>{MONEY_CSS}</style>
       <h1>Money book</h1>
-      <div className="bar">
+      <div className="mbar">
         <input type="date" value={from} onChange={(e) => setFrom(e.target.value)} />
         <span>to</span>
         <input type="date" value={to} onChange={(e) => setTo(e.target.value)} />
         {ranges.map((r) => <button key={r[0]} type="button" className={'chip' + (from === r[1] && to === r[2] ? ' on' : '')} onClick={() => { setFrom(r[1]); setTo(r[2]); }}>{r[0]}</button>)}
-      </div>
-      <div className="bar">
-        <input placeholder="Search entries" value={search} onChange={(e) => setSearch(e.target.value)} />
+      <input placeholder="Search entries" value={search} onChange={(e) => setSearch(e.target.value)} />
         <label><input type="checkbox" checked={showDel} onChange={(e) => setShowDel(e.target.checked)} /> show deleted</label>
         <button type="button" className="chip" onClick={() => downloadCsv(entries)}>Download CSV</button>
         <button type="button" className={'chip' + (form ? ' on' : '')} onClick={() => setForm(!form)}>{form ? 'Close form' : '+ New entry'}</button>
@@ -82,7 +80,7 @@ export default function Money() {
           <p className="hint">Direct costs belong to a job (materials, dealer payments). Overheads are running costs (rent, salaries). Entries cannot be edited: use the reverse icon on a wrong one.</p>
         </div>
       ) : null}
-      <div className="bar">
+      <div className="mbar">
         {[['ledger', 'Ledger'], ['category', 'By category'], ['job', 'By job']].map(([k, l]) => <button key={k} type="button" className={'chip' + (tab === k ? ' on' : '')} onClick={() => setTab(k)}>{l}</button>)}
       </div>
       {tab === 'ledger' ? <Ledger entries={entries} query={search} onReverse={reverse} onDelete={del} /> : null}

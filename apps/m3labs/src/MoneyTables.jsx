@@ -7,7 +7,7 @@ export const MONEY_CSS = `
 .mb h1{text-align:center}
 .mb input,.mb select{width:auto!important;margin:0;padding:6px 8px;font-size:14px;border:1px solid #c8ccd2;border-radius:6px;background:#fff;min-width:0;box-sizing:border-box}
 .mb input[type=date]{width:150px!important}
-.mb .bar{display:flex;flex-wrap:wrap;gap:8px;align-items:center;justify-content:center;margin:8px 0}
+.mb .mbar{display:flex;flex-wrap:wrap;gap:8px;align-items:center;justify-content:center;margin:8px 0}
 .mb .chip{padding:5px 11px;border:1px solid #0b2a4a;border-radius:14px;background:#fff;color:#0b2a4a;cursor:pointer;font-size:13px}
 .mb .chip.on{background:#0b2a4a;color:#fff}
 .mb .sum{display:flex;flex-wrap:wrap;background:#fff;border:1px solid #e3e3e3;border-radius:10px;margin:10px 0}
@@ -28,7 +28,7 @@ export const MONEY_CSS = `
 .mb .in{color:#1b7a3a}.mb .out{color:#a02020}
 .mb tfoot td{font-weight:700;background:#eef1f5}
 .mb .ib{background:#fff;border:1px solid #c8ccd2;border-radius:6px;width:26px;height:26px;cursor:pointer;margin-left:4px;color:#0b2a4a}
-.mb .note{color:#666;font-size:12px;text-align:center;margin:6px 0}
+.mb .mnote{color:#666;font-size:12px;text-align:center;margin:6px 0}
 `;
 
 export function Ledger({ entries, query, onReverse, onDelete }) {
@@ -69,7 +69,7 @@ export function Ledger({ entries, query, onReverse, onDelete }) {
           <tfoot><tr><td colSpan={6}>Totals ({live.length} entries)</td><td className="num in">{n(tin)}</td><td className="num out">{n(tout)}</td><td className="num">{n(tin - tout)}</td><td /></tr></tfoot>
         </table>
       </div>
-      <p className="note">Amounts in KES. Balance runs through the dates you chose.</p>
+      <p className="mnote">Amounts in KES. Balance runs through the dates you chose.</p>
     </>
   );
 }
