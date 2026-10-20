@@ -10,16 +10,22 @@ export const themes = {
     radius: '8px'
   },
   prestige: {
-    name: 'Prestige M',
-    colors: { navy: '#14264A', gold: '#B8913A', bg: '#FFF9F4', surface: '#F7E9EE', text: '#1A2238', muted: '#6B6F85', border: '#EBDDE2', accent: '#B8913A', onAccent: '#14264A' },
+    name: 'Pyfon Gift Hub',
+    colors: { navy: '#3A2630', gold: '#C99A7A', bg: '#FBF3EC', surface: '#F5E4DA', text: '#3B2A2E', muted: '#8A7274', border: '#EBD9CE', accent: '#C4566F', onAccent: '#FFFFFF' },
     fonts: { heading: serif, body: system },
-    radius: '14px'
+    radius: '2px'
+  },
+  prestigeHim: {
+    name: 'Pyfon Gift Hub (for him)',
+    colors: { navy: '#101827', gold: '#C8283A', bg: '#F5F2EF', surface: '#E9E4DF', text: '#15181F', muted: '#6B6F78', border: '#DDD7D0', accent: '#7A1F2E', onAccent: '#FFFFFF' },
+    fonts: { heading: serif, body: system },
+    radius: '2px'
   },
   trim: {
     name: 'TriM Atelier',
-    colors: { navy: '#0B1F3A', gold: '#A8873A', bg: '#FFFFFF', surface: '#F6F3EE', text: '#1F2933', muted: '#667085', border: '#E5DFD3', accent: '#0B1F3A', onAccent: '#FFFFFF' },
-    fonts: { heading: serif, body: system },
-    radius: '2px'
+    colors: { navy: '#111111', gold: '#B8975A', bg: '#FAF6EE', surface: '#F0E9DA', text: '#1A1A1A', muted: '#6F6A60', border: '#E3DAC8', accent: '#111111', onAccent: '#F5EFE1' },
+    fonts: { heading: '"Playfair Display", Georgia, serif', body: '"Jost", system-ui, -apple-system, "Segoe UI", sans-serif' },
+    radius: '0px'
   },
   m3: {
     name: 'M3 Labs',

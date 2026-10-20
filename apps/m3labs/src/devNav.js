@@ -8,22 +8,22 @@ export const DEV_NAV = [
   ] },
   { name: 'People', icon: 'users', items: [
     ['/users', 'Users', true], ['/tickets', 'Tickets', true], ['/activity', 'Activity log', true],
-    ['/sessions', 'Live sessions', false],
+    ['/sessions', 'Live sessions', true],
   ] },
   { name: 'Security', icon: 'shield', items: [
-    ['/sec/scan', 'Security scan', false], ['/sec/access', 'Access matrix test', false],
-    ['/sec/pentest', 'Pen-test lab (own system only)', false], ['/sec/secrets', 'Secrets watch', false],
-    ['/sec/deps', 'Dependency audit', false], ['/sec/logins', 'Login attacks', false],
+    ['/sec/scan', 'Security scan', true], ['/sec/access', 'Access matrix test', true],
+    ['/sec/pentest', 'Pen-test lab (own system only)', true], ['/sec/secrets', 'Secrets watch', true],
+    ['/sec/deps', 'Dependency audit', true], ['/sec/logins', 'Login attacks', true],
   ] },
   { name: 'Code', icon: 'code', items: [
-    ['/code', 'Code explorer', false], ['/learn', 'Learn the code', false], ['/ai', 'AI helper', false],
-    ['/db', 'Database map', false],
+    ['/code', 'Code explorer', true], ['/learn', 'Learn the code', true], ['/ai', 'AI helper', false],
+    ['/db', 'Database map', true],
   ] },
   { name: 'Tools', icon: 'tools', items: [
-    ['/commands', 'Commands', false], ['/sql', 'SQL console (read only)', false], ['/api-test', 'API tester', false],
-    ['/links', 'Links', false], ['/tools', 'Workspace tools', true],
+    ['/commands', 'Commands', true], ['/sql', 'SQL console (read only)', true], ['/api-test', 'API tester', true],
+    ['/links', 'Links', true], ['/tools', 'Workspace tools', true],
   ] },
   { name: 'System', icon: 'gear', items: [
-    ['/settings', 'Settings', true], ['/guide', 'Guides', false],
+    ['/settings', 'Settings', true], ['/guide', 'Guides', true],
   ] },
 ];

@@ -24,6 +24,17 @@ import DevUsers from './DevUsers.jsx';
 import ErrorExplainer from './ErrorExplainer.jsx';
 import DevGraphs from './DevGraphs.jsx';
 import DevUptime from './DevUptime.jsx';
+import DevSecurity from './DevSecurity.jsx';
+import DevSecLab from './DevSecLab.jsx';
+import DevSessions from './DevSessions.jsx';
+import DevSql from './DevSql.jsx';
+import DevApiTest from './DevApiTest.jsx';
+import DevCommands from './DevCommands.jsx';
+import DevLinks from './DevLinks.jsx';
+import DevDbMap from './DevDbMap.jsx';
+import DevCode from './DevCode.jsx';
+import DevLearn from './DevLearn.jsx';
+import DevGuides from './DevGuides.jsx';
 import DevReports from './DevReports.jsx';
 import Money from './Money.jsx';
 import Activity from './Activity.jsx';
@@ -71,6 +82,21 @@ export default function App() {
         <Route path="/errors" element={<ErrorExplainer />} />
         <Route path="/graphs" element={<DevGraphs />} />
         <Route path="/uptime" element={<DevUptime />} />
+        <Route path="/sec/scan" element={<DevSecurity kind="scan" />} />
+        <Route path="/sec/logins" element={<DevSecurity kind="logins" />} />
+        <Route path="/sec/deps" element={<DevSecurity kind="deps" />} />
+        <Route path="/sec/secrets" element={<DevSecurity kind="secrets" />} />
+        <Route path="/sec/access" element={<DevSecLab key="access" kind="access" />} />
+        <Route path="/sec/pentest" element={<DevSecLab key="pentest" kind="pentest" />} />
+        <Route path="/sessions" element={<DevSessions />} />
+        <Route path="/sql" element={<DevSql />} />
+        <Route path="/api-test" element={<DevApiTest />} />
+        <Route path="/commands" element={<DevCommands />} />
+        <Route path="/links" element={<DevLinks />} />
+        <Route path="/db" element={<DevDbMap />} />
+        <Route path="/code" element={<DevCode />} />
+        <Route path="/learn" element={<DevLearn />} />
+        <Route path="/guide" element={<DevGuides />} />
         <Route path="/reports" element={<DevReports />} />
         <Route path="/money" element={<Money />} />
         <Route path="/activity" element={<Activity />} />

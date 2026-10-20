@@ -1,0 +1,37 @@
+/* Prestige M look. Loaded after styles.css. Colours come from packages/theme (prestige). */
+.logo { font-family: var(--pf-font-heading); letter-spacing: .06em; }
+h1, h2 { font-family: var(--pf-font-heading); }
+.pm-btn { display: inline-block; background: var(--pf-gold); color: var(--pf-navy); padding: 14px 28px; border: 0; border-radius: 999px; font-weight: 600; text-decoration: none; cursor: pointer; font-size: 16px; }
+.pm-hero { min-height: 70vh; display: flex; align-items: center; justify-content: center; text-align: center; color: #fff; background: linear-gradient(135deg, #F7E9EE, #14264A) center / cover no-repeat; padding: 40px 20px; }
+.pm-hero-in { max-width: 640px; }
+.pm-hero h1 { font-size: clamp(34px, 6vw, 60px); margin: 0 0 12px; }
+.pm-hero p { font-size: 18px; margin: 0 0 24px; }
+.pm-cats { display: flex; flex-wrap: wrap; gap: 10px; justify-content: center; padding: 28px 0 8px; }
+.pm-cats a { padding: 10px 20px; border-radius: 999px; background: var(--pf-surface); color: var(--pf-navy); text-decoration: none; font-weight: 500; }
+.pm-mosaic { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; padding: 24px 0; }
+.pm-tile { position: relative; overflow: hidden; border-radius: var(--pf-radius); aspect-ratio: 1 / 1; display: block; }
+.pm-tile.t0, .pm-tile.t4 { grid-row: span 2; aspect-ratio: auto; }
+.pm-tile img { width: 100%; height: 100%; object-fit: cover; display: block; }
+.pm-tile span { position: absolute; left: 10px; bottom: 10px; background: rgba(255,255,255,.9); color: var(--pf-navy); padding: 4px 10px; border-radius: 999px; font-size: 13px; }
+.pm-row { padding: 16px 0 32px; text-align: center; }
+.pm-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; text-align: left; }
+.pm-card { text-decoration: none; color: inherit; display: flex; flex-direction: column; gap: 4px; }
+.pm-card img { width: 100%; aspect-ratio: 1 / 1; object-fit: cover; border-radius: var(--pf-radius); }
+.pm-card span { color: var(--pf-muted); font-size: 14px; }
+.pm-talk { background: var(--pf-surface); padding: 40px 0; text-align: center; }
+.pm-quotes { display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px; }
+.pm-quotes blockquote { margin: 0; padding: 20px; background: #fff; border-radius: var(--pf-radius); }
+.pm-quotes p { font-family: var(--pf-font-heading); font-size: 18px; margin: 0 0 10px; }
+.pm-quotes footer, .pm-small { color: var(--pf-muted); font-size: 13px; }
+.pm-insta { text-align: center; padding: 36px 0; }
+.pm-igrid { display: grid; grid-template-columns: repeat(6, 1fr); gap: 8px; margin-bottom: 16px; }
+.pm-igrid img { width: 100%; aspect-ratio: 1 / 1; object-fit: cover; border-radius: 6px; }
+.pm-sub { background: var(--pf-navy); color: #fff; text-align: center; padding: 44px 20px; }
+.pm-sub form { display: flex; gap: 10px; justify-content: center; flex-wrap: wrap; }
+.pm-sub input { padding: 14px 18px; border-radius: 999px; border: 0; min-width: 240px; font-size: 16px; }
+@media (max-width: 800px) {
+  .pm-mosaic { grid-template-columns: repeat(2, 1fr); }
+  .pm-grid { grid-template-columns: repeat(2, 1fr); }
+  .pm-quotes { grid-template-columns: 1fr; }
+  .pm-igrid { grid-template-columns: repeat(3, 1fr); }
+}

@@ -24,6 +24,12 @@ import { devSystemRoutes } from './devSystem.js';
 import { devUserRoutes } from './devUsers.js';
 import { devGraphRoutes } from './devGraphs.js';
 import { devUptimeRoutes } from './devUptime.js';
+import { devSecurityRoutes } from './devSecurity.js';
+import { devSecurityLabRoutes } from './devSecurityLab.js';
+import { devSessionsRoutes } from './devSessions.js';
+import { devSqlRoutes } from './devSql.js';
+import { devCommandRoutes } from './devCommands.js';
+import { devCodeRoutes } from './devCode.js';
 import { siteVideoAdminRoutes } from './siteVideos.js';
 
 function group(role) {
@@ -70,6 +76,12 @@ devRoutes.use('/system', devSystemRoutes);
 devRoutes.use('/system', devUserRoutes);
 devRoutes.use('/system', devGraphRoutes);
 devRoutes.use('/system', devUptimeRoutes);
+devRoutes.use('/system', devSecurityRoutes);
+devRoutes.use('/system', devSecurityLabRoutes);
+devRoutes.use('/system', devSessionsRoutes);
+devRoutes.use('/system', devSqlRoutes);
+devRoutes.use('/system', devCommandRoutes);
+devRoutes.use('/system', devCodeRoutes);
 
 export const vendorRoutes = group('vendor');
 vendorRoutes.use(vendorJobRoutes);
