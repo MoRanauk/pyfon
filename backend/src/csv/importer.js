@@ -6,6 +6,18 @@ import { COLUMNS, readCsv, validateAll, slugify } from './validate.js';
 
 const IMG_DIR = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..', '..', 'public', 'product-images');
 
+function videoMap(records, errors) {
+  const m = new Map();
+  records.forEach((r, i) => {
+    if (!('video_url' in r)) return;
+    const u = String(r.video_url || '').trim();
+    const sku = String(r.sku || '').trim();
+    if (u && !/^https:\/\/\S+$/.test(u)) errors.push({ row: i + 2, sku, message: 'video_url: must start with https://' });
+    m.set(sku, u || null);
+  });
+  return m;
+}
+
 async function context(db) {
   const sf = await db.query('SELECT code FROM storefronts');
   const im = await db.query('SELECT DISTINCT file_name FROM item_images');
@@ -18,7 +30,8 @@ export async function checkCsv(db, text, overwrite) {
   const r = readCsv(text);
   if (r.error) return { fatal: r.error, errors: [], rows: 0, create: 0, update: 0, skipped: [], items: [] };
   const { errors, items } = validateAll(r.records, await context(db));
-  const out = { rows: items.length, errors, create: 0, update: 0, skipped: [], items };
+  const vids = videoMap(r.records, errors);
+  const out = { rows: items.length, errors, create: 0, update: 0, skipped: [], items, videos: vids };
   if (errors.length) return out;
   const ex = await db.query('SELECT sku, manager_edited FROM catalog_items WHERE sku = ANY($1::text[])', [items.map((i) => i.sku)]);
   const m = new Map(ex.rows.map((x) => [x.sku, x.manager_edited]));
@@ -53,6 +66,7 @@ export async function applyCsv(client, text, overwrite, who, fileName) {
       [it.sku, it.type, it.name, cat.rows[0].id, it.subcategory, it.description, it.priceType, it.price, it.compare, it.minQty,
         JSON.stringify(it.options), it.personalization, it.vendor, it.stockStatus, it.stockQty, it.leadTime, it.tags, it.featured, it.status]);
     const id = r.rows[0].id;
+    if (c.videos && c.videos.has(it.sku)) await client.query('UPDATE catalog_items SET video_url = $1 WHERE id = $2', [c.videos.get(it.sku), id]);
     if (r.rows[0].inserted) created++; else updated++;
     await client.query('DELETE FROM item_storefronts WHERE item_id = $1', [id]);
     await client.query('INSERT INTO item_storefronts (item_id, storefront_code) SELECT $1, unnest($2::text[])', [id, it.storefronts]);
@@ -73,16 +87,16 @@ const q = (v) => { const s = v == null ? '' : String(v); return /[",\r\n]/.test(
 export async function exportCsv(db) {
   const { rows } = await db.query(
     `SELECT i.sku, i.type, i.name, c.name AS category, i.subcategory, i.description, i.price_type, i.price_kes, i.compare_at_price_kes,
-       i.min_order_qty, i.options, i.personalization, i.vendor_code, i.stock_status, i.stock_qty, i.lead_time_days, i.tags, i.featured, i.status,
+       i.min_order_qty, i.options, i.personalization, i.vendor_code, i.stock_status, i.stock_qty, i.lead_time_days, i.tags, i.featured, i.status, i.video_url,
        (SELECT string_agg(s.storefront_code, '|' ORDER BY s.storefront_code) FROM item_storefronts s WHERE s.item_id = i.id) AS storefronts,
        (SELECT string_agg(m.file_name, '|' ORDER BY m.position) FROM item_images m WHERE m.item_id = i.id AND m.status = 'active') AS images
      FROM catalog_items i LEFT JOIN categories c ON c.id = i.category_id ORDER BY i.sku`);
-  const lines = [COLUMNS.join(',')];
+  const lines = [COLUMNS.join(',') + ',video_url'];
   for (const r of rows) {
     const opts = Array.isArray(r.options) ? r.options.map((o) => o.name + ':' + o.values.join('|')).join(';') : '';
     const pers = Array.isArray(r.personalization) && r.personalization.length ? r.personalization.join('|') : 'none';
     const v = { sku: r.sku, type: r.type, name: r.name, category: r.category, subcategory: r.subcategory, storefronts: r.storefronts, description: r.description, price_type: r.price_type, price_kes: r.price_kes, compare_at_price_kes: r.compare_at_price_kes, min_order_qty: r.min_order_qty, options: opts, personalization: pers, vendor: r.vendor_code, stock_status: r.stock_status, stock_qty: r.stock_qty, lead_time_days: r.lead_time_days, images: r.images, tags: Array.isArray(r.tags) ? r.tags.join('|') : '', featured: r.featured ? 'true' : 'false', status: r.status };
-    lines.push(COLUMNS.map((c) => q(v[c])).join(','));
+    lines.push(COLUMNS.map((c) => q(v[c])).join(',') + ',' + q(r.video_url));
   }
   return '\uFEFF' + lines.join('\r\n') + '\r\n';
 }

@@ -43,6 +43,7 @@ function shape(r) {
     leadTimeDays: r.lead_time_days,
     tags: r.tags, features: r.features || [],
     featured: r.featured,
+    video: r.video_url || '',
     image: images[0],
     images,
   };
@@ -51,7 +52,7 @@ function shape(r) {
 const SELECT_ITEM = `
   SELECT i.sku, i.type, i.name, c.name AS category, c.slug AS category_slug, i.subcategory, i.description,
          i.price_type, i.price_kes, i.compare_at_price_kes, i.min_order_qty, i.options, i.personalization,
-         i.stock_status, i.lead_time_days, i.tags, i.featured, i.features,
+         i.stock_status, i.lead_time_days, i.tags, i.featured, i.features, i.video_url,
          COALESCE((SELECT array_agg(file_name ORDER BY position) FROM item_images WHERE item_id = i.id AND status = 'active'), '{}') AS images
   FROM catalog_items i
   JOIN categories c ON c.id = i.category_id`;
