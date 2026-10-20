@@ -1,10 +1,13 @@
 import { useEffect, useState } from 'react';
-import { NavLink, useLocation } from 'react-router-dom';
-import { Footer } from '@pyfon/ui';
+import { NavLink, useLocation, useNavigate } from 'react-router-dom';
+import { Footer, HelpButton } from '@pyfon/ui';
+import { HELP_TOPICS, HELP_FAQ } from './helpTopics.js';
+import { HELP_TOURS } from './helpTours.js';
 import { useAuth, nameOf } from './Auth.jsx';
 import { STAGE, STAGE_LABEL, FIXED, switchPortal } from './api.js';
 import { ls, photoKey } from './store.js';
 import { DEV_NAV as DEV_MENU } from './devNav.js';
+import { PARTNER_MENU } from './partnerNav.js';
 
 const I = {
   home: '<path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><path d="M9 22V12h6v10"/>',
@@ -36,8 +39,9 @@ const DEV_NAV = [
   ['/settings', 'gear', 'Settings'], ['/help', 'help', 'Help'],
 ];
 
-const liveGroups = () => DEV_MENU.map((g) => ({ ...g, items: g.items.filter((i) => i[2]) })).filter((g) => g.items.length);
-const inGroup = (g, p) => g.items.some(([to]) => (to === '/' ? p === '/' : p === to || p.startsWith(to + '/')));
+const MENU = STAGE === 'dev' ? DEV_MENU : PARTNER_MENU;
+const liveGroups = () => MENU.map((g) => ({ ...g, items: g.items.filter((i) => i[2]) })).filter((g) => g.items.length);
+const inGroup = (g, p) => g.items.some(([to]) => (to === '/' ? p === '/' : p === to || p.startsWith(to + '/'))) || (g.name === 'Work' && (p.startsWith('/jobs/') || p.startsWith('/invoice/')));
 function DevSide({ path }) {
   return liveGroups().map((g) => (
     <NavLink key={g.name} to={g.items[0][0]} end className={inGroup(g, path) ? 'active' : ''}><Icon n={g.icon} />{g.name}</NavLink>
@@ -59,6 +63,7 @@ export default function Layout({ children }) {
   const { user, logout } = useAuth();
   const [open, setOpen] = useState(false);
   const loc = useLocation();
+  const go = useNavigate();
   useEffect(() => { setOpen(false); }, [loc.pathname]);
   const covering = user && user.stage && user.stage !== STAGE;
   const nav = STAGE === 'dev' ? DEV_NAV : PARTNER_NAV;
@@ -71,10 +76,10 @@ export default function Layout({ children }) {
           <div className="wordmark" style={{ color: '#fff', fontSize: '24px' }}>M3 <b>Labs</b></div>
           <span className="badge">{STAGE_LABEL[STAGE]}</span>
         </div>
-        {STAGE === 'dev' ? <DevSide path={loc.pathname} /> : nav.map(([to, icon, label, end]) => (
+        {MENU ? <DevSide path={loc.pathname} /> : nav.map(([to, icon, label, end]) => (
           <NavLink key={to} to={to} end={Boolean(end)}><Icon n={icon} />{label}</NavLink>
         ))}
-        <div className="me">
+        <div className="me" role="link" tabIndex={0} title="Your settings" style={{ cursor: 'pointer' }} onClick={() => go('/settings')} onKeyDown={(e) => { if (e.key === 'Enter') go('/settings'); }}>
           <span className="avatar">{photo ? <img src={photo} alt="" /> : <svg viewBox="0 0 24 24" fill="none" strokeWidth="1.6"><circle cx="12" cy="8" r="4" /><path d="M4 21c0-4.4 3.6-8 8-8s8 3.6 8 8" /></svg>}</span>
           <span style={{ fontSize: '13px', lineHeight: 1.3 }}>{nameOf(user)}</span>
         </div>
@@ -87,10 +92,10 @@ export default function Layout({ children }) {
           <b style={{ color: '#0b2a4a' }}>M3 Labs</b>
           <span className="badge">{STAGE_LABEL[STAGE]}</span>
         </header>
-        {STAGE === 'dev' ? <TopTabs path={loc.pathname} /> : null}
+        <TopTabs path={loc.pathname} />
         {covering ? <div className="cover">You are covering for the {STAGE_LABEL[STAGE]} partner. Every action is logged as acting for them.</div> : null}
         <main className="page wide">{children}</main>
-        <Footer />
+        <Footer /><HelpButton path={loc.pathname} topics={HELP_TOPICS} faq={HELP_FAQ} tours={HELP_TOURS} />
       </div>
     </div>
   );

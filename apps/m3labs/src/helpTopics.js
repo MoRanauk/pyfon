@@ -1,0 +1,27 @@
+export const HELP_TOPICS = {
+  '/': { title: 'Dashboard', text: 'Your summary: jobs waiting for you, approvals and recent activity. Open a job to act on it.' },
+  '/orders': { title: 'Orders flow', text: 'Every order by stage. Open one to see its job, move it on, or message the customer.' },
+  '/queue': { title: 'My queue', text: 'Jobs waiting for you at this desk. Do the work, then sign off. A second partner must co-sign.' },
+  '/jobs': { title: 'Job', text: 'One job: its steps, invoice and notes. Sign off your step, co-sign another, or reject with a reason.' },
+  '/approvals': { title: 'Approvals', text: 'Price changes, deletes, discounts and product file imports need all three partners to approve.' },
+  '/tickets': { title: 'Tickets', text: 'Report a problem or follow one up. The developer team answers here.' },
+  '/products': { title: 'Products', text: 'Search, add and edit products. Live prices and deleting need approval from all three partners.' },
+  '/csv': { title: 'Product file', text: 'Upload the products CSV. Run a dry run first: it lists every error and changes nothing.' },
+  '/videos': { title: 'Videos', text: 'Add or remove the videos shown on the shop.' },
+  '/reports': { title: 'Reports', text: 'Sales by day, week or month, top products, jobs per stage and jobs waiting. You can download any table as CSV.' },
+  '/activity': { title: 'Activity log', text: 'Who did what and when, including covering for another partner.' },
+  '/connect': { title: 'Connect', text: 'Send an email or WhatsApp message to a customer or partner. Every message is logged.' },
+  '/tools': { title: 'Workspace tools', text: 'Small helpers for daily work.' },
+  '/settings': { title: 'Settings', text: 'Your photo, password and preferences. Open it by clicking your name in the sidebar.' },
+  '/users': { title: 'Users', text: 'Manage accounts. Right-click a user to send a temporary password.' },
+  '/health': { title: 'System health', text: 'Shows whether the backend and database are up.' },
+  '/logs': { title: 'Logs and traces', text: 'Recent requests and errors, searchable.' },
+};
+export const HELP_FAQ = [
+  { q: 'How do I sign off a job?', a: 'Open the job from My queue, check your step, press sign off. Another partner then co-signs with their own password.', k: 'sign approve co-sign' },
+  { q: 'Can one partner finish a job alone?', a: 'No. Every stage needs two different partners, and all three stages must be signed.', k: 'alone two partners' },
+  { q: 'How do I reject a stage?', a: 'Open the job, choose Reject and give a reason. The job goes back to the right stage.', k: 'reject return back' },
+  { q: 'How do I change a price?', a: 'Edit the product and submit. All three partners must approve under Approvals.', k: 'price change cost' },
+  { q: 'How do I change my password?', a: 'Click your name in the sidebar to open Settings, then choose change password.', k: 'password reset' },
+  { q: 'Something is broken', a: 'Open Tickets and describe what you did and what you saw. Add a screenshot if you can.', k: 'error bug problem broken report' },
+];

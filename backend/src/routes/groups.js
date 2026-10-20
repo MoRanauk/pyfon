@@ -51,6 +51,7 @@ partnerRoutes.use(partnerMessageRoutes);
 partnerRoutes.use(partnerConnectRoutes);
 partnerRoutes.use(partnerSendRoutes);
 partnerRoutes.use(partnerCsvRoutes);
+partnerRoutes.use(reportRoutes);
 partnerRoutes.use(partnerApprovalRoutes);
 partnerRoutes.use(partnerJobRoutes);
 partnerRoutes.use(partnerUploadRoutes);

@@ -1,7 +1,8 @@
 import { useCallback, useEffect, useState } from 'react';
 import { get } from './http.js';
+import { STAGE } from './api.js';
 
-const R = '/v1/dev/reports';
+const R = (STAGE === 'dev' ? '/v1/dev' : '/v1/partner') + '/reports';
 const DAYS = [['7', '7 days'], ['30', '30 days'], ['90', '90 days'], ['365', '1 year']];
 const MODES = [['day', 'By day'], ['week', 'By week'], ['month', 'By month']];
 const WAIT = [['24', 'Over 1 day'], ['72', 'Over 3 days'], ['168', 'Over 7 days']];

@@ -5,3 +5,4 @@ export { Button, TextField } from './Forms.jsx';
 export { PasswordField } from './PasswordField.jsx';
 export { ResetByCode } from './ResetByCode.jsx';
 export { Reveal, Slider } from './Motion.jsx';
+export { default as HelpButton } from './HelpButton.jsx';
