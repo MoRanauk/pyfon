@@ -13,6 +13,7 @@ import Sell from './Sell.jsx';
 import Info from './Info.jsx';
 import CoBrand from './CoBrand.jsx';
 import Orders from './Orders.jsx';
+import Track from './Track.jsx';
 import FloatingVideo from './FloatingVideo.jsx';
 
 function NotFound() {
@@ -44,6 +45,7 @@ export default function App() {
         <Route path="/cart" element={<Cart />} />
         <Route path="/account" element={<Account />} />
         <Route path="/orders" element={<Orders />} />
+        <Route path="/track" element={<Track />} />
       </Route>
     </Routes>
   );

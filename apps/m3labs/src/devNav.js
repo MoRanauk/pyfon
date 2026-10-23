@@ -8,7 +8,7 @@ export const DEV_NAV = [
   ] },
   { name: 'People', icon: 'users', items: [
     ['/users', 'Users', true], ['/tickets', 'Tickets', true], ['/activity', 'Activity log', true],
-    ['/sessions', 'Live sessions', true],
+    ['/sessions', 'Live sessions', true], ['/password-requests', 'Password requests', true],
   ] },
   { name: 'Security', icon: 'shield', items: [
     ['/sec/scan', 'Security scan', true], ['/sec/access', 'Access matrix test', true],
@@ -20,7 +20,7 @@ export const DEV_NAV = [
     ['/db', 'Database map', true],
   ] },
   { name: 'Tools', icon: 'tools', items: [
-    ['/commands', 'Commands', true], ['/sql', 'SQL console (read only)', true], ['/api-test', 'API tester', true],
+    ['/commands', 'Commands', true], ['/sql', 'SQL console (read only)', true], ['/builder', 'Site builder', true], ['/vault', 'Code vault', true], ['/theme', 'Theme manager', true], ['/api-test', 'API tester', true],
     ['/links', 'Links', true], ['/tools', 'Workspace tools', true],
   ] },
   { name: 'System', icon: 'gear', items: [

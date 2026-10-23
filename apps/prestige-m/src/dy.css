@@ -1,0 +1,7 @@
+.dy-wrap{max-width:720px;margin:0 auto;padding:0 16px 56px;text-align:left}
+.dy-wrap h1,.dy-wrap .dy-lead{text-align:center}
+.dy-tiles{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:10px;margin:14px 0 26px}
+.dy-tile{padding:14px 10px;border:1px solid #d9d9d9;border-radius:10px;background:#fff;cursor:pointer;font:inherit;text-align:center}
+.dy-tile.on{border-color:#c9a227;box-shadow:0 0 0 2px #c9a227 inset;font-weight:600}
+.dy-wrap textarea.jx-in{min-height:84px;resize:vertical}
+.dy-done{max-width:560px;margin:0 auto;text-align:center;padding:0 16px 56px}

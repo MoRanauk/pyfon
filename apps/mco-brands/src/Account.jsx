@@ -60,7 +60,7 @@ export default function Account() {
       <div className="auth">
         <h1>Reset your password</h1>
         <p className="muted">We will send you a 6-digit code to confirm it is you.</p>
-        <ResetByCode client={api} onDone={() => { setFails(0); setPassword(''); go('in'); setInfo('Password changed. Sign in with your new password.'); }} />
+        <ResetByCode helpShop="mco" client={api} onDone={() => { setFails(0); setPassword(''); go('in'); setInfo('Password changed. Sign in with your new password.'); }} />
         <p><button type="button" className="linkbtn" onClick={() => go('in')}>Back to sign in</button></p>
       </div>
     );

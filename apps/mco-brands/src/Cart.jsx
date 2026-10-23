@@ -2,13 +2,21 @@ import { useEffect, useState } from 'react';
 import PhoneField, { phoneOk, phoneForServer, emailOk } from './PhoneField.jsx';
 import { Link } from 'react-router-dom';
 import { formatKES, TextField } from '@pyfon/ui';
-import { api, img } from './api.js';
+import { api, img, API_URL, STORE, tokens } from './api.js';
 import { useCart } from './CartState.jsx';
 import { useAuth } from './AuthState.jsx';
 import { DELIVERY } from './delivery.js';
 import { errText } from './util.js';
 
 const PHONE = /^\+?[0-9 ]{9,15}$/;
+
+async function previewCoupon(code, itemsKes) {
+  const t = await tokens.get();
+  const r = await fetch(API_URL + '/v1/customer/coupons/check', { method: 'POST', headers: { 'Content-Type': 'application/json', 'X-Interface': STORE, Authorization: 'Bearer ' + t }, body: JSON.stringify({ code, itemsKes }) });
+  const j = await r.json().catch(() => ({}));
+  if (!r.ok) throw new Error(r.status === 429 ? 'Too many tries. Please wait a few minutes.' : (j.error && j.error.message) || 'Could not check the coupon.');
+  return j;
+}
 
 export default function Cart() {
   const { lines, setQty, remove, clear, total } = useCart();
@@ -22,11 +30,20 @@ export default function Cart() {
   const [err, setErr] = useState('');
   const [busy, setBusy] = useState(false);
   const [done, setDone] = useState(null);
+  const [cp, setCp] = useState('');
+  const [applied, setApplied] = useState(null);
+  const [cpMsg, setCpMsg] = useState('');
   useEffect(() => { if (user) { setEmail((v) => v || user.email || ''); setName((v) => v || user.fullName || user.full_name || ''); } }, [user]);
 
   const del = DELIVERY.find((d) => d.code === method) || DELIVERY[0];
   const fee = del.feeKes;
-  const grand = total + (fee || 0);
+  const disc = applied ? Math.min(applied.discountKes, total) : 0;
+  const grand = total - disc + (fee || 0);
+
+  async function applyCoupon() {
+    setCpMsg('');
+    try { setApplied(await previewCoupon(cp, total)); } catch (ex) { setApplied(null); setCpMsg(ex.message); }
+  }
 
   async function submit(e) {
     e.preventDefault();
@@ -41,6 +58,7 @@ export default function Cart() {
         contactName: name.trim(),
         contactPhone: phoneForServer(phone),
         deliveryMethod: method,
+        couponCode: applied ? applied.code : undefined,
         lines: lines.map((l) => ({
           sku: l.sku,
           qty: l.qty,
@@ -68,6 +86,7 @@ export default function Cart() {
       <div className="wrap section">
         <h2>Thank you! Your order is received</h2>
         {o.ref ? <p>Your order reference is <strong>{o.ref}</strong>.</p> : null}
+        {o.discountKes ? <p>Coupon {o.couponCode} saved you {formatKES(o.discountKes)}. Your total is {o.totalKes != null ? formatKES(o.totalKes) : 'shown on WhatsApp'}.</p> : null}
         {o.totalKes != null ? (
           <p>
             Items {formatKES(o.itemsKes)} + delivery {o.deliveryFeeKes == null ? 'to be confirmed' : formatKES(o.deliveryFeeKes)}
@@ -144,9 +163,18 @@ export default function Cart() {
           </fieldset>
           {del.needsAddress ? <TextField label="Delivery address" value={address} onChange={(e) => setAddress(e.target.value)} placeholder="Building, street, area, town" /> : null}
           <TextField label="Notes (optional)" value={notes} onChange={(e) => setNotes(e.target.value)} />
+          <div>
+            <div style={{ display: 'flex', gap: 8 }}>
+              <input value={cp} onChange={(e) => setCp(e.target.value)} onKeyDown={(e) => { if (e.key === 'Enter') { e.preventDefault(); applyCoupon(); } }} placeholder="Coupon code" aria-label="Coupon code" style={{ flex: 1 }} />
+              <button type="button" className="btn" onClick={applyCoupon}>Apply</button>
+            </div>
+            {applied ? <p>Coupon <strong>{applied.code}</strong> applied. You save {formatKES(applied.discountKes)}.</p> : null}
+            {cpMsg ? <p role="alert" style={{ color: '#b00020' }}>{cpMsg}</p> : null}
+          </div>
 
           <div>
             <div className="sumrow"><span>Items</span><span>{formatKES(total)}</span></div>
+            {disc ? <div className="sumrow"><span>Coupon</span><span>-{formatKES(disc)}</span></div> : null}
             <div className="sumrow"><span>Delivery</span><span>{fee == null ? 'Confirmed on WhatsApp' : fee === 0 ? 'Free' : formatKES(fee)}</span></div>
             <div className="sumrow" style={{ fontSize: 18 }}><strong>Total</strong><strong>{formatKES(grand)}{fee == null ? ' + delivery' : ''}</strong></div>
           </div>

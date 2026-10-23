@@ -16,7 +16,7 @@ function hide(email) {
   return keep(local) + '@' + (dot > 0 ? domain.slice(0, 1) + '***' + domain.slice(dot) : domain.slice(0, 1) + '***');
 }
 
-export function ResetByCode({ client, fixedEmail, onDone }) {
+export function ResetByCode({ client, fixedEmail, onDone, helpShop }) {
   const [channels, setChannels] = useState(['email']);
   const [email, setEmail] = useState(fixedEmail || '');
   const [channel, setChannel] = useState('email');
@@ -28,6 +28,22 @@ export function ResetByCode({ client, fixedEmail, onDone }) {
   const [pw2, setPw2] = useState('');
   const [err, setErr] = useState('');
   const [busy, setBusy] = useState(false);
+  const [asked, setAsked] = useState('');
+
+  async function askTeam() {
+    setErr('');
+    setAsked('');
+    if (!email.trim()) return setErr('Enter your account email first.');
+    setBusy(true);
+    try {
+      await client.post('/v1/password-help', { email: email.trim(), shop: helpShop });
+      setAsked('Thank you. If that email belongs to an account, the team has been told and will email you a temporary password.');
+    } catch (x) {
+      setErr(x.message || 'Could not send your request');
+    } finally {
+      setBusy(false);
+    }
+  }
 
   useEffect(() => {
     client.get('/v1/auth/reset-channels')
@@ -94,6 +110,12 @@ export function ResetByCode({ client, fixedEmail, onDone }) {
         {channel !== 'email' ? <p style={{ fontSize: '13px', opacity: 0.8 }}>SMS and WhatsApp go to the phone number saved on your account.</p> : null}
         {err ? <p role="alert" style={{ color: '#b00020' }}>{err}</p> : null}
         <button className="btn" type="submit" disabled={busy}>{busy ? 'Please wait...' : 'Send code'}</button>
+        {helpShop ? (
+          <p style={{ marginTop: '12px' }}>
+            <button type="button" disabled={busy} onClick={askTeam} style={link}>Ask the team to reset my password</button>
+          </p>
+        ) : null}
+        {asked ? <p role="status">{asked}</p> : null}
       </form>
     );
   }

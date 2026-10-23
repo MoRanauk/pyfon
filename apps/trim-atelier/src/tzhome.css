@@ -25,3 +25,12 @@ body{overflow-x:hidden}
 .th-br a{color:#7a6a4a;text-decoration:none}
 @media(max-width:900px){.th-tiles{grid-template-columns:1fr 1fr}}
 @media(prefers-reduced-motion:reduce){.th-sl.on{animation:none}.swipe-page,.swipe-page.swipe-out{animation:none}}
+
+/* 7c20 */
+.th-hero .btn{background:#F3E6CF;color:#111}
+.th-hero .btn:hover{background:#fff}
+.wrap.sec{padding-left:24px;padding-right:24px}
+.wrap.th-col{max-width:1180px;margin:0 auto;padding:60px 24px 90px}
+.th-col h1{text-align:center}
+.th-br{justify-content:center}
+@media(max-width:900px){.wrap.th-col{padding:40px 16px 70px}}

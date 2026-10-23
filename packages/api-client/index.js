@@ -24,7 +24,7 @@ export function createClient({ baseUrl, interfaceCode, getToken }) {
 
   async function request(method, path, opts = {}) {
     const headers = { 'X-Interface': interfaceCode };
-    const token = getToken ? getToken() : null;
+    const token = opts.token || (getToken ? getToken() : null);
     if (token) headers.Authorization = 'Bearer ' + token;
 
     let body;
@@ -58,8 +58,10 @@ export function createClient({ baseUrl, interfaceCode, getToken }) {
 
     if (!res.ok) {
       const e = (data && data.error) || {};
+      if (e.code === 'password_change_required' && typeof window !== 'undefined') window.dispatchEvent(new CustomEvent('pyfon:must-change'));
       throw new ApiError(res.status, e.code || 'error', e.message || 'Something went wrong.', e.details, e.requestId);
     }
+    if (path === '/v1/auth/login' && data && data.mustChangePassword && typeof window !== 'undefined') window.dispatchEvent(new CustomEvent('pyfon:must-change'));
     return data;
   }
 

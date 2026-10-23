@@ -17,11 +17,13 @@ export default function JobDetail() {
   const [price, setPrice] = useState('');
   const [mode, setMode] = useState('in_house');
   const [vendor, setVendor] = useState('');
+  const [dealers, setDealers] = useState([]);
 
   const load = useCallback(async () => {
     try { setD(await api.get(P + '/jobs/' + ref)); } catch (e) { setErr(e.message); }
   }, [ref]);
   useEffect(() => { load(); }, [load]);
+  useEffect(() => { api.get(P + '/dealers').then((x) => setDealers(x.dealers || [])).catch(() => {}); }, []);
 
   async function run(fn, ok) {
     setErr(''); setMsg('');
@@ -102,8 +104,14 @@ export default function JobDetail() {
             <option value="in_house">In-house (Pyfon Brands)</option>
             <option value="dealer">A dealer</option>
           </select>
-          {mode === 'dealer' ? <input placeholder="Dealer code" value={vendor} onChange={(e) => setVendor(e.target.value)} /> : null}
-          <button type="button" onClick={() => run(() => api.post(P + '/jobs/' + ref + '/production', mode === 'dealer' ? { mode, vendorCode: vendor } : { mode }), 'Assignment saved')}>Save</button>
+          {mode === 'dealer' ? (
+            <select value={vendor} onChange={(e) => setVendor(e.target.value)}>
+              <option value="">Choose a dealer</option>
+              {dealers.map((d) => <option key={d.code} value={d.code}>{d.name} ({d.code}){d.speciality ? ' - ' + d.speciality : ''}</option>)}
+            </select>
+          ) : null}
+          {mode === 'dealer' && !dealers.length ? <p className="muted">No active dealers yet.</p> : null}
+          <button type="button" onClick={() => run(() => api.post(P + '/jobs/' + ref + '/production', mode === 'dealer' ? { mode, vendorCode: vendor } : { mode }), 'Assignment saved')} disabled={mode === 'dealer' && !vendor}>Save</button>
         </section>
       ) : null}
 

@@ -15,6 +15,7 @@ import { SearchHintProvider } from './SearchHint.jsx';
 import SideMenu from './SideMenu.jsx';
 import SiteFooter from './SiteFooter.jsx';
 import { FloatPair } from './FloatPair.jsx';
+import { useSiteContent, themeStyle } from './siteContent.js';
 
 // True only on a wide window with a mouse. Only then does hovering open the mega-menu.
 function useHoverMenu() {
@@ -92,6 +93,8 @@ function Shell({ lite }) {
   const go = useNavigate();
   const { count } = useCart();
   const { user } = useAuth();
+  const content = useSiteContent('mco');
+  const wrapStyle = themeStyle('mco', content.theme);
 
   useEffect(() => { setOpen(''); setMenu(false); setSOpen(false); }, [loc.pathname, loc.search]);
   useEffect(() => { if (!hoverOk) setOpen(''); }, [hoverOk]);
@@ -131,6 +134,7 @@ function Shell({ lite }) {
 
   return (
     <SearchHintProvider>
+    <div className="mood-root" style={wrapStyle}>
       <header className={'site' + (scrolled ? ' small' : '')}>
         <Announce />
         <div className="hbar">
@@ -185,6 +189,7 @@ function Shell({ lite }) {
       <main style={{ minHeight: '60vh' }}><Outlet /></main>
       <SiteFooter groups={footGroups} />
       <HelpButton ai={askAi} path={loc.pathname} topics={SHOP_TOPICS} faq={SHOP_FAQ} tours={SHOP_TOURS} go={go} lift={loc.pathname === '/' ? 130 : 0} />
+    </div>
     </SearchHintProvider>
   );
 }

@@ -1,19 +1,16 @@
 import { useState } from 'react';
-import PhoneField, { phoneOk, phoneForServer, emailOk } from './PhoneField.jsx';
-import { Link } from 'react-router-dom';
+import PhoneField, { phoneOk, emailOk } from './PhoneField.jsx';
 import { TextField } from '@pyfon/ui';
 import { api } from './api.js';
-import { useAuth } from './AuthState.jsx';
 import { errText } from './util.js';
 
-const PHONE = /^\+?[0-9 ]{9,15}$/;
+const ROLE = { 'Dealer or maker': 'dealer', Designer: 'designer', Both: 'both' };
 
 export default function Sell() {
-  const { user } = useAuth();
-  const [f, setF] = useState({ name: '', phone: '', role: 'Dealer or maker', link: '', about: '' });
+  const [f, setF] = useState({ name: '', phone: '', email: '', role: 'Dealer or maker', link: '', about: '', website: '' });
   const [err, setErr] = useState('');
   const [busy, setBusy] = useState(false);
-  const [done, setDone] = useState(null);
+  const [done, setDone] = useState(false);
   const set = (k) => (e) => setF({ ...f, [k]: e.target.value });
 
   async function submit(e) {
@@ -21,19 +18,20 @@ export default function Sell() {
     setErr('');
     if (f.name.trim().length < 2) return setErr('Enter your name or business name.');
     if (!phoneOk(f.phone)) return setErr('Choose your country and enter a valid phone number.');
+    if (f.email.trim() && !emailOk(f.email.trim())) return setErr('That email does not look right. Leave it empty or fix it.');
     if (f.about.trim().length < 10) return setErr('Tell us a little about what you do.');
-    const body = [
-      'Name: ' + f.name.trim(),
-      'Phone: ' + f.phone.trim(),
-      'I am a: ' + f.role,
-      'Portfolio or social link: ' + (f.link.trim() || 'none'),
-      '',
-      f.about.trim()
-    ].join('\n');
     setBusy(true);
     try {
-      const d = await api.tickets.create('customer', { subject: 'Seller application: ' + f.name.trim(), body });
-      setDone({ ref: d.ticket && d.ticket.ref });
+      await api.post('/v1/apply', {
+        name: f.name.trim(),
+        phone: f.phone.trim(),
+        email: f.email.trim(),
+        role: ROLE[f.role] || 'dealer',
+        link: f.link.trim(),
+        about: f.about.trim(),
+        website: f.website
+      });
+      setDone(true);
     } catch (ex) {
       setErr(errText(ex));
     } finally {
@@ -72,17 +70,13 @@ export default function Sell() {
         <h2 style={{ fontFamily: 'var(--pf-font-heading)', marginTop: 0 }}>Apply to sell with us</h2>
         {done ? (
           <div className="banner">
-            <p><strong>Thank you!</strong> Your application is in{done.ref ? ' (reference ' + done.ref + ')' : ''}. A partner will contact you on WhatsApp.</p>
-          </div>
-        ) : !user ? (
-          <div className="banner">
-            <p>Please sign in first so we can follow up with you.</p>
-            <Link className="btn" to="/account?next=/sell">Sign in or sign up</Link>
+            <p><strong>Thank you!</strong> Your application is in. A partner will contact you on WhatsApp. You do not need an account.</p>
           </div>
         ) : (
           <form onSubmit={submit}>
             <TextField label="Your name or business name" value={f.name} onChange={set('name')} />
             <PhoneField label="Phone (WhatsApp)" onChange={(v) => setF((s) => ({ ...s, phone: v }))} />
+            <TextField label="Email (optional)" type="email" value={f.email} onChange={set('email')} />
             <label className="fld">I am a
               <select value={f.role} onChange={set('role')}>
                 <option>Dealer or maker</option>
@@ -94,6 +88,9 @@ export default function Sell() {
             <label className="fld">What do you do?
               <textarea rows={4} value={f.about} onChange={set('about')} maxLength={1500} />
             </label>
+            <div aria-hidden="true" style={{ position: 'absolute', left: '-9999px', height: 0, overflow: 'hidden' }}>
+              <label>Leave this empty<input tabIndex={-1} autoComplete="off" value={f.website} onChange={set('website')} /></label>
+            </div>
             {err ? <p role="alert" style={{ color: '#b00020', margin: 0 }}>{err}</p> : null}
             <button className="btn" type="submit" disabled={busy}>{busy ? 'Sending...' : 'Send application'}</button>
           </form>

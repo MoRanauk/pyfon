@@ -44,7 +44,7 @@ export default function Cart() {
         </table>
         <div className="jx-row">
           <input className="jx-in" style={{ maxWidth: 260 }} placeholder="Coupon code" value={code} onChange={(e) => setCode(e.target.value)} />
-          <button type="button" className="jx-btn" onClick={() => setMsg('Coupon codes are not switched on yet.')}>Apply coupon</button>
+          <button type="button" className="jx-btn" onClick={() => setMsg('Enter your coupon code at the next step (checkout). Your discount is shown there.')}>Apply coupon</button>
           {msg ? <span className="muted">{msg}</span> : null}
         </div>
         <div className="jx-two" style={{ marginTop: 40 }}>

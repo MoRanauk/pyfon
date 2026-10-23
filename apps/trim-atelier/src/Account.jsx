@@ -3,6 +3,7 @@ import { useNavigate, useSearchParams } from 'react-router-dom';
 import { PasswordField } from '@pyfon/ui';
 import { useAuth } from './store.jsx';
 import { errText, normPhone } from './lib.js';
+import PasswordHelp from './PasswordHelp.jsx';
 
 export default function Account() {
   const { user, login, register, logout } = useAuth();
@@ -37,6 +38,7 @@ export default function Account() {
       {err ? <p className="err" role="alert">{err}</p> : null}
       <button className="btn" type="submit" disabled={busy}>{busy ? 'Please wait...' : mode === 'up' ? 'Sign up' : 'Sign in'}</button>
       <p><button type="button" className="chip" onClick={() => setMode(mode === 'up' ? 'in' : 'up')}>{mode === 'up' ? 'I already have an account' : 'Create an account'}</button></p>
+      {mode === 'in' ? <PasswordHelp /> : null}
     </form></div>
   );
 }

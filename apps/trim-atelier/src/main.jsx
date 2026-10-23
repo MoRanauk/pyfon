@@ -1,3 +1,5 @@
+import { MustChangeGate } from '@pyfon/ui';
+import { api as gateApi } from './api.js';
 import React from 'react';
 import { createRoot } from 'react-dom/client';
 import { BrowserRouter } from 'react-router-dom';
@@ -12,7 +14,7 @@ createRoot(document.getElementById('root')).render(
     <AuthProvider>
       <CartProvider>
         <CatalogProvider>
-          <App />
+          <MustChangeGate client={gateApi}><App /></MustChangeGate>
         </CatalogProvider>
       </CartProvider>
     </AuthProvider>

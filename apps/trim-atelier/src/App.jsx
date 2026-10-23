@@ -6,6 +6,8 @@ import Product from './Product.jsx';
 import Cart from './Cart.jsx';
 import Checkout from './Checkout.jsx';
 import Account from './Account.jsx';
+import Orders from './Orders.jsx';
+import Track from './Track.jsx';
 import Collection from './Collection.jsx';
 
 const NotFound = () => <div className="wrap sec center"><h1>Page not found</h1><Link to="/">Back to home</Link></div>;
@@ -22,6 +24,8 @@ export default function App() {
         <Route path="/cart" element={<Cart />} />
         <Route path="/checkout" element={<Checkout />} />
         <Route path="/account" element={<Account />} />
+        <Route path="/orders" element={<Orders />} />
+        <Route path="/track" element={<Track />} />
         <Route path="*" element={<NotFound />} />
       </Route>
     </Routes>

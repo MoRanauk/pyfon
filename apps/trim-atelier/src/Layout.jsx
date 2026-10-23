@@ -6,6 +6,7 @@ import { SITE } from './site.js';
 import { useCart, useAuth, useCatalog } from './store.jsx';
 import { groupCats, brandsOf } from './cats.js';
 import './tzhome.css';
+import { useSiteContent, themeStyle } from './siteContent.js';
 
 const wa = (t) => 'https://wa.me/' + SITE.whatsapp + '?text=' + encodeURIComponent(t);
 
@@ -15,7 +16,9 @@ export default function Layout() {
   const { items } = useCatalog();
   const go = useNavigate();
   const loc = useLocation();
-  const [ann, setAnn] = useState(true);
+  const content = useSiteContent('trim');
+  const wrapStyle = themeStyle('trim', content.theme);
+  const [ann, setAnn] = useState(() => { try { return Date.now() - Number(localStorage.getItem('ann_closed') || 0) > 86400000; } catch (e) { return true; } });
   useEffect(() => { window.scrollTo(0, 0); }, [loc.pathname]);
   const cats = groupCats(items);
   function search(e) {
@@ -24,14 +27,14 @@ export default function Layout() {
     if (q) go('/shop?q=' + encodeURIComponent(q));
   }
   return (
-    <div>
-      {ann ? <div className="ann">{SITE.announce}<button type="button" aria-label="Close" onClick={() => setAnn(false)}>&times;</button></div> : null}
+    <div className="mood-root" style={wrapStyle}>
+      {ann ? <div className="ann">{content.announce && content.announce.length ? content.announce[0] : SITE.announce}<button type="button" aria-label="Close" onClick={() => { setAnn(false); try { localStorage.setItem('ann_closed', String(Date.now())); } catch (e) { /* ignore */ } }}>&times;</button></div> : null}
       <header className="t-hdr">
         <div className="wrap t-top">
           <form className="t-search" onSubmit={search}><input name="q" placeholder="Search" aria-label="Search" /></form>
           <Link to="/" className="t-logo">{SITE.name}</Link>
           <div className="t-ico">
-            <Link to="/account">{user ? 'Account' : 'Sign in'}</Link>
+            <Link to="/account">{user ? 'Account' : 'Sign in'}</Link>{user ? <Link to="/orders">Orders</Link> : null}
             <Link to="/cart">Cart{count ? <span className="cnt">{count}</span> : null}</Link>
           </div>
         </div>
@@ -58,7 +61,7 @@ export default function Layout() {
         <div className="wrap cols">
           <div><h4>Collection</h4>{cats.map((c) => <Link key={c.key} to={'/c/' + c.key}>{c.title}</Link>)}</div>
           <div>
-            <h4>Customer care</h4>
+            <h4>Customer care</h4><Link to="/track">Track my order</Link>{user ? <Link to="/orders">My orders</Link> : null}
             <a href={wa('Hello, I need help with an order.')} target="_blank" rel="noreferrer">Chat on WhatsApp</a>
             <a href={wa('Hello, I have a question about delivery and returns.')} target="_blank" rel="noreferrer">Delivery and returns</a>
             <a href={wa('Hello, I would like a quote for corporate gifting.')} target="_blank" rel="noreferrer">Corporate gifting</a>

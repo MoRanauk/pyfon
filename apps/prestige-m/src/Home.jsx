@@ -1,96 +1,100 @@
-import { useState } from 'react';
 import { Link, useOutletContext } from 'react-router-dom';
-import { SITE, MENU } from './site.js';
-import { useCatalog } from './store.jsx';
+import './home2.css';
 import { img } from './api.js';
-import { isAddon, tagVals, pretty } from './lib.js';
+import { useCatalog } from './store.jsx';
+import { isAddon } from './lib.js';
+import { SITE } from './site.js';
+import { useContent, wa } from './content.js';
+import { GiftCard } from './Sub.jsx';
+
+const IC = {
+  clock: <><circle cx="12" cy="12" r="9" /><path d="M12 7v5l3 2" /></>,
+  pen: <path d="M4 20l4-1 11-11-3-3L5 16z" />,
+  chat: <path d="M4 5h16v11H9l-5 4z" />,
+  gift: <path d="M4 9h16v4H4zM6 13v7h12v-7M12 9v11M12 9c-3-4-6-1-3 0M12 9c3-4 6-1 3 0" />,
+};
+
+function Rail5({ r, shop }) {
+  const list = shop.filter((i) => (r.tag ? (i.tags || []).includes(r.tag) : i.categorySlug === r.cat)).slice(0, 5);
+  if (!list.length) return null;
+  return (
+    <section className="hm-sec">
+      <div className="hm-head"><h2>{r.title}</h2><Link to={r.to}>View all</Link></div>
+      <div className="hm-rail">{list.map((i) => <GiftCard key={i.sku} i={i} />)}</div>
+    </section>
+  );
+}
 
 export default function Home() {
   const { mood } = useOutletContext();
+  const H = useContent().home;
   const { items } = useCatalog();
-  const [pr, setPr] = useState(0);
-  const shop = items.filter((i) => !isAddon(i));
-  const first = (m) => shop.find((i) => i.categorySlug === m.key && i.image);
-  const uniq = (p) => [...new Set(shop.flatMap((i) => tagVals(i, p)))].slice(0, 12);
-  const c = SITE.moods[mood];
-  const bg = c.hero ? { backgroundImage: 'linear-gradient(rgba(0,0,0,.3),rgba(0,0,0,.2)), url(' + c.hero + ')' } : undefined;
-  function onScroll(e) {
-    const el = e.currentTarget;
-    const max = el.scrollWidth - el.clientWidth;
-    setPr(max > 0 ? el.scrollLeft / max : 0);
-  }
-  function subscribe(e) {
-    e.preventDefault();
-    const email = new FormData(e.currentTarget).get('email');
-    const t = 'Hello ' + SITE.name + ', please add me to your updates.' + (email ? ' My email: ' + email : '');
-    window.open('https://wa.me/' + SITE.whatsapp + '?text=' + encodeURIComponent(t), '_blank', 'noopener');
-  }
+  const shop = (items || []).filter((i) => !isAddon(i));
+  const mo = SITE.moods[mood] || SITE.moods.her;
+  const byTag = (t) => { const it = shop.find((i) => (i.tags || []).includes(t)); return it ? img(it.image) : ''; };
+  const byCat = (s) => { const it = shop.find((i) => i.categorySlug === s); return it ? img(it.image) : ''; };
+  const him = mood === 'him';
+  const ticks = [...useContent().ticks, ...useContent().ticks];
   return (
-    <>
-      <section className={'hero' + (c.hero ? '' : ' nophoto')} style={bg}>
-        <div className="wrap">
-          <h1>{c.title}</h1>
-          <p>{c.text}</p>
-          <Link className="hbtn" to="/shop"><span>Shop now</span><span>&rarr;</span></Link>
-        </div>
-      </section>
-
-      <section className="wrap sec">
-        <div className="railrow">
-          <div className="railh"><h2>Gifts</h2></div>
-          <div className="railbox">
-            <div className="rail" onScroll={onScroll}>
-              {MENU.filter((m) => m.by === 'cat').map((m) => (
-                <Link key={m.key} to={'/c/' + m.key} className="tile">
-                  <div className="ph">{first(m) ? <img src={img(first(m).image)} alt="" loading="lazy" /> : null}</div>
-                  <b>{m.title}</b>
-                </Link>
-              ))}
-            </div>
-            <div className="track"><i style={{ left: (pr * 70) + '%' }} /></div>
+    <div>
+      <div className="hm-rounds">
+        {H.rounds.map((r) => (
+          <Link key={r[0]} to={r[1]} className="hm-r">
+            <span className="hm-rc"><b>{r[0].charAt(0)}</b>{byTag(r[2]) ? <img src={byTag(r[2])} alt="" /> : null}</span>{r[0]}
+          </Link>
+        ))}
+      </div>
+      <section className="hm-hero">
+        <div className="hm-hin">
+          <div className="hm-arch">{mo.hero ? <img src={mo.hero} alt="" /> : <div className="hm-ph" />}{H.badge ? <span className="hm-badge">{H.badge}</span> : null}</div>
+          <div className="hm-txt">
+            {H.pill ? <span className="hm-pill">{H.pill}</span> : null}
+            <h1>{mo.title}</h1>
+            <p>{mo.text}</p>
+            <Link className="hm-btn" to={him ? '/c/gifts-for?for=him' : '/c/flowers'}>{him ? 'Shop gifts for him' : 'Shop flowers'}</Link>
           </div>
         </div>
-        {uniq('occasion').length ? <div className="pills">{uniq('occasion').map((v) => <Link key={v} className="pill" to={'/c/occasions?occasion=' + v}>{pretty(v)}</Link>)}</div> : null}
-        {uniq('for').length ? <div className="pills">{uniq('for').map((v) => <Link key={v} className="pill" to={'/c/gifts-for?for=' + v}>For {pretty(v).toLowerCase()}</Link>)}</div> : null}
       </section>
-
-      <section className="quote sec center">
-        <div className="wrap">
-          <span className="qm">&ldquo;</span>
-          <p>{SITE.quote}</p>
-          <span className="muted">{SITE.quoteBy}{SITE.showSample ? ' (sample until real reviews arrive)' : ''}</span>
+      <div className="hm-tick"><div>{ticks.map((t, n) => <span key={n}>{t}</span>)}</div></div>
+      {H.rails[0] ? <Rail5 r={H.rails[0]} shop={shop} /> : null}
+      <section className="hm-sec">
+        <div className="hm-head"><h2>{H.circlesTitle}</h2></div>
+        <div className="hm-circs">
+          {H.circles.map((c) => <Link key={c[0]} to={c[1]}><div className="hm-cc">{byCat(c[2]) ? <img src={byCat(c[2])} alt="" /> : c[0].charAt(0)}</div>{c[0]}</Link>)}
         </div>
       </section>
-
-      <section className="split">
-        <div className="l">
-          <div className="mono">PGH</div>
-          <h2>Wrapped by hand, sent with love</h2>
-          <p>Every gift is checked and wrapped by our team before it leaves us, then delivered for you.</p>
-          <Link className="btn line" to="/c/occasions">Shop by occasion</Link>
-        </div>
-        <div className="r">
-          <span className="muted">Make it yours</span>
-          <div className="ln">Your own card message</div>
-          <div className="ln">Ribbon and gift wrap</div>
-          <div className="ln">A surprise delivery</div>
+      <section className="hm-band"><small>{H.band.eyebrow}</small><p>{H.band.text}</p><Link to={H.band.to}>{H.band.button} &rarr;</Link></section>
+      {H.rails[1] ? <Rail5 r={H.rails[1]} shop={shop} /> : null}
+      <section className="hm-feat">
+        <div className="hm-fin">
+          <div className="hm-fimg">{H.feature.img ? <img src={H.feature.img} alt="" /> : null}</div>
+          <div className="hm-fcard"><small>{H.feature.eyebrow}</small><h2>{H.feature.title}</h2><p>{H.feature.text}</p><Link className="sbp-b" to={H.feature.to}>{H.feature.button}</Link></div>
         </div>
       </section>
-
-      {shop.length ? (
-        <section className="wrap sec">
-          <div className="shead">
-            <h2>Join us and share the joy of giving</h2>
-            <a href={'https://wa.me/' + SITE.whatsapp} target="_blank" rel="noreferrer">WhatsApp</a>
-          </div>
-          <div className="strip">{shop.slice(0, 6).map((i) => <img key={i.sku} src={img(i.image)} alt={i.name} loading="lazy" />)}</div>
+      {H.rails[2] ? <Rail5 r={H.rails[2]} shop={shop} /> : null}
+      <section className="hm-band"><small>{H.abroad.eyebrow}</small><p>{H.abroad.text}</p><a href={wa(H.abroad.ask)} target="_blank" rel="noreferrer">{H.abroad.button} &rarr;</a></section>
+      <section className="hm-sec">
+        <div className="hm-head"><h2>{H.countTitle}</h2></div>
+        <div className="hm-ct">
+          {H.count.map((c) => <div key={c[1]}><div className="hm-ic"><svg viewBox="0 0 24 24">{IC[c[0]] || IC.gift}</svg></div><b>{c[1]}</b><p>{c[2]}</p></div>)}
+        </div>
+      </section>
+      {SITE.quote ? (
+        <section className="hm-rev">
+          <h2 style={{ fontWeight: 500 }}>{H.reviewTitle}</h2>
+          <blockquote>&ldquo;{SITE.quote}&rdquo;</blockquote>
+          <span style={{ opacity: 0.7 }}>{SITE.quoteBy}{SITE.showSample ? ' (sample)' : ''}</span>
         </section>
       ) : null}
-
-      <section className="wrap sec sub">
-        <p>Keep informed on new gifts and special offers</p>
-        <form onSubmit={subscribe}><input name="email" type="email" placeholder="Email Address" aria-label="Email address" /><button type="submit" aria-label="Subscribe">&rarr;</button></form>
+      <section className="hm-gl">
+        <div>
+          <h2>{H.glance.title}</h2>
+          {H.glance.text.map((t) => <p key={t}>{t}</p>)}
+          <p><b>{H.glance.chipsTitle}</b></p>
+          {H.glance.chips.map((c) => <Link key={c[0]} to={c[1]} className="hm-chip">{c[0]}</Link>)}
+        </div>
+        <div className="hm-gc">{H.glance.facts.map((f) => <div key={f[0]}><b>{f[0]}</b><span>{f[1]}</span></div>)}</div>
       </section>
-    </>
+    </div>
   );
 }

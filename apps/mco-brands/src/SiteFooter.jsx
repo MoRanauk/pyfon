@@ -27,6 +27,8 @@ export default function SiteFooter({ groups }) {
             <Link to="/info/delivery">Delivery</Link>
             <Link to="/info/contact">Contact us</Link>
             <Link to="/account">My account</Link>
+            <Link to="/orders">My orders</Link>
+            <Link to="/track">Track my order</Link>
             <Link to="/cart">My cart</Link>
           </div>
           <div>

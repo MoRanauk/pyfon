@@ -97,3 +97,10 @@ input.in,textarea.in,select.in{width:100%;padding:11px 12px;border:1px solid var
 .h1row{grid-template-columns:auto 1fr auto;height:auto;padding:10px 20px}.h1row .logo{font-size:24px}
 .cats{flex-wrap:wrap;gap:4px 18px}.menu{display:none!important}.hero{padding-top:210px}
 }
+
+/* featured dealers strip (7c29) */
+.dealers{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:16px;max-width:1000px;margin:20px auto 0;padding:0 16px}
+.dealer{text-align:center;padding:16px;border:1px solid var(--pf-border,#ddd);border-radius:var(--pf-radius,8px);background:var(--pf-surface,#fff)}
+.dealer img{width:100%;aspect-ratio:4/3;object-fit:cover;border-radius:var(--pf-radius,8px)}
+.dealer h3{margin:10px 0 2px}
+.dmark{display:inline-flex;width:56px;height:56px;border-radius:50%;align-items:center;justify-content:center;background:var(--pf-primary,#0b2a4a);color:#fff;font-size:24px}

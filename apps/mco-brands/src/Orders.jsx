@@ -98,6 +98,7 @@ export default function Orders() {
       <div className="orders">
         <h1>My orders and quotes</h1>
         <p><Link to="/account?next=/orders">Sign in</Link> to see your orders and quotes.</p>
+        <p>Or <Link to="/track">track an order with its number and phone</Link>.</p>
       </div>
     );
   }

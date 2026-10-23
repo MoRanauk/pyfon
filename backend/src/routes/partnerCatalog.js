@@ -312,10 +312,10 @@ partnerCatalogRoutes.post('/items/:sku/publish', limiter, asyncHandler(async (re
     if (it.price_type !== 'quote' && it.price_kes == null) problems.push('Enter a price');
     const sf = await client.query('SELECT count(*)::int AS n FROM item_storefronts WHERE item_id = $1', [it.id]);
     if (!sf.rows[0].n) problems.push('Choose at least one shop to list it in');
-    const im = await client.query("SELECT count(*)::int AS n FROM item_images WHERE item_id = $1 AND status = 'active'", [it.id]);
-    if (!im.rows[0].n) problems.push('Add at least one photo');
+    const im = await client.query("SELECT count(*)::int AS n FROM item_images WHERE item_id = $1 AND status = 'active' AND file_name NOT ILIKE '%placeholder%'", [it.id]);
+    if (!im.rows[0].n) problems.push('Add at least one real photo (the grey starter photo does not count)');
     if (problems.length) throw new HttpError(400, 'not_ready', 'Not ready to publish: ' + problems.join('; '), problems);
-    await client.query("UPDATE catalog_items SET status = 'active', updated_at = now() WHERE id = $1", [it.id]);
+    await client.query("UPDATE catalog_items SET status = 'active', tags = array_remove(tags, 'needs-photo'), updated_at = now() WHERE id = $1", [it.id]);
   });
   await audit(req, { action: 'catalog.item_published', entityType: 'catalog_item', entityId: sku, actorUserId: req.user.id });
   res.json({ sku, status: 'active' });

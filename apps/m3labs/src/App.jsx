@@ -16,6 +16,8 @@ import ProductEdit from './ProductEdit.jsx';
 import Videos from './Videos.jsx';
 import Invoice from './Invoice.jsx';
 import Approvals from './Approvals.jsx';
+import Coupons from './Coupons.jsx';
+import Applications from './Applications.jsx';
 import CsvImport from './CsvImport.jsx';
 import Tickets from './Tickets.jsx';
 import DevHealth from './DevHealth.jsx';
@@ -28,6 +30,10 @@ import DevSecurity from './DevSecurity.jsx';
 import DevSecLab from './DevSecLab.jsx';
 import DevSessions from './DevSessions.jsx';
 import DevSql from './DevSql.jsx';
+import SiteBuilder from './SiteBuilder.jsx';
+import CodeVault from './CodeVault.jsx';
+import ThemeManager from './ThemeManager.jsx';
+import PasswordRequests from './PasswordRequests.jsx';
 import DevApiTest from './DevApiTest.jsx';
 import DevCommands from './DevCommands.jsx';
 import DevLinks from './DevLinks.jsx';
@@ -74,6 +80,8 @@ export default function App() {
         <Route path="/products/:sku" element={<ProductEdit />} />
         <Route path="/videos" element={<Videos />} />
         <Route path="/approvals" element={<Approvals />} />
+        <Route path="/coupons" element={<Coupons />} />
+        <Route path="/applications" element={<Applications />} />
         <Route path="/csv" element={<CsvImport />} />
         <Route path="/tickets" element={<Tickets />} />
         <Route path="/health" element={<DevHealth />} />
@@ -90,6 +98,10 @@ export default function App() {
         <Route path="/sec/pentest" element={<DevSecLab key="pentest" kind="pentest" />} />
         <Route path="/sessions" element={<DevSessions />} />
         <Route path="/sql" element={<DevSql />} />
+        <Route path="/builder" element={<SiteBuilder />} />
+        <Route path="/vault" element={<CodeVault />} />
+        <Route path="/theme" element={<ThemeManager />} />
+        <Route path="/password-requests" element={<PasswordRequests />} />
         <Route path="/api-test" element={<DevApiTest />} />
         <Route path="/commands" element={<DevCommands />} />
         <Route path="/links" element={<DevLinks />} />

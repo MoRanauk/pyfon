@@ -12,6 +12,7 @@ import { findDelivery } from '../delivery.js';
 import { enqueueMessage } from '../messages/queue.js';
 import { shapeFile } from './customerFiles.js';
 import { buildStages } from '../jobs/tracking.js';
+import { checkCoupon } from '../coupons.js';
 
 export const customerOrderRoutes = Router();
 
@@ -27,6 +28,7 @@ const orderSchema = z.object({
   deliveryNotes: shortText(500).optional(),
   deliveryMethod: z.string().trim().min(1).max(30).default('pickup'),
   deliveryAddress: shortText(300).optional(),
+  couponCode: z.string().trim().max(30).optional(),
   lines: z.array(z.object({
     sku: z.string().trim().min(1).max(40),
     qty: z.number().int().min(1).max(100000),
@@ -69,12 +71,12 @@ function friendly(row) {
 const kes = (n) => 'KES ' + Number(n).toLocaleString('en-KE');
 const siteUrl = () => (process.env.SITE_URL || String(process.env.CORS_ORIGINS || '').split(',')[0] || '').trim().replace(/\/+$/, '');
 
-function orderText({ name, ref, itemsKes, totalKes, delivery, email }) {
+function orderText({ name, ref, itemsKes, totalKes, delivery, email, discountKes }) {
   const first = String(name).trim().split(/\s+/)[0];
   let del = 'Delivery: we will confirm the cost with you.';
   if (delivery.feeKes === 0) del = 'Delivery: ' + delivery.label + ' (no charge).';
   else if (delivery.feeKes > 0) del = 'Delivery: ' + delivery.label + ', ' + kes(delivery.feeKes) + '.';
-  return 'Hello ' + first + ', thank you for ordering with Pyfon Brands. Your order ' + ref + ' is received. Items: ' + kes(itemsKes) + '. ' + del
+  return 'Hello ' + first + ', thank you for ordering with Pyfon Brands. Your order ' + ref + ' is received. Items: ' + kes(itemsKes) + '. ' + (discountKes ? 'Coupon discount: -' + kes(discountKes) + '. ' : '') + del
     + (delivery.feeKes == null ? '' : ' Total: ' + kes(totalKes) + '.')
     + ' Track your order progress here: ' + siteUrl() + '/orders.'
     + (email ? ' We will also email you when it is delivered.' : '')
@@ -132,15 +134,26 @@ customerOrderRoutes.post('/orders', writeLimiter, asyncHandler(async (req, res) 
 
   const itemsKes = lines.reduce((sum, l) => sum + l.unitPriceKes * l.qty, 0);
   const feeKes = delivery.feeKes;
-  const totalKes = itemsKes + (feeKes || 0);
+  let totalKes = itemsKes + (feeKes || 0);
+  let discountKes = 0;
+  let couponUsed = null;
 
   const result = await withTransaction(async (client) => {
+    if (body.couponCode) {
+      couponUsed = await checkCoupon(client, body.couponCode, storefront, req.user.id, itemsKes, true);
+      discountKes = couponUsed.discountKes;
+      totalKes = itemsKes - discountKes + (feeKes || 0);
+    }
     const o = await client.query(
-      `INSERT INTO orders (customer_id, storefront_code, contact_name, contact_phone, contact_email, delivery_notes, total_kes, delivery_method, delivery_fee_kes, delivery_address)
-       VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10) RETURNING id, ref`,
-      [req.user.id, storefront, body.contactName, body.contactPhone, body.contactEmail ?? null, body.deliveryNotes ?? null, totalKes, delivery.code, feeKes, body.deliveryAddress ?? null]
+      `INSERT INTO orders (customer_id, storefront_code, contact_name, contact_phone, contact_email, delivery_notes, total_kes, delivery_method, delivery_fee_kes, delivery_address, coupon_code, discount_kes)
+       VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12) RETURNING id, ref`,
+      [req.user.id, storefront, body.contactName, body.contactPhone, body.contactEmail ?? null, body.deliveryNotes ?? null, totalKes, delivery.code, feeKes, body.deliveryAddress ?? null, couponUsed ? couponUsed.code : null, discountKes]
     );
     const order = o.rows[0];
+    if (couponUsed) {
+      await client.query('INSERT INTO coupon_redemptions (coupon_id, order_id, user_id, discount_kes) VALUES ($1, $2, $3, $4)', [couponUsed.id, order.id, req.user.id, discountKes]);
+      await client.query('UPDATE coupons SET used_count = used_count + 1 WHERE id = $1', [couponUsed.id]);
+    }
     for (const l of lines) {
       await client.query(
         `INSERT INTO order_lines (order_id, item_id, sku, name, unit_price_kes, qty, options, personalization, design_id, design_name, design_url)
@@ -153,7 +166,7 @@ customerOrderRoutes.post('/orders', writeLimiter, asyncHandler(async (req, res) 
       kind: 'order_received',
       phone: body.contactPhone,
       orderId: order.id,
-      body: orderText({ name: body.contactName, ref: order.ref, itemsKes, totalKes, delivery, email: body.contactEmail }),
+      body: orderText({ name: body.contactName, ref: order.ref, itemsKes, totalKes, delivery, email: body.contactEmail, discountKes }),
     });
     return { order, job };
   });
@@ -167,6 +180,8 @@ customerOrderRoutes.post('/orders', writeLimiter, asyncHandler(async (req, res) 
       totalKes,
       itemsKes,
       deliveryFeeKes: feeKes,
+      discountKes,
+      couponCode: couponUsed ? couponUsed.code : null,
       deliveryLabel: delivery.label,
       lines: lines.map((l) => ({ sku: l.sku, name: l.name, qty: l.qty, unitPriceKes: l.unitPriceKes, options: l.options })),
     },

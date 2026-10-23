@@ -13,6 +13,11 @@ import { customerRoutes, partnerRoutes, devRoutes, vendorRoutes } from './routes
 import { publicVideoRoutes } from './routes/siteVideos.js';
 import { publicDealerRoutes } from './routes/publicDealers.js';
 import { helpAskRoutes } from './routes/helpAsk.js';
+import { publicContentRoutes } from './routes/siteContent.js';
+import { publicTrackRoutes } from './routes/publicTrack.js';
+import { publicPasswordHelpRoutes } from './routes/publicPasswordHelp.js';
+import publicApply from './routes/publicApply.js';
+import publicDealerInvite from './routes/publicDealerInvite.js';
 
 const app = express();
 app.set('trust proxy', 1);
@@ -61,6 +66,11 @@ app.use('/v1/vendor', vendorRoutes);
 app.use('/v1/videos', publicVideoRoutes);
 app.use('/v1/dealers', publicDealerRoutes);
 app.use('/v1/help', helpAskRoutes);
+app.use('/v1/content', publicContentRoutes);
+app.use('/v1/track', publicTrackRoutes);
+app.use('/v1/password-help', publicPasswordHelpRoutes);
+app.use('/v1/apply', publicApply);
+app.use('/v1/dealer-invite', publicDealerInvite);
 
 app.use((req, res) => {
   res.status(404).json({ error: { code: 'not_found', message: 'Route not found' } });
