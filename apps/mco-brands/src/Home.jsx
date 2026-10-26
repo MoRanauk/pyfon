@@ -71,7 +71,7 @@ export default function Home() {
 
   return (
     <>
-      <div className="herowrap"><Slider slides={slides} /></div>
+      <div className="herowrap"><Slider slides={slides} contain /></div>
 
       {error ? <div className="wrap section"><p role="alert">Could not load the shop: {error}</p></div> : null}
 

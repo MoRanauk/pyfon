@@ -36,7 +36,7 @@ const FADE = 2800;
 
 // Crossfading hero. slides = [{ image, node }]. The photo drifts slowly (zoom)
 // while the next slide dissolves in over it. Pauses on hover, swipe on touch.
-export function Slider({ slides, interval = 9500, height = 'clamp(360px, 50vw, 540px)' }) {
+export function Slider({ slides, interval = 9500, height = 'clamp(360px, 50vw, 540px)', contain = false }) {
   const n = slides.length;
   const [cur, setCur] = useState(0);
   const [prev, setPrev] = useState(-1);
@@ -85,7 +85,7 @@ export function Slider({ slides, interval = 9500, height = 'clamp(360px, 50vw, 5
         touchX.current = null;
         if (Math.abs(dx) > 50) go(safe + (dx < 0 ? 1 : -1));
       }}
-      style={{ position: 'relative', overflow: 'hidden', height, background: 'var(--pf-navy)' }}
+      className={'pf-sl' + (contain ? ' pf-sl-contain' : '')} style={{ position: 'relative', overflow: 'hidden', height, background: 'var(--pf-navy)' }}
     >
       <style>{'@keyframes pfkb{from{transform:scale(1)}to{transform:scale(1.1)}}'}</style>
       {slides.map((s, k) => {
@@ -106,7 +106,7 @@ export function Slider({ slides, interval = 9500, height = 'clamp(360px, 50vw, 5
           >
             {s.image ? (
               <img
-                src={s.image}
+                className="pf-sl-img" src={s.image}
                 alt=""
                 style={{
                   position: 'absolute', inset: 0, width: '100%', height: '100%', objectFit: 'cover',
@@ -114,7 +114,7 @@ export function Slider({ slides, interval = 9500, height = 'clamp(360px, 50vw, 5
                 }}
               />
             ) : null}
-            <div style={{ position: 'absolute', inset: 0, background: 'linear-gradient(90deg, rgba(10,25,48,.88) 0%, rgba(10,25,48,.55) 50%, rgba(10,25,48,.12) 100%)' }} />
+            <div className="pf-sl-shade" style={{ position: 'absolute', inset: 0, background: 'linear-gradient(90deg, rgba(10,25,48,.88) 0%, rgba(10,25,48,.55) 50%, rgba(10,25,48,.12) 100%)' }} />
             <div style={{ position: 'absolute', inset: 0, display: 'flex', alignItems: 'center' }}>
               <div
                 style={{

@@ -551,3 +551,20 @@ html,body{overflow-x:clip;max-width:100%}
 .hlinks{flex:0 0 auto;gap:10px}
 .cartlink{flex:0 0 auto}
 }
+
+/* 7c74 hero: whole product on desktop, phone unchanged */
+@media(min-width:901px){
+.pf-sl-contain .pf-sl-img{left:auto!important;right:0!important;width:54%!important;object-fit:contain!important;animation:none!important;background:#f3eee4;box-sizing:border-box;padding:18px}
+.pf-sl-contain .pf-sl-shade{display:none}
+.pf-sl-contain .hs{max-width:44%}
+}
+
+/* 7c75 hero fade: navy melts into the photo panel (laptop only) */
+@media(min-width:901px){
+.pf-sl-contain .pf-sl-shade{display:block;background:linear-gradient(90deg,var(--pf-navy) 0%,var(--pf-navy) 38%,color-mix(in srgb,var(--pf-navy) 0%,transparent) 56%)!important}
+}
+/* 7c76 hero feather: short soft edge, replaces the long fade (laptop only) */
+@media(min-width:901px){
+.pf-sl-contain .pf-sl-shade{display:none!important}
+.pf-sl-contain .pf-sl-img{-webkit-mask-image:linear-gradient(90deg,transparent 0,rgba(0,0,0,.25) 3%,rgba(0,0,0,.6) 6%,#000 10%);mask-image:linear-gradient(90deg,transparent 0,rgba(0,0,0,.25) 3%,rgba(0,0,0,.6) 6%,#000 10%)}
+}
