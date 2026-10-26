@@ -6,6 +6,7 @@ import { parse } from '../validate.js';
 import { sendEmail, maskEmail, maskPhone } from '../mail.js';
 import { toWaNumber } from '../messages/queue.js';
 import { sendTextbeeSms, textbeeReady } from '../messages/textbee.js';
+import { channelStatus } from '../messages/channels.js';
 
 export const partnerSendRoutes = Router();
 const me = (req) => req.user.id || req.user.sub;
@@ -96,4 +97,10 @@ partnerSendRoutes.post('/connect/send', asyncHandler(async (req, res) => {
   } catch (e) { console.error('connect audit failed: ' + e.message); }
   if (error) throw error;
   res.json({ ok: true });
+}));
+
+// Which channels are set up (used by the Connect page).
+partnerSendRoutes.get('/connect/channels', asyncHandler(async (req, res) => {
+  const m = await pool.query("SELECT value FROM app_settings WHERE key = 'whatsapp_mode'");
+  res.json(channelStatus(m.rows[0] ? m.rows[0].value : 'direct'));
 }));

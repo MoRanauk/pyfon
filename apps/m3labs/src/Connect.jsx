@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { P, STAGE_LABEL } from './api.js';
 import { get, post } from './http.js';
 import { waLink } from './store.js';
@@ -72,6 +72,21 @@ function Outbox({ c, user, onInapp }) {
   );
 }
 
+function ChannelStatus({ ch }) {
+  if (ch === null) return null;
+  if (ch === false) return <p className="center muted">Channel status is not available.</p>;
+  const state = (on) => <span style={{ color: on ? '#0a7a2f' : '#999' }}>{on ? 'On' : 'Off'}</span>;
+  return (
+    <div className="card" style={{ marginBottom: 12 }}>
+      <b>How messages leave the system</b>
+      <p className="muted" style={{ margin: '4px 0 8px' }}>Order: WhatsApp, then SMS, then email.</p>
+      <div className="mrow"><span className="grow">1. WhatsApp (OpenWA)<br /><span className="muted">{ch.whatsapp.configured ? 'Set up' : 'Not set up'}{' \u00b7 '}mode: {ch.whatsapp.mode}</span></span>{state(ch.whatsapp.sending)}</div>
+      <div className="mrow"><span className="grow">2. SMS gateway<br /><span className="muted">{ch.sms.configured ? 'Set up' : 'Not set up yet'}</span></span>{state(ch.sms.configured)}</div>
+      <div className="mrow"><span className="grow">3. Email (safety net)<br /><span className="muted">{ch.email.configured ? 'Brevo set up' : 'Brevo not set up'}</span></span>{state(ch.email.fallback)}</div>
+    </div>
+  );
+}
+
 export default function Connect() {
   const { user } = useAuth();
   const [kind, setKind] = useState(null);
@@ -80,6 +95,8 @@ export default function Connect() {
   const [open, setOpen] = useState('');
   const [chat, setChat] = useState(null);
   const [err, setErr] = useState('');
+  const [ch, setCh] = useState(null);
+  useEffect(() => { get(P + '/connect/channels').then(setCh).catch(() => setCh(false)); }, []);
 
   function pickGroup(k) {
     setKind(k); setList(null); setQ(''); setOpen(''); setChat(null); setErr('');
@@ -92,6 +109,7 @@ export default function Connect() {
       <div style={wrap}>
         <h1 className="center">Connect</h1>
         <p className="center muted">Who do you want to reach?</p>
+        <ChannelStatus ch={ch} />
         <div className="card">
           {GROUPS.map(([k, title, sub]) => (
             <div className="mrow" key={k}>
