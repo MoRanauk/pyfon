@@ -16,7 +16,7 @@ html[data-mode="dark"] [style*="url("] img,html[data-mode="dark"] [style*="url("
 
 export function getMode() {
   try { const v = localStorage.getItem(KEY); if (ORDER.includes(v)) return v; } catch (e) { /* ignore */ }
-  return 'system';
+  return 'light';
 }
 
 function effective(m) {
