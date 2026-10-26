@@ -3,7 +3,7 @@ import { get } from './http.js';
 import { STAGE } from './api.js';
 
 const TYPES = [['', 'Everything'], ['signoffs', 'Job sign-offs and co-signs'], ['approvals', 'Approvals'], ['invoices', 'Invoices'], ['products', 'Products and videos'], ['orders', 'Orders, quotes and tickets'], ['logins', 'Sign-ins and passwords'], ['system', 'Settings and accounts']];
-const DESK = { 'm3-creative': 'Creative desk', 'm3-production': 'Production desk', 'm3-finance': 'Finance desk', dev: 'Developer desk', mco: 'M & Co. shop', prestige: 'Prestige M shop', trim: 'TriM Atelier shop', vendor: 'Dealer portal' };
+const DESK = { 'm3-creative': 'Creative desk', 'm3-production': 'Production desk', 'm3-finance': 'Finance desk', dev: 'Developer desk', mco: 'M & Co. shop', prestige: 'Pyfon Gift Hub shop', trim: 'TriM Atelier shop', vendor: 'Dealer portal' };
 const PAGE = 50;
 const day = (ms) => new Date(ms).toLocaleDateString('en-CA', { timeZone: 'Africa/Nairobi' });
 const start = () => ({ from: day(Date.now() - 7 * 864e5), to: day(Date.now()), actor: '', type: '', who: 'staff', q: '' });

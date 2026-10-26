@@ -53,7 +53,7 @@ async function brevo(path, body) {
   }
 }
 
-export async function sendEmail({ to, subject, text, html }) {
+export async function sendEmail({ to, subject, text, html, fromName }) {
   const from = process.env.BREVO_SENDER_EMAIL;
   if (!key() || !from) {
     console.warn(JSON.stringify({ level: 'warn', message: 'Email not configured, nothing sent', to, subject }));
@@ -61,7 +61,7 @@ export async function sendEmail({ to, subject, text, html }) {
     return false;
   }
   return brevo('/smtp/email', {
-    sender: { name: process.env.BREVO_SENDER_NAME || 'Pyfon Brands', email: from },
+    sender: { name: fromName || process.env.BREVO_SENDER_NAME || 'Pyfon Brands', email: from },
     to: [{ email: to }],
     subject,
     textContent: text,

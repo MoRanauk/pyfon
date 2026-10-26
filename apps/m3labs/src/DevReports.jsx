@@ -89,7 +89,7 @@ function Table({ name, head, rows }) {
   );
 }
 
-const SHOP = { mco: 'M & Co. Brands', prestige: 'Prestige M', trim: 'TriM Atelier' };
+const SHOP = { mco: 'M & Co. Brands', prestige: 'Pyfon Gift Hub', trim: 'TriM Atelier' };
 
 export default function DevReports() {
   const [days, setDays] = useState('30');

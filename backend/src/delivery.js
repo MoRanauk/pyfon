@@ -7,3 +7,13 @@ export const DELIVERY = [
 ];
 
 export const findDelivery = (code) => DELIVERY.find((d) => d.code === code) || null;
+
+export const SHOP_NAMES = { mco: 'M & Co. Brands', prestige: 'Pyfon Gift Hub', trim: 'TriM Atelier' };
+
+// Same as findDelivery, but the pickup label names the shop the customer ordered from.
+export function deliveryFor(code, storefront) {
+  const d = findDelivery(code);
+  if (!d) return null;
+  if (d.code === 'pickup' && SHOP_NAMES[storefront]) return { ...d, label: 'Pick up from ' + SHOP_NAMES[storefront] + ' Shop' };
+  return d;
+}

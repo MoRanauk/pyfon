@@ -19,6 +19,11 @@ async function previewCoupon(code, itemsKes) {
 
 const SLOTS = ['Morning (8am to 12pm)', 'Afternoon (12pm to 4pm)', 'Evening (4pm to 7pm)'];
 
+const DRAFT = 'pf_co_draft_' + STORE;
+const BILL = 'pf_co_billing_' + STORE;
+const BLANK = { name: '', phone: '', email: '', rName: '', rPhone: '', address: '', date: '', slot: SLOTS[0], msg: '', from: '', notes: '' };
+function readJson(area, key) { try { const v = JSON.parse(area.getItem(key) || 'null'); return v && typeof v === 'object' ? v : {}; } catch (e) { return {}; } }
+
 function Fld({ f, up, label, k, ...p }) {
   return <label className="jx-lab"><small>{label}</small><input className="jx-in" value={f[k]} onChange={up(k)} {...p} /></label>;
 }
@@ -28,8 +33,8 @@ export default function Checkout() {
   const { user } = useAuth();
   const nav = useNavigate();
   const gift = STORE === 'prestige';
-  const [f, setF] = useState({ name: '', phone: '', email: '', rName: '', rPhone: '', address: '', date: '', slot: SLOTS[0], msg: '', from: '', notes: '' });
-  const [surprise, setSurprise] = useState(false);
+  const [f, setF] = useState(() => ({ ...BLANK, ...readJson(localStorage, BILL), ...(readJson(sessionStorage, DRAFT).f || {}) }));
+  const [surprise, setSurprise] = useState(() => !!readJson(sessionStorage, DRAFT).surprise);
   const [m, setM] = useState(getShip());
   const [err, setErr] = useState('');
   const [busy, setBusy] = useState(false);
@@ -39,6 +44,8 @@ export default function Checkout() {
   const [cpMsg, setCpMsg] = useState('');
   const up = (k) => (e) => setF((s) => ({ ...s, [k]: e.target.value }));
   useEffect(() => { if (user) setF((s) => ({ ...s, email: s.email || user.email || '', name: s.name || user.fullName || user.full_name || '' })); }, [user]);
+
+  useEffect(() => { try { sessionStorage.setItem(DRAFT, JSON.stringify({ f, surprise })); } catch (e) { /* ignore */ } }, [f, surprise]);
 
   const fresh = lines.some((l) => l.fresh);
   const options = DELIVERY.filter((d) => !(fresh && d.code === 'courier'));
@@ -64,7 +71,7 @@ export default function Checkout() {
     if (gift && !f.date) return setErr('Choose the delivery or pickup date.');
     if (del.needsAddress && f.address.trim().length < 5) return setErr('Enter the delivery address.');
     const notes = (gift ? ['GIFT FOR ' + f.rName.trim() + (f.rPhone ? ' (' + f.rPhone.trim() + ')' : ''),
-      'Date: ' + f.date + ', ' + f.slot, f.msg ? 'Card message: ' + f.msg.trim().slice(0, 200) : '',
+      'Delivery date: ' + f.date + ', ' + f.slot, f.msg ? 'Card message: ' + f.msg.trim().slice(0, 200) : '',
       f.from ? 'From: ' + f.from.trim().slice(0, 40) : '', surprise ? 'SURPRISE: do not call the recipient before delivery' : '']
       : []).concat(f.notes ? ['Notes: ' + f.notes.trim().slice(0, 100)] : []).filter(Boolean).join('. ').slice(0, 500);
     setBusy(true);
@@ -75,6 +82,7 @@ export default function Checkout() {
       };
       if (del.needsAddress) body.deliveryAddress = f.address.trim();
       const d = await api.customer.createOrder(body);
+      try { localStorage.setItem(BILL, JSON.stringify({ name: f.name, phone: f.phone, email: f.email, address: f.address })); sessionStorage.removeItem(DRAFT); } catch (e2) { /* ignore */ }
       setDone({ order: d.order, url: d.whatsappUrl }); clear();
     } catch (ex) { setErr(errText(ex)); }
     setBusy(false);
@@ -87,6 +95,7 @@ export default function Checkout() {
         <h1>Thank you! Your order is received</h1>
         {o.ref ? <p>Your order reference is <b>{o.ref}</b>.</p> : null}
         {o.discountKes ? <p>Coupon {o.couponCode} saved you {formatKES(o.discountKes)}.</p> : null}
+        <p><b>Please note: your order will be ready after 24 hours.</b></p>
         <h2>Pay now</h2>
         {o.ref ? <PayPanel orderRef={o.ref} iface={STORE} startOpen /> : null}
         <p>Prefer to pay later? You can pay any time from My orders. We will message you on WhatsApp about delivery.</p>
@@ -120,8 +129,8 @@ export default function Checkout() {
                   <Fld f={f} up={up} label="Card message (optional, up to 200 characters)" k="msg" maxLength={200} />
                   <Fld f={f} up={up} label="From (leave empty to stay anonymous)" k="from" maxLength={40} />
                   <label className="ad"><input type="checkbox" checked={surprise} onChange={(e) => setSurprise(e.target.checked)} /><span>It is a surprise: do not call the recipient before delivery</span></label>
-                  <Fld f={f} up={up} label="Date *" k="date" type="date" min={today} />
-                  <label className="jx-lab"><small>Time</small><select className="jx-in" value={f.slot} onChange={up('slot')}>{SLOTS.map((s) => <option key={s}>{s}</option>)}</select></label>
+                  <Fld f={f} up={up} label="Date of delivery or pickup *" k="date" type="date" min={today} />
+                  <label className="jx-lab"><small>Time of delivery or pickup</small><select className="jx-in" value={f.slot} onChange={up('slot')}>{SLOTS.map((s) => <option key={s}>{s}</option>)}</select></label>
                 </>
               ) : null}
               {del.needsAddress ? <Fld f={f} up={up} label="Delivery address *" k="address" placeholder="Building, street, area, town" /> : null}
@@ -142,6 +151,7 @@ export default function Checkout() {
             <div className="jx-box">
               <p><b>Pay with M-Pesa after you place your order</b></p>
               <p className="muted" style={{ fontSize: 14 }}>Place your order, then pay to our till on the next screen. You do not need to type anything. The team confirms your payment and messages you.</p>
+              <p className="muted" style={{ fontSize: 14 }}><b>Please note: your order will be ready after 24 hours.</b></p>
               {err ? <p className="err" role="alert">{err}</p> : null}
               <button className="jx-bar" form="co" type="submit" disabled={busy}>{busy ? 'Saving...' : user ? 'Place order' : 'Sign in to place order'}</button>
             </div>

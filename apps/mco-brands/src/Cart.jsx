@@ -94,6 +94,7 @@ export default function Cart() {
             {o.deliveryFeeKes == null ? '' : ' = ' + formatKES(o.totalKes)}.
           </p>
         ) : null}
+        <p><b>Please note: your order will be ready after 24 hours.</b></p>
         <h3>Pay now</h3>
         {o.ref ? <PayPanel orderRef={o.ref} iface={STORE} startOpen /> : null}
         <p>You can also pay later from My orders, and follow every stage of your order there.</p>
@@ -183,6 +184,7 @@ export default function Cart() {
           </div>
 
           {err ? <p role="alert" style={{ color: '#b00020' }}>{err}</p> : null}
+          <p className="muted"><b>Please note: your order will be ready after 24 hours.</b></p>
           <button className="btn" type="submit" disabled={busy}>{busy ? 'Saving...' : 'Place order'}</button>
         </form>
       )}

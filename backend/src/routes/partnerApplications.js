@@ -8,6 +8,10 @@ import { parse } from '../validate.js';
 import { audit } from '../audit.js';
 import { sendEmail } from '../mail.js';
 
+// Emails to an applicant come from the shop they applied on.
+const SHOP_LABEL = { mco: 'M & Co. Brands', prestige: 'Pyfon Gift Hub', trim: 'TriM Atelier' };
+const shopOf = (a) => SHOP_LABEL[a.shop] || 'Pyfon Brands';
+
 // Partners only. Seller applications: see them, accept (sends a one-time sign-up link), decline, message.
 export const partnerApplicationRoutes = Router();
 
@@ -80,11 +84,12 @@ partnerApplicationRoutes.post('/:id/accept', asyncHandler(async (req, res) => {
   const link = portal() + '/join?token=' + token;
   const sent = await sendEmail({
     to: a.email,
-    subject: 'Your Pyfon Brands dealer invitation',
-    text: ['Hello ' + a.name + ',', '', 'Thank you for applying to work with Pyfon Brands. We would like to welcome you as a dealer.',
+    fromName: shopOf(a),
+    subject: 'Your ' + shopOf(a) + ' dealer invitation',
+    text: ['Hello ' + a.name + ',', '', 'Thank you for applying to work with ' + shopOf(a) + '. We would like to welcome you as a dealer.',
       ...(b.note ? ['', b.note] : []), '',
       'Create your dealer account here. The link works once and expires in 7 days:', link, '',
-      'If you did not apply, you can ignore this email.', '', 'Pyfon Brands'].join('\n'),
+      'If you did not apply, you can ignore this email.', '', shopOf(a)].join('\n'),
   });
   if (!sent) {
     await query('UPDATE application_invites SET expires_at = now() WHERE token_hash = $1', [sha(token)]);
@@ -108,9 +113,10 @@ partnerApplicationRoutes.post('/:id/decline', asyncHandler(async (req, res) => {
   if (b.send && a.email) {
     emailed = await sendEmail({
       to: a.email,
-      subject: 'Your application to Pyfon Brands',
-      text: ['Hello ' + a.name + ',', '', 'Thank you for your interest in working with Pyfon Brands. We are not able to take your application forward right now.',
-        ...(b.message ? ['', b.message] : []), '', 'We wish you every success.', '', 'Pyfon Brands'].join('\n'),
+      fromName: shopOf(a),
+      subject: 'Your application to ' + shopOf(a),
+      text: ['Hello ' + a.name + ',', '', 'Thank you for your interest in working with ' + shopOf(a) + '. We are not able to take your application forward right now.',
+        ...(b.message ? ['', b.message] : []), '', 'We wish you every success.', '', shopOf(a)].join('\n'),
     });
   }
   await mark(id, 'declined', req.user.id);
@@ -128,8 +134,9 @@ partnerApplicationRoutes.post('/:id/message', asyncHandler(async (req, res) => {
     if (!a.email) throw new HttpError(400, 'no_email', 'This applicant gave no email. Use WhatsApp.');
     const sent = await sendEmail({
       to: a.email,
-      subject: 'Message from Pyfon Brands',
-      text: ['Hello ' + a.name + ',', '', b.message, '', 'Pyfon Brands'].join('\n'),
+      fromName: shopOf(a),
+      subject: 'Message from ' + shopOf(a),
+      text: ['Hello ' + a.name + ',', '', b.message, '', shopOf(a)].join('\n'),
     });
     if (!sent) throw new HttpError(502, 'send_failed', 'The email was not sent. Check the Brevo settings.');
   }

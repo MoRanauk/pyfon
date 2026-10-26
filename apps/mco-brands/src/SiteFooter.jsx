@@ -30,6 +30,7 @@ export default function SiteFooter({ groups }) {
             <Link to="/orders">My orders</Link>
             <Link to="/track">Track my order</Link>
             <Link to="/cart">My cart</Link>
+            <p style={{ margin: '7px 0', fontSize: 14, opacity: 0.9 }}>Physical Location: Keekorok Road (Store Under Maintenance)</p>
           </div>
           <div>
             <h4>Follow us</h4>

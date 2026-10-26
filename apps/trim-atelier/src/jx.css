@@ -63,3 +63,17 @@
 .jx-lab small{opacity:.7}
 @media(max-width:900px){.jx-pdp,.jx-vid,.jx-two,.jx-bandin,.jx-grid3{grid-template-columns:1fr;gap:28px}.jx-zoom,.jx-lens{display:none}.jx h1{font-size:30px}}
 .jx{--jx-dark:#111111}
+
+/* 7c73 rail */
+.jx-band{overflow:hidden}
+.jx-bandin{grid-template-columns:300px minmax(0,1fr)}
+.jx-bandin>*{min-width:0}
+.jx-rail{min-width:0;max-width:100%;scroll-snap-type:x proximity;padding-bottom:4px}
+.jx-rail a{scroll-snap-align:start}
+.jx-track{display:block;position:relative;height:4px;margin-top:16px;border-radius:4px;background:rgba(128,128,128,.3)}
+.jx-track i{position:absolute;top:0;bottom:0;border-radius:4px;background:currentColor;opacity:.75}
+@media(max-width:900px){
+.jx-bandin{grid-template-columns:minmax(0,1fr);gap:20px;padding:0 16px}
+.jx-rail{gap:16px}
+.jx-rail a{flex:0 0 62%}
+}

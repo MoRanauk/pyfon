@@ -107,13 +107,10 @@ export default function Orders() {
   }
 
   return (
-    <div className="orders">
+    <div className="orders orders-wide">
       <h1>My orders and quotes</h1>
       {err ? <p role="alert" style={{ color: '#b00020' }}>{err}</p> : null}
-      <h2>Orders</h2>
-      {orders === null ? <p className="muted">Loading...</p> : orders.length === 0 ? <p className="muted">No orders yet.</p> : <OrdersTable orders={orders} iface="mco" />}
-      <h2>Quote requests</h2>
-      {quotes === null ? <p className="muted">Loading...</p> : quotes.length === 0 ? <p className="muted">No quote requests yet.</p> : quotes.map((q) => <QuoteCard key={q.ref} q={q} />)}
+      {orders === null || quotes === null ? <p className="muted">Loading...</p> : orders.length + quotes.length === 0 ? <p className="muted">No orders yet.</p> : <OrdersTable orders={orders} quotes={quotes} iface="mco" />}
       <p><Link to="/account">Back to my account</Link></p>
     </div>
   );

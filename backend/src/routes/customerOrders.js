@@ -8,7 +8,7 @@ import { parse } from '../validate.js';
 import { audit } from '../audit.js';
 import { createJob } from '../jobs/createJob.js';
 import { orderWhatsappUrl, quoteWhatsappUrl } from '../whatsapp.js';
-import { findDelivery } from '../delivery.js';
+import { findDelivery, deliveryFor } from '../delivery.js';
 import { enqueueMessage } from '../messages/queue.js';
 import { shapeFile } from './customerFiles.js';
 import { buildStages } from '../jobs/tracking.js';
@@ -78,6 +78,7 @@ function orderText({ name, ref, itemsKes, totalKes, delivery, email, discountKes
   else if (delivery.feeKes > 0) del = 'Delivery: ' + delivery.label + ', ' + kes(delivery.feeKes) + '.';
   return 'Hello ' + first + ', thank you for ordering with Pyfon Brands. Your order ' + ref + ' is received. Items: ' + kes(itemsKes) + '. ' + (discountKes ? 'Coupon discount: -' + kes(discountKes) + '. ' : '') + del
     + (delivery.feeKes == null ? '' : ' Total: ' + kes(totalKes) + '.')
+    + ' Please note: your order will be ready after 24 hours.'
     + ' Track your order progress here: ' + siteUrl() + '/orders.'
     + (email ? ' We will also email you when it is delivered.' : '')
     + ' Thank you for choosing Pyfon Brands.';
@@ -100,7 +101,7 @@ customerOrderRoutes.post('/orders', writeLimiter, asyncHandler(async (req, res) 
   const items = await findItems([...new Set(body.lines.map((l) => l.sku))], storefront);
 
   const problems = [];
-  const delivery = findDelivery(body.deliveryMethod);
+  const delivery = deliveryFor(body.deliveryMethod, storefront);
   if (!delivery) problems.push({ field: 'deliveryMethod', message: 'Choose a delivery option' });
   else if (delivery.needsAddress && (body.deliveryAddress || '').length < 5) {
     problems.push({ field: 'deliveryAddress', message: 'Enter your delivery address' });
@@ -236,8 +237,8 @@ customerOrderRoutes.get('/orders', asyncHandler(async (req, res) => {
   const { rows } = await query(
     `SELECT o.id, o.ref, o.total_kes, o.created_at, o.delivery_method, o.delivery_fee_kes, o.delivery_address, o.delivery_notes, j.ref AS job_ref, j.current_step, j.status AS job_status, j.completed_at
        FROM orders o LEFT JOIN jobs j ON j.order_id = o.id
-      WHERE o.customer_id = $1 ORDER BY o.created_at DESC LIMIT 50`,
-    [req.user.id]
+      WHERE o.customer_id = $1 AND o.storefront_code = $2 ORDER BY o.created_at DESC LIMIT 50`,
+    [req.user.id, req.interfaceCode]
   );
   const orderIds = rows.map((r) => r.id);
 
@@ -308,7 +309,7 @@ customerOrderRoutes.get('/orders', asyncHandler(async (req, res) => {
       totalKes: r.total_kes,
       createdAt: r.created_at,
       progress: friendly(r),
-      delivery: { method: r.delivery_method, label: (findDelivery(r.delivery_method) || {}).label || r.delivery_method, feeKes: r.delivery_fee_kes, address: r.delivery_address, notes: r.delivery_notes }, tracking: trackingFor(r),
+      delivery: { method: r.delivery_method, label: (deliveryFor(r.delivery_method, req.interfaceCode) || {}).label || r.delivery_method, feeKes: r.delivery_fee_kes, address: r.delivery_address, notes: r.delivery_notes }, tracking: trackingFor(r),
       lines: linesByOrder.get(String(r.id)) || [],
     })),
   });
@@ -318,8 +319,8 @@ customerOrderRoutes.get('/quote-requests', asyncHandler(async (req, res) => {
   const { rows } = await query(
     `SELECT q.id, q.ref, q.kind, q.status, q.quoted_price_kes, q.created_at, q.quantity, q.company_name, q.spec, q.notes, ci.name AS item_name, j.current_step, j.status AS job_status
        FROM quote_requests q LEFT JOIN jobs j ON j.quote_request_id = q.id LEFT JOIN catalog_items ci ON ci.id = q.item_id
-      WHERE q.customer_id = $1 ORDER BY q.created_at DESC LIMIT 50`,
-    [req.user.id]
+      WHERE q.customer_id = $1 AND q.storefront_code = $2 ORDER BY q.created_at DESC LIMIT 50`,
+    [req.user.id, req.interfaceCode]
   );
   const quoteIds = rows.map((r) => r.id);
 

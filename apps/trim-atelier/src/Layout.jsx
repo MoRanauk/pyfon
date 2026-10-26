@@ -67,6 +67,7 @@ export default function Layout() {
             <a href={wa('Hello, I need help with an order.')} target="_blank" rel="noreferrer">Chat on WhatsApp</a>
             <a href={wa('Hello, I have a question about delivery and returns.')} target="_blank" rel="noreferrer">Delivery and returns</a>
             <a href={wa('Hello, I would like a quote for corporate gifting.')} target="_blank" rel="noreferrer">Corporate gifting</a>
+              <p style={{ margin: '7px 0', fontSize: 14, opacity: 0.9 }}>Physical Location: Keekorok Road (Store Under Maintenance)</p>
           </div>
         <div><h4>Social</h4><SocialLinks store="trim" layout="list" size={22} gap={12} /></div>
         </div>
