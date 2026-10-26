@@ -1,7 +1,7 @@
 import fs from 'node:fs';
 import path from 'node:path';
 let bad = 0;
-const f = path.resolve('..', 'apps', 'prestige-m', 'src', 'Layout.jsx');
+const f = path.resolve('..', 'apps', 'gift-hub', 'src', 'Layout.jsx');
 function rep(oldS, newS) {
   const s = fs.readFileSync(f, 'utf8');
   if (s.includes(newS)) { console.log('Already done: ' + oldS.slice(0, 40)); return; }

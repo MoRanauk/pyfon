@@ -2,6 +2,8 @@ import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { useAuth } from './AuthState.jsx';
 import { API_URL, tokens } from './api.js';
+import PayPanel from './PayPanel.jsx';
+import OrdersTable from './OrdersTable.jsx';
 
 const kes = (n) => 'KES ' + Number(n).toLocaleString('en-KE');
 const KIND = { service: 'Print service', bulk: 'Bulk order', corporate: 'Corporate order', design: 'Co. Brand design' };
@@ -60,6 +62,7 @@ function OrderCard({ o }) {
       </ul>
       <p className="muted">Delivery: {d.label || 'not set'} ({fee}){d.address ? ', ' + d.address : ''}{d.notes ? '. Notes: ' + d.notes : ''}</p>
       <p><strong>Total: {kes(o.totalKes)}</strong></p>
+      <PayPanel orderRef={o.ref} iface="mco" />
     </div>
   );
 }
@@ -108,7 +111,7 @@ export default function Orders() {
       <h1>My orders and quotes</h1>
       {err ? <p role="alert" style={{ color: '#b00020' }}>{err}</p> : null}
       <h2>Orders</h2>
-      {orders === null ? <p className="muted">Loading...</p> : orders.length === 0 ? <p className="muted">No orders yet.</p> : orders.map((o) => <OrderCard key={o.ref} o={o} />)}
+      {orders === null ? <p className="muted">Loading...</p> : orders.length === 0 ? <p className="muted">No orders yet.</p> : <OrdersTable orders={orders} iface="mco" />}
       <h2>Quote requests</h2>
       {quotes === null ? <p className="muted">Loading...</p> : quotes.length === 0 ? <p className="muted">No quote requests yet.</p> : quotes.map((q) => <QuoteCard key={q.ref} q={q} />)}
       <p><Link to="/account">Back to my account</Link></p>

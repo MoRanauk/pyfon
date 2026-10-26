@@ -1,5 +1,7 @@
 import { useEffect, useState } from 'react';
 import { Link, useParams } from 'react-router-dom';
+import { ReviewsSection } from '@pyfon/ui';
+import { API_URL, tokens } from './api.js';
 import './jx.css';
 import { api, img, STORE } from './api.js';
 import * as S from './site.js';
@@ -124,7 +126,7 @@ export default function Product() {
       </div>
 
       {pics.slice(v ? 1 : 2, 4).length ? <div className="jx-imgs">{pics.slice(v ? 1 : 2, 4).map((p) => <img key={p} src={img(p)} alt="" />)}</div> : null}
-      {SITE.quote ? <div className="jx-quote">&ldquo;<br />{SITE.quote}{SITE.showSample ? <div style={{ fontSize: 13, opacity: 0.6 }}>(sample)</div> : null}</div> : null}
+      <div style={{ maxWidth: 1100, margin: '40px auto', padding: '0 16px' }}><ReviewsSection store={STORE} sku={item.sku} apiUrl={API_URL} getToken={() => tokens.get()} loginHref="/account" title="Customer reviews" accent="#c9a14a" /></div>
       {rel.length ? <div className="jx-band"><div className="jx-bandin"><h2>Accompany With</h2><Rail list={rel} /></div></div> : null}
     </div>
   );

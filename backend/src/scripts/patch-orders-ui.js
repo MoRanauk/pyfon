@@ -4,13 +4,13 @@ import path from 'node:path';
 const root = path.resolve(process.cwd(), '..');
 const CK = ['thank-you link', '<p><Link to="/shop">Keep shopping</Link></p>', '<p><Link to="/orders">Track my order</Link></p><p><Link to="/shop">Keep shopping</Link></p>'];
 const jobs = [
-  { file: 'apps/prestige-m/src/Layout.jsx', edits: [
+  { file: 'apps/gift-hub/src/Layout.jsx', edits: [
     ['announce memory', "const [ann, setAnn] = useState(true);", "const [ann, setAnn] = useState(() => { try { return Date.now() - Number(localStorage.getItem('ann_closed') || 0) > 86400000; } catch (e) { return true; } });"],
     ['announce close', 'onClick={() => setAnn(false)}>&times;</button>', "onClick={() => { setAnn(false); try { localStorage.setItem('ann_closed', String(Date.now())); } catch (e) { /* ignore */ } }}>&times;</button>"],
     ['header link', "<Link to=\"/account\">{user ? 'Account' : 'Sign in'}</Link>", "<Link to=\"/account\">{user ? 'Account' : 'Sign in'}</Link>{user ? <Link to=\"/orders\">Orders</Link> : null}"],
     ['footer link', '<Link to="/cart">Your cart</Link>', '<Link to="/cart">Your cart</Link><Link to="/orders">My orders</Link>'],
   ] },
-  { file: 'apps/prestige-m/src/Checkout.jsx', edits: [CK] },
+  { file: 'apps/gift-hub/src/Checkout.jsx', edits: [CK] },
   { file: 'apps/trim-atelier/src/Checkout.jsx', edits: [CK] },
 ];
 

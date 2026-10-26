@@ -98,7 +98,7 @@ function wire(appDir) {
       } },
   ]);
 }
-wire('prestige-m');
+wire('gift-hub');
 wire('trim-atelier');
 wire('mco-brands');
 

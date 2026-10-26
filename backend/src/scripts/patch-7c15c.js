@@ -1,7 +1,7 @@
 import fs from 'node:fs';
 import path from 'node:path';
 let bad = 0;
-const D = path.resolve('..', 'apps', 'prestige-m', 'src');
+const D = path.resolve('..', 'apps', 'gift-hub', 'src');
 function rep(name, oldS, newS) {
   const file = path.join(D, name);
   const s = fs.readFileSync(file, 'utf8');

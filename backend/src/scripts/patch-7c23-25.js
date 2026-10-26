@@ -13,7 +13,7 @@ const jobs = [
   ['apps/m3labs/src/devNav.js', [
     ["['/vault', 'Code vault', true],", "['/vault', 'Code vault', true], ['/theme', 'Theme manager', true],", 'swap'],
   ]],
-  ['apps/prestige-m/src/App.jsx', [
+  ['apps/gift-hub/src/App.jsx', [
     ["import Series from './Series.jsx';", "import Series from './PersonalisedRoute.jsx';", 'swap'],
   ]],
 ];

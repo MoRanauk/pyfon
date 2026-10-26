@@ -9,6 +9,8 @@ import { AuthProvider } from './AuthState.jsx';
 import { CartProvider } from './CartState.jsx';
 import { CatalogProvider } from './CatalogState.jsx';
 import './styles.css';
+import { startThemeMode } from '@pyfon/ui';
+startThemeMode();
 
 applyTheme('mco');
 createRoot(document.getElementById('root')).render(

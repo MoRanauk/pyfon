@@ -19,7 +19,7 @@ const jobs = [
     ['import', "import ThemeManager from './ThemeManager.jsx';", "import ThemeManager from './ThemeManager.jsx';\nimport PasswordRequests from './PasswordRequests.jsx';"],
     ['route', '<Route path="/theme" element={<ThemeManager />} />', '<Route path="/theme" element={<ThemeManager />} />\n        <Route path="/password-requests" element={<PasswordRequests />} />'],
   ] },
-  { file: 'apps/prestige-m/src/Account.jsx', edits: ACC },
+  { file: 'apps/gift-hub/src/Account.jsx', edits: ACC },
   { file: 'apps/trim-atelier/src/Account.jsx', edits: ACC },
 ];
 

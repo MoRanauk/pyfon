@@ -20,7 +20,7 @@ export const DEV_NAV = [
     ['/db', 'Database map', true],
   ] },
   { name: 'Tools', icon: 'tools', items: [
-    ['/commands', 'Commands', true], ['/sql', 'SQL console (read only)', true], ['/builder', 'Site builder', true], ['/vault', 'Code vault', true], ['/theme', 'Theme manager', true], ['/api-test', 'API tester', true],
+    ['/commands', 'Commands', true], ['/sql', 'SQL console (read only)', true], ['/builder', 'Site builder', true], ['/vault', 'Code vault', true], ['/theme', 'Theme manager', true], ['/login-gallery', 'Login gallery', true], ['/site-images', 'Shop photos', true], ['/reviews', 'Reviews', true], ['/api-test', 'API tester', true],
     ['/links', 'Links', true], ['/tools', 'Workspace tools', true],
   ] },
   { name: 'System', icon: 'gear', items: [

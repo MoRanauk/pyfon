@@ -5,7 +5,7 @@ const root = path.resolve(process.cwd(), '..');
 const CART_NEW = 'Enter your coupon code at the next step (checkout). Your discount is shown there.';
 const CART_RE = /Coupon codes? (?:are|is) not[^<{}]*?\./i;
 const jobs = [
-  { file: 'apps/prestige-m/src/Cart.jsx', cart: true },
+  { file: 'apps/gift-hub/src/Cart.jsx', cart: true },
   { file: 'apps/trim-atelier/src/Cart.jsx', cart: true },
   { file: 'apps/mco-brands/src/App.jsx', edits: [
     ['track import', "import Orders from './Orders.jsx';", "import Orders from './Orders.jsx';\nimport Track from './Track.jsx';"],

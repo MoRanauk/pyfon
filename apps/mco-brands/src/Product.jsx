@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useState } from 'react';
 import { Link, useParams } from 'react-router-dom';
-import { api, img, STORE } from './api.js';
+import { api, img, STORE, API_URL, tokens } from './api.js';
+import { ReviewsSection } from '@pyfon/ui';
 import { useCart } from './CartState.jsx';
 import { useCatalog } from './CatalogState.jsx';
 import { Card, Rail } from './Shared.jsx';
@@ -215,6 +216,8 @@ export default function Product() {
           </div>
         </div>
       </div>
+
+      <div style={{ marginTop: 40 }}><ReviewsSection store={STORE} sku={item.sku} apiUrl={API_URL} getToken={() => tokens.get()} loginHref="/account" title="Customer reviews" accent="#c9a14a" /></div>
 
       {more.length ? (
         <div style={{ marginTop: 40 }}>

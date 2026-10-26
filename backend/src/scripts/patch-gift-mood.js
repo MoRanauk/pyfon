@@ -1,5 +1,5 @@
 import fs from 'node:fs';
-const f = '../apps/prestige-m/src/Layout.jsx';
+const f = '../apps/gift-hub/src/Layout.jsx';
 let s = fs.readFileSync(f, 'utf8');
 let bad = 0;
 function patch(name, find, make) {

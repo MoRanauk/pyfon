@@ -12,11 +12,11 @@ const jobs = [
     ['track import', "import { publicContentRoutes } from './routes/siteContent.js';", "import { publicContentRoutes } from './routes/siteContent.js';\nimport { publicTrackRoutes } from './routes/publicTrack.js';"],
     ['track mount', "app.use('/v1/content', publicContentRoutes);", "app.use('/v1/content', publicContentRoutes);\napp.use('/v1/track', publicTrackRoutes);"],
   ] },
-  { file: 'apps/prestige-m/src/App.jsx', edits: APP },
+  { file: 'apps/gift-hub/src/App.jsx', edits: APP },
   { file: 'apps/trim-atelier/src/App.jsx', edits: APP },
-  { file: 'apps/prestige-m/src/Orders.jsx', edits: [ORD] },
+  { file: 'apps/gift-hub/src/Orders.jsx', edits: [ORD] },
   { file: 'apps/trim-atelier/src/Orders.jsx', edits: [ORD] },
-  { file: 'apps/prestige-m/src/Layout.jsx', edits: [
+  { file: 'apps/gift-hub/src/Layout.jsx', edits: [
     ['footer track', '<Link to="/orders">My orders</Link>', '<Link to="/orders">My orders</Link><Link to="/track">Track my order</Link>'],
   ] },
   { file: 'apps/trim-atelier/src/Layout.jsx', edits: [

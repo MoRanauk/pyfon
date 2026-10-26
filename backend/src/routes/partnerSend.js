@@ -5,6 +5,7 @@ import { HttpError, asyncHandler } from '../errors.js';
 import { parse } from '../validate.js';
 import { sendEmail, maskEmail, maskPhone } from '../mail.js';
 import { toWaNumber } from '../messages/queue.js';
+import { sendTextbeeSms, textbeeReady } from '../messages/textbee.js';
 
 export const partnerSendRoutes = Router();
 const me = (req) => req.user.id || req.user.sub;
@@ -57,6 +58,7 @@ async function deliver(b, full) {
     if (!r.ok) { const why = (await r.text().catch(() => '')).slice(0, 200); throw new HttpError(502, 'send_failed', 'OpenWA said HTTP ' + r.status + (why ? ': ' + why : '')); }
     return to;
   }
+  if (textbeeReady()) { await sendTextbeeSms(to, full); return to; }
   const url = process.env.SMS_GATEWAY_URL;
   const gkey = process.env.SMS_GATEWAY_KEY;
   if (!url || !gkey) throw new HttpError(503, 'sms_not_set_up', 'The SMS gateway is not set up yet. Add SMS_GATEWAY_URL and SMS_GATEWAY_KEY to backend\\.env');

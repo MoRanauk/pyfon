@@ -1,6 +1,8 @@
 import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import './od.css';
+import PayPanel from './PayPanel.jsx';
+import OrdersTable from './OrdersTable.jsx';
 import { useAuth } from './store.jsx';
 import { API_URL, STORE, tokens } from './api.js';
 
@@ -62,6 +64,7 @@ function OrderCard({ o }) {
       </ul>
       <p className="od-muted">Delivery: {d.label || 'not set'} ({fee}){d.address ? ', ' + d.address : ''}{d.notes ? '. Notes: ' + d.notes : ''}</p>
       <p className="od-total">Total: {kes(o.totalKes)}</p>
+      <PayPanel orderRef={o.ref} iface={STORE} />
     </div>
   );
 }
@@ -111,7 +114,7 @@ export default function Orders() {
       <h1>My orders</h1>
       {err ? <p className="od-err" role="alert">{err}</p> : null}
       <h2>Orders</h2>
-      {orders === null ? <p className="od-muted od-center">Loading...</p> : orders.length === 0 ? <p className="od-muted od-center">No orders yet.</p> : orders.map((o) => <OrderCard key={o.ref} o={o} />)}
+      {orders === null ? <p className="od-muted od-center">Loading...</p> : orders.length === 0 ? <p className="od-muted od-center">No orders yet.</p> : <OrdersTable orders={orders} iface={STORE} />}
       <h2>Quote requests</h2>
       {quotes === null ? <p className="od-muted od-center">Loading...</p> : quotes.length === 0 ? <p className="od-muted od-center">No quote requests yet.</p> : quotes.map((q) => <QuoteCard key={q.ref} q={q} />)}
       <p className="od-center"><Link to="/shop">Keep shopping</Link></p>

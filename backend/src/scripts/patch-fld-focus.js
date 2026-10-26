@@ -10,7 +10,7 @@ const NEW = [
 ];
 let miss = false;
 const pending = [];
-for (const app of ['prestige-m', 'trim-atelier']) {
+for (const app of ['gift-hub', 'trim-atelier']) {
   const rel = 'apps/' + app + '/src/Checkout.jsx';
   const full = path.join(root, rel);
   const raw = fs.readFileSync(full, 'utf8');

@@ -7,6 +7,7 @@ import { useCart } from './CartState.jsx';
 import { useAuth } from './AuthState.jsx';
 import { DELIVERY } from './delivery.js';
 import { errText } from './util.js';
+import PayPanel from './PayPanel.jsx';
 
 const PHONE = /^\+?[0-9 ]{9,15}$/;
 
@@ -93,7 +94,9 @@ export default function Cart() {
             {o.deliveryFeeKes == null ? '' : ' = ' + formatKES(o.totalKes)}.
           </p>
         ) : null}
-        <p>You can follow every stage of your order on the site. We will confirm payment and delivery with you.</p>
+        <h3>Pay now</h3>
+        {o.ref ? <PayPanel orderRef={o.ref} iface={STORE} startOpen /> : null}
+        <p>You can also pay later from My orders, and follow every stage of your order there.</p>
         <a className="btn" href="/orders">Track my order</a>
         <p><a className="linkbtn" href={done.url} target="_blank" rel="noreferrer">Message us on WhatsApp</a></p>
         <p><Link to="/shop">Keep shopping</Link></p>

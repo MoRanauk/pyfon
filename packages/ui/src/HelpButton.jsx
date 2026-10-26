@@ -5,6 +5,7 @@ const NAVY = '#0b2a4a';
 const GOLD = '#c9a227';
 const KEY = 'haruno_tour';
 const POS = 'haruno_pos';
+const WA_URL = 'https://wa.me/254794802462?text=' + encodeURIComponent('Hello Pyfon Brands, I would like to ask about an order.');
 const words = (t) => String(t || '').toLowerCase().split(/[^a-z0-9]+/).filter((w) => w.length > 2);
 const S = {
   tab: (on) => ({ flex: 1, padding: '8px 6px', border: '1px solid ' + NAVY, borderRadius: '16px', background: on ? NAVY : '#fff', color: on ? '#fff' : NAVY, cursor: 'pointer', fontSize: '14px' }),
@@ -254,10 +255,13 @@ export default function HelpButton({ path = '/', topics = {}, faq = [], tours = 
   const above = B < vh / 2;
   const fab = { position: 'fixed', right: R + 'px', bottom: B + 'px', width: '56px', height: '56px', borderRadius: '50%', border: '2px solid ' + GOLD, background: '#fff', padding: 0, cursor: 'grab', zIndex: 9960, boxShadow: '0 4px 14px rgba(0,0,0,.3)', touchAction: 'none', userSelect: 'none' };
   const box = { position: 'fixed', right: boxRight + 'px', width: w + 'px', overflowY: 'auto', background: '#fff', color: NAVY, border: '1px solid #ddd', borderRadius: '14px', boxShadow: '0 6px 24px rgba(0,0,0,.25)', padding: '14px', zIndex: 9960, textAlign: 'left' };
-  if (above) { box.bottom = (B + 64) + 'px'; box.maxHeight = Math.max(160, vh - B - 80) + 'px'; }
+  if (above) { box.bottom = (B + 132) + 'px'; box.maxHeight = Math.max(160, vh - B - 148) + 'px'; }
   else { box.top = (vh - B + 8) + 'px'; box.maxHeight = Math.max(160, B - 20) + 'px'; }
   return (
     <>
+      <a data-haruno="1" href={WA_URL} target="_blank" rel="noopener noreferrer" aria-label="Chat with us on WhatsApp" title="Chat with us on WhatsApp" style={{ ...fab, bottom: (B + 68) + 'px', background: '#25D366', border: '2px solid #fff', display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer', touchAction: 'auto', textDecoration: 'none' }}>
+        <svg width="34" height="34" viewBox="0 0 24 24" fill="none" stroke="#fff" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true" focusable="false"><path d="M4 20l1.3-4.1A8.5 8.5 0 1 1 8.2 18.8L4 20z" /><path d="M9.2 8.6c0 3.2 2.9 6 6.1 6.1l1.2-1.5-2-1-.9.8c-1-.4-1.9-1.3-2.3-2.3l.8-.9-1-2-1.9.8z" fill="#fff" stroke="none" /></svg>
+      </a>
       <button type="button" data-haruno="1" style={fab} aria-label="Haruno, your helper" title="Haruno (drag me anywhere)" onPointerDown={down} onPointerMove={move} onPointerUp={up} onPointerCancel={up} onClick={click}><Face size={48} /></button>
       {open ? (
         <div data-haruno="1" style={box} role="dialog" aria-label="Haruno">

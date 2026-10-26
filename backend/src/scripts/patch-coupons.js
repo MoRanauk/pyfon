@@ -44,7 +44,7 @@ const SLOTS = ['Morning (8am to 12pm)', 'Afternoon (12pm to 4pm)', 'Evening (4pm
 const jobs = [
   { file: 'backend/src/routes/customerOrders.js', edits: CO },
   { file: 'backend/src/routes/groups.js', edits: GR },
-  { file: 'apps/prestige-m/src/Checkout.jsx', edits: CK },
+  { file: 'apps/gift-hub/src/Checkout.jsx', edits: CK },
   { file: 'apps/trim-atelier/src/Checkout.jsx', edits: CK },
 ];
 

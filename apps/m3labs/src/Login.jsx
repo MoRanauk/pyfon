@@ -4,6 +4,7 @@ import { useAuth } from './Auth.jsx';
 import { STAGE, STAGE_LABEL, FIXED, switchPortal } from './api.js';
 import ChangePassword from './ChangePassword.jsx';
 import { ls } from './store.js';
+import LoginArt from './LoginArt.jsx';
 
 const QUOTES = [
   'Good work is a promise kept to someone you may never meet.',
@@ -48,9 +49,7 @@ export default function Login() {
         </div>
         <Footer />
       </div>
-      <div className="split-art" style={img ? { backgroundImage: 'linear-gradient(rgba(11,42,74,.25),rgba(11,42,74,.25)), url("' + img + '")' } : undefined}>
-        <blockquote>{quote}</blockquote>
-      </div>
+      <LoginArt quote={quote} fallbackImg={img} />
     </div>
   );
 }

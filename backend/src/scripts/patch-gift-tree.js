@@ -1,5 +1,5 @@
 import fs from 'node:fs';
-const base = '../apps/prestige-m/src/';
+const base = '../apps/gift-hub/src/';
 function patch(file, name, find, to) {
   let s = fs.readFileSync(base + file, 'utf8');
   if (s.includes(to)) { console.log('Already done: ' + name); return 0; }

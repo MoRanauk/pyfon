@@ -8,7 +8,7 @@ Keep BOTH files in Project knowledge (7c24 for the full background, this for wha
 - 7c26 part 2 (public tracking, TriM header and announcement bar): BUILT, UNTESTED until he reports PASS.
 
 ## What was built in 7c26
-- `apps/{prestige-m,trim-atelier}/src/Orders.jsx` (route `/orders`, uses `store.jsx` useAuth, replaces the old unused AuthState version; classes `od-`, file `od.css`). Gift `Layout.jsx`: header Orders link when signed in, footer My orders, announcement close stored in localStorage `ann_closed` (24h).
+- `apps/{gift-hub,trim-atelier}/src/Orders.jsx` (route `/orders`, uses `store.jsx` useAuth, replaces the old unused AuthState version; classes `od-`, file `od.css`). Gift `Layout.jsx`: header Orders link when signed in, footer My orders, announcement close stored in localStorage `ann_closed` (24h).
 - `backend/src/routes/publicTrack.js`, mounted in `app.js` at `/v1/track` (public, POST, rate limit 12 per 15 min per IP). Body `{ref, phone}`. Matches `orders.ref` + `storefront_code` = X-Interface (mco|prestige|trim) + last 9 digits of `contact_phone`. Same 404 for wrong ref or phone. Returns only ref, createdAt, delivery label, cancelled flag, tracking stages (via `jobs/tracking.js`). Never returns address, prices, names or items.
 - `Track.jsx` in both shops (route `/track`, accepts `?ref=`). Links: footer "Track my order" in both shops, signed-out Orders page, TriM header Orders link when signed in. TriM `Layout.jsx` announcement bar also remembers close (24h).
 - Scripts: `patch-orders-ui.js`, `patch-fld-focus.js`, `patch-track.js` in `backend/src/scripts`.

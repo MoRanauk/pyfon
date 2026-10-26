@@ -3,6 +3,8 @@ import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { useCatalog } from './CatalogState.jsx';
 import { priceText } from './groups.js';
 import { useSearchHint } from './SearchHint.jsx';
+import SocialLinks from './SocialLinks.jsx';
+import './soc.css';
 
 // True when motion should be off: reduced-motion setting OR a narrow window (under 900px).
 const still = () => typeof window !== 'undefined' && !!window.matchMedia
@@ -32,7 +34,12 @@ export function Announce() {
     const t = setInterval(() => setI((x) => (x + 1) % MESSAGES.length), 8000);
     return () => clearInterval(t);
   }, []);
-  return <div className="announce"><span key={i} className="ann">{MESSAGES[i]}</span></div>;
+  return (
+    <div className="announce" style={{ position: 'relative' }}>
+      <span key={i} className="ann">{MESSAGES[i]}</span>
+      <span className="ann-soc"><SocialLinks store="mco" size={26} gap={16} /></span>
+    </div>
+  );
 }
 
 const IDEAS = ['Hoodies with your logo', 'A mug with their name on it', 'Posters for your wall', 'Gifts that feel personal', 'Banners for your business', 'Uniforms for your team'];

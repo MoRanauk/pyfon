@@ -17,6 +17,7 @@ import Videos from './Videos.jsx';
 import Invoice from './Invoice.jsx';
 import Approvals from './Approvals.jsx';
 import Coupons from './Coupons.jsx';
+import Payments from './Payments.jsx';
 import Applications from './Applications.jsx';
 import CsvImport from './CsvImport.jsx';
 import Tickets from './Tickets.jsx';
@@ -33,6 +34,9 @@ import DevSql from './DevSql.jsx';
 import SiteBuilder from './SiteBuilder.jsx';
 import CodeVault from './CodeVault.jsx';
 import ThemeManager from './ThemeManager.jsx';
+import LoginGallery from './LoginGallery.jsx';
+import SiteImages from './SiteImages.jsx';
+import Reviews from './Reviews.jsx';
 import PasswordRequests from './PasswordRequests.jsx';
 import DevApiTest from './DevApiTest.jsx';
 import DevCommands from './DevCommands.jsx';
@@ -81,6 +85,7 @@ export default function App() {
         <Route path="/videos" element={<Videos />} />
         <Route path="/approvals" element={<Approvals />} />
         <Route path="/coupons" element={<Coupons />} />
+        <Route path="/payments" element={<Payments />} />
         <Route path="/applications" element={<Applications />} />
         <Route path="/csv" element={<CsvImport />} />
         <Route path="/tickets" element={<Tickets />} />
@@ -101,6 +106,9 @@ export default function App() {
         <Route path="/builder" element={<SiteBuilder />} />
         <Route path="/vault" element={<CodeVault />} />
         <Route path="/theme" element={<ThemeManager />} />
+        <Route path="/login-gallery" element={<LoginGallery />} />
+        <Route path="/site-images" element={<SiteImages />} />
+        <Route path="/reviews" element={<Reviews />} />
         <Route path="/password-requests" element={<PasswordRequests />} />
         <Route path="/api-test" element={<DevApiTest />} />
         <Route path="/commands" element={<DevCommands />} />

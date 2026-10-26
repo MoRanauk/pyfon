@@ -2,11 +2,13 @@ import Help from './Help.jsx';
 import { Link, Outlet, NavLink, useNavigate, useLocation } from 'react-router-dom';
 import { useEffect, useState } from 'react';
 import { Footer } from '@pyfon/ui';
+import SocialLinks from './SocialLinks.jsx';
 import { SITE } from './site.js';
 import { useCart, useAuth, useCatalog } from './store.jsx';
 import { groupCats, brandsOf } from './cats.js';
 import './tzhome.css';
 import { useSiteContent, themeStyle } from './siteContent.js';
+import { TrimName } from './TrimName.jsx';
 
 const wa = (t) => 'https://wa.me/' + SITE.whatsapp + '?text=' + encodeURIComponent(t);
 
@@ -32,7 +34,7 @@ export default function Layout() {
       <header className="t-hdr">
         <div className="wrap t-top">
           <form className="t-search" onSubmit={search}><input name="q" placeholder="Search" aria-label="Search" /></form>
-          <Link to="/" className="t-logo">{SITE.name}</Link>
+          <Link to="/" className="t-logo"><TrimName /></Link>
           <div className="t-ico">
             <Link to="/account">{user ? 'Account' : 'Sign in'}</Link>{user ? <Link to="/orders">Orders</Link> : null}
             <Link to="/cart">Cart{count ? <span className="cnt">{count}</span> : null}</Link>
@@ -66,6 +68,7 @@ export default function Layout() {
             <a href={wa('Hello, I have a question about delivery and returns.')} target="_blank" rel="noreferrer">Delivery and returns</a>
             <a href={wa('Hello, I would like a quote for corporate gifting.')} target="_blank" rel="noreferrer">Corporate gifting</a>
           </div>
+        <div><h4>Social</h4><SocialLinks store="trim" layout="list" size={22} gap={12} /></div>
         </div>
       </div>
       <Help />

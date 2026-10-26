@@ -10,7 +10,7 @@ const CSS = `
 .dealer h3{margin:10px 0 2px}
 .dmark{display:inline-flex;width:56px;height:56px;border-radius:50%;align-items:center;justify-content:center;background:var(--pf-primary,#0b2a4a);color:#fff;font-size:24px}
 `;
-for (const app of ['mco-brands', 'prestige-m']) {
+for (const app of ['mco-brands', 'gift-hub']) {
   const dir = path.join(root, 'apps', app, 'src');
   const css = path.join(dir, 'styles.css');
   if (!fs.existsSync(css)) { console.log(app + ': NOT FOUND styles.css'); continue; }

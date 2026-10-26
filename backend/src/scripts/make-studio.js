@@ -1,15 +1,15 @@
 import fs from 'node:fs';
 import path from 'node:path';
 const A = path.resolve('..', 'apps');
-const src = path.join(A, 'prestige-m');
+const src = path.join(A, 'gift-hub');
 const dst = path.join(A, 'studio');
 fs.mkdirSync(path.join(dst, 'src'), { recursive: true });
-const swap = (s) => s.replace(/5175/g, '5177').replace(/prestige-m/g, 'studio');
+const swap = (s) => s.replace(/5175/g, '5177').replace(/gift-hub/g, 'studio');
 const put = (f, text, force) => { const t = path.join(dst, f); if (fs.existsSync(t) && !force) { console.log('Kept: ' + f); return; } fs.writeFileSync(t, text); console.log('Wrote: ' + f); };
 put('package.json', swap(fs.readFileSync(path.join(src, 'package.json'), 'utf8')));
 const vc = fs.readdirSync(src).find((x) => /^vite\.config\./.test(x));
 if (vc) put(vc, swap(fs.readFileSync(path.join(src, vc), 'utf8')));
-else console.log('NOT FOUND: vite config in prestige-m');
+else console.log('NOT FOUND: vite config in gift-hub');
 put('index.html', fs.readFileSync(path.join(src, 'index.html'), 'utf8').replace(/<title>[^<]*<\/title>/, '<title>Studio</title>'));
 fs.copyFileSync(path.join(src, 'src', 'siteEdit.js'), path.join(dst, 'src', 'siteEdit.js'));
 console.log('Copied: siteEdit.js');

@@ -7,6 +7,7 @@ import { useCart, useAuth } from './store.jsx';
 import { DELIVERY } from './delivery.js';
 import { errText, normPhone } from './lib.js';
 import { Acc, getShip, setShipPref } from './Bits.jsx';
+import PayPanel from './PayPanel.jsx';
 
 async function previewCoupon(code, itemsKes) {
   const t = await tokens.get();
@@ -86,7 +87,9 @@ export default function Checkout() {
         <h1>Thank you! Your order is received</h1>
         {o.ref ? <p>Your order reference is <b>{o.ref}</b>.</p> : null}
         {o.discountKes ? <p>Coupon {o.couponCode} saved you {formatKES(o.discountKes)}.</p> : null}
-        <p>We will confirm payment and delivery with you on WhatsApp.</p>
+        <h2>Pay now</h2>
+        {o.ref ? <PayPanel orderRef={o.ref} iface={STORE} startOpen /> : null}
+        <p>Prefer to pay later? You can pay any time from My orders. We will message you on WhatsApp about delivery.</p>
         <p><a className="jx-btn" href={done.url} target="_blank" rel="noreferrer">Message us on WhatsApp</a></p>
         <p><Link to="/orders">Track my order</Link></p><p><Link to="/shop">Keep shopping</Link></p>
       </div>
@@ -137,8 +140,8 @@ export default function Checkout() {
               <tr><th>Total</th><td><b>{formatKES(total - disc + (fee || 0))}</b>{fee == null ? ' + delivery' : ''}</td></tr>
             </tbody></table>
             <div className="jx-box">
-              <p><b>Pay after we confirm on WhatsApp</b></p>
-              <p className="muted" style={{ fontSize: 14 }}>We save your order, then open WhatsApp so we can confirm the price and payment with you. M-Pesa checkout is coming.</p>
+              <p><b>Pay with M-Pesa after you place your order</b></p>
+              <p className="muted" style={{ fontSize: 14 }}>Place your order, then pay to our till on the next screen. You do not need to type anything. The team confirms your payment and messages you.</p>
               {err ? <p className="err" role="alert">{err}</p> : null}
               <button className="jx-bar" form="co" type="submit" disabled={busy}>{busy ? 'Saving...' : user ? 'Place order' : 'Sign in to place order'}</button>
             </div>

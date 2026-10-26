@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useState } from 'react';
 import { Link } from 'react-router-dom';
-import { Reveal, Slider } from '@pyfon/ui';
-import { api, STORE, img } from './api.js';
+import { Reveal, Slider, ReviewsSection } from '@pyfon/ui';
+import { api, STORE, img, API_URL, tokens } from './api.js';
 import { useCatalog } from './CatalogState.jsx';
 import { mix, priceText } from './groups.js';
 import { slugOf } from './tree.js';
@@ -140,6 +140,8 @@ export default function Home() {
         </div>
         <div className="grid">{tabItems.map((it) => <Card key={it.sku} it={it} />)}</div>
       </Section>
+
+      <section className="section"><div className="wrap"><ReviewsSection store={STORE} apiUrl={API_URL} getToken={() => tokens.get()} loginHref="/account" title="What customers say" accent="#c9a14a" /></div></section>
 
       <section className="section">
         <div className="wrap">

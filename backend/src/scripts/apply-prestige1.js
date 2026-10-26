@@ -1,6 +1,6 @@
 import fs from 'fs';
 import path from 'path';
-const app = '../apps/prestige-m';
+const app = '../apps/gift-hub';
 const swaps = [["'mco'", "'prestige'"], ['"mco"', '"prestige"'], ['M & Co. Brands', 'Prestige M'], ['M &amp; Co. Brands', 'Prestige M']];
 function walk(d, out) {
   for (const it of fs.readdirSync(d, { withFileTypes: true })) {
@@ -20,7 +20,7 @@ for (const f of walk(app + '/src', [])) {
 }
 console.log('Renamed in ' + changed + ' files');
 const one = [
-  [app + '/package.json', '@pyfon/mco-brands', '@pyfon/prestige-m'],
+  [app + '/package.json', '@pyfon/mco-brands', '@pyfon/gift-hub'],
   [app + '/vite.config.js', 'port: 5173', 'port: 5175'],
   [app + '/index.html', 'M &amp; Co. Brands', 'Prestige M'],
   [app + '/src/main.jsx', "applyTheme('mco')", "applyTheme('prestige')"],

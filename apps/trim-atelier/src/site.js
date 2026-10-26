@@ -7,12 +7,8 @@ export const SITE = {
   heroTitle: 'Quiet luxury, chosen with care',
   heroText: 'Fine jewellery, timepieces, fragrance and finishing touches for people who notice.',
   order: ['Pendant & Neckwear', 'Eternal Bands', 'Timepieces', 'Haute Parfumerie', 'Velvet Skin', "Objet d'Art & Accents"],
-  showSample: true, // set to false when the reviews below are real customers' words
-  reviews: [
-    { t: 'The piece arrived beautifully presented and exactly as described.', by: 'Sample customer' },
-    { t: 'Helpful on WhatsApp from the first message to delivery.', by: 'Sample customer' },
-    { t: 'A thoughtful gift, and she wears it every day.', by: 'Sample customer' },
-  ],
+  showSample: false, // set to false when the reviews below are real customers' words
+  reviews: [],
   guides: [
     { t: 'Choosing a necklace length', x: 'A choker sits at the base of the neck, a princess length rests on the collarbone and longer chains fall to the chest. Choose by the neckline you wear most.' },
     { t: 'Caring for gold-plated pieces', x: 'Keep them dry, put them on after perfume and lotion, and store each piece apart in a soft pouch so the plating lasts longer.' },
