@@ -1,3 +1,4 @@
+import * as Sentry from '@sentry/node';
 import express from 'express';
 import cors from 'cors';
 import helmet from 'helmet';
@@ -78,9 +79,17 @@ app.use('/v1/password-help', publicPasswordHelpRoutes);
 app.use('/v1/apply', publicApply);
 app.use('/v1/dealer-invite', publicDealerInvite);
 
+if (process.env.SENTRY_TEST === '1') {
+  app.get('/debug-sentry', () => {
+    throw new Error('Sentry test error from pyfon-api');
+  });
+}
+
 app.use((req, res) => {
   res.status(404).json({ error: { code: 'not_found', message: 'Route not found' } });
 });
+
+Sentry.setupExpressErrorHandler(app);
 
 app.use((err, req, res, next) => {
   const known = err instanceof HttpError;
