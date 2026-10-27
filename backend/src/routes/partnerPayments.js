@@ -8,6 +8,7 @@ import { parse } from '../validate.js';
 import { audit } from '../audit.js';
 import { enqueueMessage } from '../messages/queue.js';
 import { sendEmail } from '../mail.js';
+import { SHOP_NAMES } from '../delivery.js';
 
 // Partner side of payments. Confirming writes an income row to the Money book and tells the customer.
 export const partnerPaymentRoutes = Router();
@@ -60,17 +61,18 @@ export async function settle(client, o, paymentId, mpesaCode, amountKes, userId)
 // Runs AFTER the money is saved. A failed message never undoes a confirmed payment.
 export async function tell(o, got, r) {
   const first = String(o.contact_name).trim().split(/\s+/)[0];
+  const shop = SHOP_NAMES[o.storefront_code] || 'Pyfon Brands';
   const body = 'Hello ' + first + ', your payment of ' + kes(got) + ' for order ' + o.ref + ' has been received. '
     + (r.dueKes > 0 ? 'Balance still due: ' + kes(r.dueKes) + '. ' : 'Your order is fully paid. ')
-    + 'Thank you for choosing Pyfon Brands.';
+    + 'Thank you for choosing ' + shop + '.';
   let queued = false;
   let emailed = false;
   try { await enqueueMessage({ query }, { kind: 'payment_received', phone: o.contact_phone, orderId: o.id, body }); queued = true; } catch (e) { console.warn('payment message not queued: ' + e.message); }
   if (o.contact_email) {
     try {
-      const html = '<div style="font-family:Arial,sans-serif;max-width:560px;margin:auto;color:#0b2a4a"><h2>Pyfon Brands</h2><p>' + esc(body) + '</p>'
+      const html = '<div style="font-family:Arial,sans-serif;max-width:560px;margin:auto;color:#0b2a4a"><h2>' + esc(shop) + '</h2><p>' + esc(body) + '</p>'
         + '<p style="font-size:12px;color:#666">Operated by Pyfon Brands<br>Built and owned by Emlabs &middot; &copy; Emlabs. All rights reserved.</p></div>';
-      emailed = Boolean(await sendEmail({ to: o.contact_email, subject: 'Payment received for order ' + o.ref, text: body, html }));
+      emailed = Boolean(await sendEmail({ to: o.contact_email, subject: 'Payment received for order ' + o.ref, text: body, html, fromName: shop }));
     } catch (e) { console.warn('payment email not sent: ' + e.message); }
   }
   return { queued, emailed };
