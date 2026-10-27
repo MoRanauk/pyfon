@@ -1,0 +1,11 @@
+import { query } from '../db/pool.js';
+const c = await query("SELECT column_name, data_type, is_nullable FROM information_schema.columns WHERE table_name = 'users' ORDER BY ordinal_position");
+console.log('== users columns ==');
+c.rows.forEach((r) => console.log(r.column_name + ' ' + r.data_type + ' null=' + r.is_nullable));
+const i = await query("SELECT indexdef FROM pg_indexes WHERE tablename = 'users'");
+console.log('== users indexes ==');
+i.rows.forEach((r) => console.log(r.indexdef));
+const n = await query("SELECT role, count(*)::int AS n FROM users GROUP BY role ORDER BY role");
+console.log('== users by role ==');
+n.rows.forEach((r) => console.log(r.role + ' ' + r.n));
+process.exit(0);

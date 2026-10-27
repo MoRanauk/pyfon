@@ -29,6 +29,16 @@ const changeSchema = z.object({ current_password: z.string().min(1).max(128), ne
 const forgotSchema = z.object({ email, channel: z.enum(['email', 'sms', 'whatsapp']).default('email') });
 const resetSchema = z.object({ email, code: z.string().trim().regex(/^\d{6}$/, 'The code has 6 digits'), new_password: newPassword });
 
+async function findAccount(emailAddr, code, cols = '*', activeOnly = false) {
+  const act = activeOnly ? ' AND is_active' : '';
+  if (INTERFACE_KINDS[code] === 'customer') {
+    const r = await query('SELECT ' + cols + " FROM users WHERE lower(email) = $1 AND role = 'customer' AND (shop = $2 OR shop IS NULL)" + act + ' ORDER BY (shop IS NULL) LIMIT 1', [emailAddr, code]);
+    return r.rows[0] || null;
+  }
+  const r = await query('SELECT ' + cols + " FROM users WHERE lower(email) = $1 AND role <> 'customer'" + act + ' LIMIT 1', [emailAddr]);
+  return r.rows[0] || null;
+}
+
 const COOLDOWN_SECONDS = 120;
 const codeHash = (c) => crypto.createHmac('sha256', config.jwtSecret).update(c).digest('hex');
 
@@ -52,15 +62,17 @@ router.post('/register', registerLimiter, asyncHandler(async (req, res) => {
     if (!phone) throw new HttpError(400, 'bad_phone', 'Enter a valid phone number with its country code');
   }
   const hash = await hashPassword(data.password);
+  const taken = await query("SELECT 1 FROM users WHERE lower(email) = $1 AND (role <> 'customer' OR shop IS NULL OR shop = $2) LIMIT 1", [data.email, req.interfaceCode]);
+  if (taken.rows[0]) throw new HttpError(409, 'email_taken', 'An account with this email already exists here. Please sign in.');
   let user;
   try {
     const { rows } = await query(
-      "INSERT INTO users (email, password_hash, full_name, role, phone) VALUES ($1, $2, $3, 'customer', $4) RETURNING id, email, full_name, role, partner_stage",
-      [data.email, hash, data.full_name, phone]
+      "INSERT INTO users (email, password_hash, full_name, role, phone, shop) VALUES ($1, $2, $3, 'customer', $4, $5) RETURNING id, email, full_name, role, partner_stage",
+      [data.email, hash, data.full_name, phone, req.interfaceCode]
     );
     user = rows[0];
   } catch (err) {
-    if (err.code === '23505') throw new HttpError(409, 'email_taken', 'An account with this email already exists');
+    if (err.code === '23505') throw new HttpError(409, 'email_taken', 'An account with this email already exists here. Please sign in.');
     throw err;
   }
   await audit(req, { action: 'user.registered', entityType: 'user', entityId: user.id, actorUserId: user.id });
@@ -70,8 +82,7 @@ router.post('/register', registerLimiter, asyncHandler(async (req, res) => {
 router.post('/login', loginLimiter, asyncHandler(async (req, res) => {
   if (!req.interfaceCode) throw new HttpError(400, 'missing_interface', 'Send a valid X-Interface header');
   const data = parse(loginSchema, req.body);
-  const { rows } = await query('SELECT * FROM users WHERE lower(email) = $1', [data.email]);
-  const user = rows[0];
+  const user = await findAccount(data.email, req.interfaceCode);
   const passwordOk = await verifyPassword(data.password, user ? user.password_hash : DUMMY_HASH);
   if (!user || !passwordOk || !user.is_active) {
     await audit(req, { action: 'auth.login_failed', actorUserId: user?.id ?? null, details: { email: data.email } });
@@ -80,6 +91,9 @@ router.post('/login', loginLimiter, asyncHandler(async (req, res) => {
   if (INTERFACE_KINDS[req.interfaceCode] !== user.role) {
     await audit(req, { action: 'auth.login_denied_interface', entityType: 'user', entityId: user.id, actorUserId: user.id });
     throw new HttpError(403, 'not_allowed_here', 'Your account cannot sign in here');
+  }
+  if (user.role === 'customer' && !user.shop) {
+    try { await query('UPDATE users SET shop = $2 WHERE id = $1 AND shop IS NULL', [user.id, req.interfaceCode]); user.shop = req.interfaceCode; } catch (e) { console.warn('shop claim skipped: ' + e.message); }
   }
   const token = jwt.sign(
     { role: user.role, stage: user.partner_stage, iface: req.interfaceCode },
@@ -117,8 +131,7 @@ router.post('/forgot-password', resetLimiter, asyncHandler(async (req, res) => {
   if (!resetChannels().includes(data.channel)) {
     throw new HttpError(400, 'channel_unavailable', 'That way of receiving a code is not available yet');
   }
-  const found = await query('SELECT id, email, role, phone FROM users WHERE lower(email) = $1 AND is_active', [data.email]);
-  const u = found.rows[0] && found.rows[0].role === INTERFACE_KINDS[req.interfaceCode] ? found.rows[0] : null;
+  const u = await findAccount(data.email, req.interfaceCode, 'id, email, role, phone', true);
 
   let sentTo = data.channel === 'email' ? maskEmail(data.email) : null;
   let wait = COOLDOWN_SECONDS;
@@ -148,8 +161,7 @@ router.post('/reset-password', resetLimiter, asyncHandler(async (req, res) => {
   if (!req.interfaceCode) throw new HttpError(400, 'missing_interface', 'Send a valid X-Interface header');
   const data = parse(resetSchema, req.body);
   const bad = () => new HttpError(400, 'invalid_code', 'That code is wrong or has expired. Ask for a new one.');
-  const ur = await query('SELECT id, role FROM users WHERE lower(email) = $1 AND is_active', [data.email]);
-  const u = ur.rows[0];
+  const u = await findAccount(data.email, req.interfaceCode, 'id, role', true);
   if (!u || u.role !== INTERFACE_KINDS[req.interfaceCode]) throw bad();
   const rr = await query(
     'SELECT id, code_hash, attempts FROM password_resets WHERE user_id = $1 AND used_at IS NULL AND expires_at > now() ORDER BY id DESC LIMIT 1',
