@@ -1,3 +1,4 @@
+import { SHOP_NAMES } from '../delivery.js';
 import { Router } from 'express';
 import rateLimit from 'express-rate-limit';
 import { z } from 'zod';
@@ -71,17 +72,17 @@ function friendly(row) {
 const kes = (n) => 'KES ' + Number(n).toLocaleString('en-KE');
 const siteUrl = () => (process.env.SITE_URL || String(process.env.CORS_ORIGINS || '').split(',')[0] || '').trim().replace(/\/+$/, '');
 
-function orderText({ name, ref, itemsKes, totalKes, delivery, email, discountKes }) {
+function orderText({ name, ref, itemsKes, totalKes, delivery, email, discountKes, shop }) {
   const first = String(name).trim().split(/\s+/)[0];
   let del = 'Delivery: we will confirm the cost with you.';
   if (delivery.feeKes === 0) del = 'Delivery: ' + delivery.label + ' (no charge).';
   else if (delivery.feeKes > 0) del = 'Delivery: ' + delivery.label + ', ' + kes(delivery.feeKes) + '.';
-  return 'Hello ' + first + ', thank you for ordering with Pyfon Brands. Your order ' + ref + ' is received. Items: ' + kes(itemsKes) + '. ' + (discountKes ? 'Coupon discount: -' + kes(discountKes) + '. ' : '') + del
+  return 'Hello ' + first + ', thank you for ordering with ' + (shop || 'Pyfon Brands') + '. Your order ' + ref + ' is received. Items: ' + kes(itemsKes) + '. ' + (discountKes ? 'Coupon discount: -' + kes(discountKes) + '. ' : '') + del
     + (delivery.feeKes == null ? '' : ' Total: ' + kes(totalKes) + '.')
     + ' Please note: your order will be ready after 24 hours.'
     + ' Track your order progress here: ' + siteUrl() + '/orders.'
     + (email ? ' We will also email you when it is delivered.' : '')
-    + ' Thank you for choosing Pyfon Brands.';
+    + ' Thank you for choosing ' + (shop || 'Pyfon Brands') + '.';
 }
 
 async function findItems(skus, storefront) {
@@ -167,7 +168,7 @@ customerOrderRoutes.post('/orders', writeLimiter, asyncHandler(async (req, res) 
       kind: 'order_received',
       phone: body.contactPhone,
       orderId: order.id,
-      body: orderText({ name: body.contactName, ref: order.ref, itemsKes, totalKes, delivery, email: body.contactEmail, discountKes }),
+      body: orderText({ name: body.contactName, ref: order.ref, itemsKes, totalKes, delivery, email: body.contactEmail, discountKes, shop: SHOP_NAMES[typeof storefront === 'undefined' ? '' : storefront] }),
     });
     return { order, job };
   });
@@ -218,7 +219,7 @@ customerOrderRoutes.post('/quote-requests', writeLimiter, asyncHandler(async (re
       kind: 'quote_received',
       phone: body.contactPhone,
       quoteRequestId: quote.id,
-      body: 'Hello ' + String(body.contactName).trim().split(/\s+/)[0] + ', Pyfon Brands has received your quote request ' + quote.ref + '. We will reply here on WhatsApp with a price.',
+      body: 'Hello ' + String(body.contactName).trim().split(/\s+/)[0] + ', ' + (SHOP_NAMES[storefront] || 'Pyfon Brands') + ' has received your quote request ' + quote.ref + '. We will reply here on WhatsApp with a price.',
     });
     return { quote, job };
   });

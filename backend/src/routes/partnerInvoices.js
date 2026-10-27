@@ -1,3 +1,4 @@
+import { SHOP_NAMES } from '../delivery.js';
 import { Router } from 'express';
 import { z } from 'zod';
 import { pool } from '../db/pool.js';
@@ -90,16 +91,21 @@ partnerInvoiceRoutes.post('/invoices/:id/email', asyncHandler(async (req, res) =
   const r = (await pool.query(SEL + "WHERE i.id = $1 AND i.status = 'issued'", [req.params.id])).rows[0];
   if (!r) throw new HttpError(404, 'invoice_not_found', 'No live invoice with that id');
   if (!r.bill_email) throw new HttpError(409, 'no_email', 'This customer has no email address on the order');
+  let shop = 'Pyfon Brands';
+  try {
+    const sc = await pool.query('SELECT COALESCE(o.storefront_code, q.storefront_code) AS sc FROM jobs j LEFT JOIN orders o ON o.id = j.order_id LEFT JOIN quote_requests q ON q.id = j.quote_request_id WHERE j.ref = $1', [r.job_ref]);
+    if (sc.rows[0] && SHOP_NAMES[sc.rows[0].sc]) shop = SHOP_NAMES[sc.rows[0].sc];
+  } catch (e) { console.warn('invoice shop lookup skipped: ' + e.message); }
   const rows = r.lines.map((l) => '<tr><td style="padding:6px 8px">' + esc(l.name) + ' x ' + l.qty + '</td><td style="padding:6px 8px;text-align:right">KES ' + (l.unitPriceKes * l.qty).toLocaleString('en-KE') + '</td></tr>').join('');
   const other = r.other_charges_kes > 0 ? '<tr><td style="padding:6px 8px">Delivery and other charges</td><td style="padding:6px 8px;text-align:right">KES ' + r.other_charges_kes.toLocaleString('en-KE') + '</td></tr>' : '';
   const html = '<div style="font-family:Arial,sans-serif;max-width:560px;margin:auto;color:#0b2a4a">'
-    + '<h2 style="margin-bottom:0">Pyfon Brands</h2><p style="margin-top:4px">Invoice ' + esc(r.number) + ' for job ' + esc(r.job_ref) + '</p>'
+    + '<h2 style="margin-bottom:0">' + esc(shop) + '</h2><p style="margin-top:4px">Invoice ' + esc(r.number) + ' for job ' + esc(r.job_ref) + '</p>'
     + '<p>Dear ' + esc(r.bill_name) + ',</p><table style="width:100%;border-collapse:collapse;border-top:2px solid #c9a227">' + rows + other
     + (r.discount_kes > 0 ? '<tr><td style="padding:6px 8px">Discount</td><td style="padding:6px 8px;text-align:right">- KES ' + r.discount_kes.toLocaleString('en-KE') + '</td></tr>' : '') + '<tr><td style="padding:8px;border-top:1px solid #ccc"><b>Total</b></td><td style="padding:8px;border-top:1px solid #ccc;text-align:right"><b>KES ' + r.total_kes.toLocaleString('en-KE') + '</b></td></tr></table>'
     + (r.notes ? '<p>' + esc(r.notes) + '</p>' : '')
     + '<p style="font-size:12px;color:#666">Operated by Pyfon Brands<br>Built and owned by Emlabs &middot; &copy; Emlabs. All rights reserved.</p></div>';
-  const text = 'Invoice ' + r.number + ' (job ' + r.job_ref + ') total KES ' + r.total_kes + '. Thank you, Pyfon Brands.';
-  const ok = await sendEmail({ to: r.bill_email, subject: 'Invoice ' + r.number + ' from Pyfon Brands', text, html });
+  const text = 'Invoice ' + r.number + ' (job ' + r.job_ref + ') total KES ' + r.total_kes + '. Thank you, ' + shop + '.';
+  const ok = await sendEmail({ to: r.bill_email, subject: 'Invoice ' + r.number + ' from ' + shop, text, html, fromName: shop });
   if (!ok) throw new HttpError(502, 'email_failed', 'The email could not be sent. Check the Brevo settings.');
   await pool.query('UPDATE invoices SET emailed_at = now() WHERE id = $1', [r.id]);
   await audit(req, { action: 'invoice.emailed', entityType: 'invoice', entityId: String(r.id), actorUserId: req.user.id, details: { number: r.number } });

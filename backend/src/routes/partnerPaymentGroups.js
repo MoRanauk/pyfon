@@ -1,3 +1,4 @@
+import { SHOP_NAMES } from '../delivery.js';
 import { z } from 'zod';
 import { query } from '../db/pool.js';
 import { withTransaction } from '../db/tx.js';
@@ -16,21 +17,22 @@ const code = z.string().trim().max(20).transform((s) => s.toUpperCase()).refine(
 
 async function tellGroup(items) {
   const o = items[0].o;
+  const shop = SHOP_NAMES[o.storefront_code] || 'Pyfon Brands';
   const first = String(o.contact_name).trim().split(/\s+/)[0];
   const total = items.reduce((a, x) => a + x.amountKes, 0);
   const list = items.map((x) => x.o.ref + ' (' + kes(x.amountKes) + ')').join(', ');
   const owing = items.some((x) => x.r.dueKes > 0);
   const body = 'Hello ' + first + ', your payment of ' + kes(total) + ' for ' + list + ' has been received. '
     + (owing ? 'Some orders still have a balance. ' : 'These orders are fully paid. ')
-    + 'Thank you for choosing Pyfon Brands.';
+    + 'Thank you for choosing ' + shop + '.';
   let queued = false;
   let emailed = false;
   try { await enqueueMessage({ query }, { kind: 'payment_received', phone: o.contact_phone, orderId: o.id, body }); queued = true; } catch (e) { console.warn('payment message not queued: ' + e.message); }
   if (o.contact_email) {
     try {
-      const html = '<div style="font-family:Arial,sans-serif;max-width:560px;margin:auto;color:#0b2a4a"><h2>Pyfon Brands</h2><p>' + esc(body) + '</p>'
+      const html = '<div style="font-family:Arial,sans-serif;max-width:560px;margin:auto;color:#0b2a4a"><h2>' + esc(shop) + '</h2><p>' + esc(body) + '</p>'
         + '<p style="font-size:12px;color:#666">Operated by Pyfon Brands<br>Built and owned by Emlabs &middot; &copy; Emlabs. All rights reserved.</p></div>';
-      emailed = Boolean(await sendEmail({ to: o.contact_email, subject: 'Payment received for ' + items.length + ' orders', text: body, html }));
+      emailed = Boolean(await sendEmail({ to: o.contact_email, subject: 'Payment received for ' + items.length + ' orders', text: body, html, fromName: shop }));
     } catch (e) { console.warn('payment email not sent: ' + e.message); }
   }
   return { queued, emailed };
