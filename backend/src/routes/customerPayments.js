@@ -6,6 +6,7 @@ import { query } from '../db/pool.js';
 import { HttpError, asyncHandler } from '../errors.js';
 import { parse } from '../validate.js';
 import { audit } from '../audit.js';
+import { stkReady } from '../mpesa/daraja.js';
 
 // Customer side of payments. A customer can only SAY they paid. Only a partner can confirm it.
 export const customerPaymentRoutes = Router();
@@ -58,7 +59,7 @@ customerPaymentRoutes.get('/payments/info', asyncHandler(async (req, res) => {
     cancelled: o.status === 'cancelled',
     till: process.env.MPESA_TILL || null,
     tillName: tillName(),
-    promptAvailable: false,
+    promptAvailable: stkReady(),
     payments: list.rows.map((p) => ({ id: String(p.id), method: p.method, status: p.status, amountKes: p.amount_kes || p.claimed_amount_kes, createdAt: p.created_at })),
   });
 }));

@@ -23,13 +23,13 @@ const amount = z.number().int().min(1).max(10000000);
 const kes = (n) => 'KES ' + Number(n).toLocaleString('en-KE');
 const esc = (s) => String(s == null ? '' : s).replace(/[&<>"]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
 
-async function lockOrder(client, orderId) {
+export async function lockOrder(client, orderId) {
   const { rows } = await client.query('SELECT id, ref, total_kes, status, contact_name, contact_phone, contact_email, storefront_code FROM orders WHERE id = $1 FOR UPDATE', [orderId]);
   if (!rows[0]) throw new HttpError(404, 'order_not_found', 'Order not found');
   return rows[0];
 }
 
-async function settle(client, o, paymentId, mpesaCode, amountKes, userId) {
+export async function settle(client, o, paymentId, mpesaCode, amountKes, userId) {
   if (o.status === 'cancelled') throw new HttpError(409, 'order_cancelled', 'This order is cancelled');
   const s = await client.query("SELECT COALESCE(sum(amount_kes), 0)::int AS paid FROM order_payments WHERE order_id = $1 AND status = 'confirmed'", [o.id]);
   const paid = s.rows[0].paid;
@@ -58,7 +58,7 @@ async function settle(client, o, paymentId, mpesaCode, amountKes, userId) {
 }
 
 // Runs AFTER the money is saved. A failed message never undoes a confirmed payment.
-async function tell(o, got, r) {
+export async function tell(o, got, r) {
   const first = String(o.contact_name).trim().split(/\s+/)[0];
   const body = 'Hello ' + first + ', your payment of ' + kes(got) + ' for order ' + o.ref + ' has been received. '
     + (r.dueKes > 0 ? 'Balance still due: ' + kes(r.dueKes) + '. ' : 'Your order is fully paid. ')

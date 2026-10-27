@@ -1,3 +1,4 @@
+import { mpesaCallbackRoutes } from './routes/mpesaCallback.js';
 import * as Sentry from '@sentry/node';
 import express from 'express';
 import cors from 'cors';
@@ -73,6 +74,7 @@ app.use('/v1/reviews', reviewRoutes);
 app.use('/v1/dealers', publicDealerRoutes);
 app.use('/v1/help', helpAskRoutes);
 app.use('/v1/content', publicContentRoutes);
+app.use('/v1/mpesa', mpesaCallbackRoutes);
 app.use('/v1/social', publicSocialRoutes);
 app.use('/v1/track', publicTrackRoutes);
 app.use('/v1/password-help', publicPasswordHelpRoutes);

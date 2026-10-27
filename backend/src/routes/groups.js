@@ -4,6 +4,7 @@ import { customerOrderRoutes } from './customerOrders.js';
 import { customerFileRoutes } from './customerFiles.js';
 import { customerCouponRoutes } from './customerCoupons.js';
 import { customerPaymentRoutes } from './customerPayments.js';
+import { customerStkRoutes } from './customerStk.js';
 import { partnerPaymentRoutes } from './partnerPayments.js';
 import { customerUploadRoutes } from './uploads.js';
 import { partnerJobRoutes } from './partnerJobs.js';
@@ -58,6 +59,7 @@ customerRoutes.use(customerOrderRoutes);
 customerRoutes.use(customerFileRoutes);
 customerRoutes.use(customerCouponRoutes);
 customerRoutes.use(customerPaymentRoutes);
+customerRoutes.use(customerStkRoutes);
 customerRoutes.use(customerUploadRoutes);
 customerRoutes.use(ticketRoutes);
 
