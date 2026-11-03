@@ -192,10 +192,16 @@ Planned: backend on Render, frontends on Cloudflare Pages, database on Neon. Clo
 ## Screenshots
 
 Add screenshots here: a storefront home page, a product page, the M3 Labs job board and the studio canvas.
+M & Co Brands Homepage: <img width="1837" height="963" alt="image" src="https://github.com/user-attachments/assets/a2b65cb3-033c-4892-b6e4-9991e6e6da0e" />
+
 
 ## Status
 
-In active development. Live links will be added here once deployed.
+In active development. The following are the live links to the frontends:
+1. https://pyfon-mco.moranauk.workers.dev/
+2. https://pyfon-gifthub.moranauk.workers.dev/
+3. https://pyfon-trimatelier.moranauk.workers.dev/
+4. https://pyfonlab.moranauk.workers.dev/
 
 ## Author
 
