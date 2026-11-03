@@ -191,8 +191,36 @@ Planned: backend on Render, frontends on Cloudflare Pages, database on Neon. Clo
 
 ## Screenshots
 
-Add screenshots here: a storefront home page, a product page, the M3 Labs job board and the studio canvas.
-M & Co Brands Homepage: <img width="1837" height="963" alt="image" src="https://github.com/user-attachments/assets/a2b65cb3-033c-4892-b6e4-9991e6e6da0e" />
+Find some screenshots here: a storefront home page, a product page, the M3 Labs job board and the studio canvas.
+M & Co Brands Homepage: <img width="1917" height="969" alt="image" src="https://github.com/user-attachments/assets/e1b73d6e-7284-4408-a778-3f4d1de77816" />
+
+Pyfon Gift Hub Homepage: <img width="1914" height="970" alt="image" src="https://github.com/user-attachments/assets/03884373-ec03-4ec6-a8af-e564c6e2a1c1" />
+
+TriM-Atelier Homepage: <img width="1918" height="967" alt="image" src="https://github.com/user-attachments/assets/13ce4a58-15a5-48d2-ab29-1135f845f6bf" />
+
+Product pages samples:
+<img width="1161" height="916" alt="image" src="https://github.com/user-attachments/assets/0768b7ba-8e86-4ea5-b6b4-cef761c83c45" />
+
+<img width="805" height="889" alt="image" src="https://github.com/user-attachments/assets/b4bd496d-87bd-4cc9-8492-c5e41558d08f" />
+<img width="922" height="900" alt="image" src="https://github.com/user-attachments/assets/cd7fd1b3-cf85-4112-b4c5-725218ad4c3a" />
+
+The partners Dashboard:
+<img width="1489" height="937" alt="image" src="https://github.com/user-attachments/assets/abe4247c-d8db-4233-8491-d36db1159c23" />
+<img width="1822" height="967" alt="image" src="https://github.com/user-attachments/assets/76b60708-2eb2-4aa2-9027-2988158493b9" />
+
+Partners, Managers and any admin need essential tools to manage workload within the limited time.
+Therefore, Essential tools are basic needs such like food is a basic need to the sustainance of life.
+However some evolved bugs argue that a car is also a basic need :)
+<img width="1627" height="958" alt="image" src="https://github.com/user-attachments/assets/d9e4a20d-11ed-4b6d-906b-17e027e1f06a" />
+
+Behind every successful woman there is a man👨! Oops!It is vice versa... Behind every successful man there is a mom/dad-figure
+"That is well said...a round of aplause for him:;"
+ <img width="480" height="266" alt="LetsGoApplauseGIFbyEmmys" src="https://github.com/user-attachments/assets/1296b848-28f9-4730-9e4d-31d58e27298f" />
+
+ So the developer desk limits much of code-writing and saves time for just a drag and drop feature to customize the webpages:
+<img width="1834" height="970" alt="image" src="https://github.com/user-attachments/assets/a3ee2767-a8c9-473d-8c01-0d98f18f57cd" />
+The studio blank page is a studio indeed not a bedsitter but one which enablesthe developer to test features before publishing changes.
+
 
 
 ## Status
@@ -202,7 +230,7 @@ In active development. The following are the live links to the frontends:
 2. https://pyfon-gifthub.moranauk.workers.dev/
 3. https://pyfon-trimatelier.moranauk.workers.dev/
 4. https://pyfonlab.moranauk.workers.dev/
-
+5. https://pyfon-studio.moranauk.workers.dev/
 ## Author
 
 Built by Ezra under Emlabs.
