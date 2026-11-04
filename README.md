@@ -296,7 +296,8 @@ In active development. All six apps are live (see the Apps table above).
 
 ## Author
 
-Built by Ezra under Emlabs.graduate research looked at how maternal exposure to aflatoxin B1 affects kidney development. I'm now training in medicine while building software, with the aim of making tools that work for the people who run clinics and care for patients.
+Built by Ezra under Emlabs.
+I'm now training in medicine while building software, with the aim of making tools that work for the people who run clinics and care for patients.
 
 ## Get in touch
 
